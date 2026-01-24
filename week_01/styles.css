@@ -21,7 +21,7 @@ body {
   justify-content: space-between;
   padding: 2rem 1.5rem;
   color: white;
-  background-image: url("./images/Ai-image.webp"); /* Path to your background image */
+  background-image: url("./images/matrix.jpg"); /* Path to your background image */
   background-size: cover; /* Make the background image cover the entire header */
   background-position: center; /* Center the background image */
   background-repeat: no-repeat; /* Prevent the background from repeating */
