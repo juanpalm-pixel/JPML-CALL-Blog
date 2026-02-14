@@ -1,11 +1,11 @@
 /* Define CSS variables globally */
 :root {
-  --primary-color: #6200ea; /* Main purple color */
-  --secondary-color: #e0e0ff; /* Light background color for sections */
-  --background-color: #f4f4f9; /* Background color for the body */
+  --primary-color: #0000FF; /* Main purple color (for links) */
+  --secondary-color: #ffe0e8; /* Light background color for sections (no clue) ffe0e8*/
+  --background-color: #e6ddd3; /* Background color for the body (background) f4f4f9*/
   --text-color: #333; /* General text color */
   --button-text-color: white; /* Text color for buttons */
-  --hover-color: #4500b5; /* Button hover color */
+  --hover-color: #ff0000; /* Button hover color */
 }
 
 body {
@@ -21,11 +21,23 @@ body {
   justify-content: space-between;
   padding: 2rem 1.5rem;
   color: white;
-  background-image: url("./images/matrix1.jpg"); /* Path to your background image */
+  background-image: url("./images/Knowledge_Is_Human_Homepage_Animated_Banner.gif"); /* Path to your background image */
   background-size: cover; /* Make the background image cover the entire header */
   background-position: center; /* Center the background image */
   background-repeat: no-repeat; /* Prevent the background from repeating */
   height: 160px;
+}
+
+.header::after {
+  content: "";
+  display: block;
+  height: 40px;
+  margin-top: 1rem;
+  background: linear-gradient(
+    to bottom,
+    rgba(247, 242, 235, 0),
+    rgba(247, 242, 235, 1)
+  );
 }
 
 .header-content {
@@ -48,6 +60,14 @@ body {
   margin-top: 1.5rem;
 }
 
+.banner-pill {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #fff;
+}
+
 .home-button {
   text-decoration: none; /* Remove underline */
   color: white; /* Button text color */
@@ -66,10 +86,13 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-}
+  }
 
 .container {
   padding: 0.5rem;
+  background-color: #fffaf3;
+  border: 1px solid #e2d6c9;
+  margin: 6px;
 }
 
 h2 {
@@ -79,16 +102,16 @@ h2 {
 .post {
   background-color: white;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-radius: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .post-meta {
   font-size: 0.9rem;
-  color: #777; /* Light gray color for the text */
-  margin-bottom: 1rem;
+  color: #777; /* Light gray color for the text */;
   font-style: italic;
+  margin: 0 0 -1rem 0;
 }
 
 .post h3 {
@@ -96,7 +119,7 @@ h2 {
 }
 
 .post p {
-  margin: 0 0 1rem 0;
+  margin: 0.5rem 0 0.5rem 0; 
 }
 
 .post a {
@@ -118,6 +141,7 @@ h2 {
 
 .about p {
   line-height: 1.6; /* Improve readability */
+  margin: 0.5rem 0 0.5rem 0; /* Add vertical spacing between paragraphs */
 }
 
 .back-button {
@@ -141,6 +165,19 @@ h2 {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blog-post p {
+  line-height: 1;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.blog-post h3 {
+  margin: 1rem 0 1rem 0;
+}
+
+.blog-post h4 {
+  margin: 0.5rem 0 0.5rem 0;
 }
 
 .post-image {
