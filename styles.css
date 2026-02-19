@@ -71,6 +71,7 @@ body {
   border-radius: 999px;
   background-color: rgba(0, 0, 0, 0.55);
   color: #fff;
+  margin: 0 0 0 0;
 }
 
 .home-button {
@@ -91,13 +92,15 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  }
+}
 
 .container {
-  padding: 0.5rem;
+  max-width: 800px;
+  margin: 0 0 1rem 0;
+  padding: 2rem;
   background-color: #fffaf3;
   border: 1px solid #e2d6c9;
-  margin: 6px;
+  border-radius: 8px;
 }
 
 h2 {
