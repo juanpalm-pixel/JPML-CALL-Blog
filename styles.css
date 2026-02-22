@@ -1,0 +1,264 @@
+/* Define CSS variables globally */
+:root {
+  --primary-color: #0000FF; /* Main purple color (for links) */
+  --secondary-color: #ffe0e8; /* Light background color for sections (no clue) ffe0e8*/
+  --background-color: #e6ddd3; /* Background color for the body (background) f4f4f9*/
+  --text-color: #333; /* General text color */
+  --button-text-color: white; /* Text color for buttons */
+  --hover-color: #ff0000; /* Button hover color */
+}
+
+body {
+  margin: 0;
+  font-family: 'Times New Roman', Times, serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 1.5rem;
+  color: white;
+  background-image: url("./images/Knowledge_Is_Human_Homepage_Animated_Banner.gif"); /* Path to your background image */
+  background-size: cover; /* Make the background image cover the entire header */
+  background-position: center; /* Center the background image */
+  background-repeat: no-repeat; /* Prevent the background from repeating */
+  height: 160px;
+}
+
+.header::after {
+  content: "";
+  display: block;
+  height: 40px;
+  margin-top: 1rem;
+  background: linear-gradient(
+    to bottom,
+    rgba(247, 242, 235, 0),
+    rgba(247, 242, 235, 1)
+  );
+}
+
+.header-content {
+  text-align: center; /* Center-align the text within its area */
+  flex-grow: 1; /* Take up remaining space so that it stays centered */
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-content h1,
+.header-content p {
+  text-shadow: 0px 0px 8px rgba(0, 0, 0, 1); /* Adds a subtle shadow to the text */
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.header p {
+  font-size: 1.5rem;
+}
+
+.banner-pill {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  margin: 0 0 0 0;
+}
+
+.home-button {
+  text-decoration: none; /* Remove underline */
+  color: white; /* Button text color */
+  font-size: 1.2rem;
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.home-button:hover {
+  text-decoration: underline; /* Add underline on hover for better feedback */
+}
+
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 0 1rem 0;
+  padding: 2rem;
+  background-color: #fffaf3;
+  border: 1px solid #e2d6c9;
+  border-radius: 8px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.post {
+  background-color: white;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  color: #777; /* Light gray color for the text */;
+  font-style: italic;
+  margin: 0 0 -1rem 0;
+}
+
+.post h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.post p {
+  margin: 0.5rem 0 0.5rem 0; 
+}
+
+.post a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.post a:hover {
+  text-decoration: underline;
+}
+
+.center {
+  display: flex; /* Enables flexbox */
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Centers children horizontally */
+  text-align: center; /* Ensures text elements (like <h2> and <p>) are centered */
+}
+
+.about p {
+  line-height: 1.6; /* Improve readability */
+  margin: 0.5rem 0 0.5rem 0; /* Add vertical spacing between paragraphs */
+}
+
+.back-button {
+  padding: 0.8rem;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  text-decoration: underline;
+}
+
+.blog-post-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.blog-post {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blog-post p {
+  line-height: 1;
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.blog-post h3 {
+  margin: 1rem 0 1rem 0;
+}
+
+.blog-post h4 {
+  margin: 0.5rem 0 0.5rem 0;
+}
+
+.post-image {
+  width: 100%;
+  max-width: 200px;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+h2,
+h3 {
+  margin-top: 1rem;
+}
+
+footer.footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+  margin-top: 2rem;
+  border-radius: 4px;
+}
+
+.technologies-section h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--hover-color); /* Accent color for the heading */
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow cards to wrap to new lines */
+  gap: 1.5rem; /* Space between the cards */
+  justify-content: center; /* Center the cards horizontally */
+}
+
+.card {
+  flex: 1 1 calc(33.333% - 1.5rem); /* 3 columns on large screens */
+  background-color: #fff; /* Light background color */
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: left;
+  text-decoration: none; /* Remove underline from links */
+  color: var(--text-color); /* Text color */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-3px); /* Subtle lift effect on hover */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color); /* Accent color for the card title */
+}
+
+.card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 2 columns on tablets */
+@media (max-width: 768px) {
+  .card {
+    flex: 1 1 calc(50% - 1.5rem); /* 2 columns */
+  }
+}
+
+/* 1 column on mobile screens */
+@media (max-width: 480px) {
+  .card {
+    flex: 1 1 100%; /* 1 column */
+  }
+}
