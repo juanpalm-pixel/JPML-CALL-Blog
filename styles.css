@@ -176,7 +176,7 @@ h2 {
 }
 
 .blog-post p {
-  line-height: 1;
+  line-height: 1.25;
   margin: 0.5rem 0 0.5rem 0;
 }
 
@@ -185,7 +185,7 @@ h2 {
 }
 
 .blog-post h4 {
-  margin: 0.5rem 0 0.5rem 0;
+  margin: 1.5rem 0 0 0;
 }
 
 .post-image {
