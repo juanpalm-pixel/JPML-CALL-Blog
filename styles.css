@@ -8,6 +8,10 @@
   --hover-color: #ff0000; /* Button hover color */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: 'Times New Roman', Times, serif;
@@ -89,9 +93,69 @@ body {
 }
 
 .page-container {
-  max-width: 800px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 2rem;
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 800px;
+  order: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: fit-content;
+}
+
+.side-tab {
+  width: 260px;
+  background-color: #fffaf3;
+  border: 1px solid #e2d6c9;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  position: sticky;
+  top: 1rem;
+  align-self: flex-start;
+  order: 2;
+  margin-left: 1rem;
+}
+
+.side-tab-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.side-tab-title {
+  color: var(--text-color);
+  font-weight: bold;
+  text-decoration: none;
+  margin-bottom: 0.2rem;
+}
+
+.side-tab-item {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding-left: 0.5rem;
+}
+
+.side-tab-item-blog {
+  font-style: italic;
+}
+
+.side-tab-item-reading {
+  font-style: italic;
+}
+
+.side-tab-title:hover,
+.side-tab-item:hover {
+  text-decoration: underline;
 }
 
 .container {
@@ -101,6 +165,8 @@ body {
   background-color: #fffaf3;
   border: 1px solid #e2d6c9;
   border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h2 {
@@ -174,6 +240,7 @@ h2 {
 .blog-post-container {
   max-width: 800px;
   margin: 0 auto;
+  width: fit-content;
 }
 
 .blog-post {
@@ -255,6 +322,25 @@ footer.footer {
 .card p {
   margin: 0;
   line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .page-container {
+    flex-direction: column;
+  }
+
+  .side-tab {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    position: static;
+    transform: none;
+  }
+
+  .side-tab-group {
+    margin-bottom: 0;
+  }
 }
 
 /* 2 columns on tablets */

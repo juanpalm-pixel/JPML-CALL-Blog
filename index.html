@@ -7,10 +7,6 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
 
-  <div class="relative">
-  <div class="sticky top-0 h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-200 to-blue-200">
-    <h1 class="text-4xl font-bold mb-4">Computer Assisted Language Learning</h1>
-    <p class="text-lg italic">by Juan Pablo Mendoza</p>
   <body>
     <div class="header">
       <div class="header-content">
@@ -21,93 +17,113 @@
       </div>
     </div>
     <div class="page-container">
-      <div class="container about">
-        <h2>About This Blog</h2>
-        <p> Welcome to my CALL blog! This blog explores the use of technology in language learning, focusing on practical applications, tools, and insights from my personal experiences as a linguist.</p>
-        <p>Through these posts, I aim to share knowledge and ideas about computer-assisted language learning, bridging the gap between technology and linguistics.</p>
-      </div>
-
-      <div class="container">
-
-        <h2>Blog Posts</h2>
-        <div class="post">
-          <h3>Introducing Myself</h3>
-          <p class="post-meta">January 26th 2026 Hilary Term</p>
-          <p>A little bit about me!...</p>
-          <a href="./posts/01_about_me.html">Read More →</a>
+      <nav class="side-tab" aria-label="Section navigation">
+        <div class="side-tab-group">
+          <a class="side-tab-title" href="#blog-posts">Blog Posts</a>
+          <a class="side-tab-item side-tab-item-blog" href="#post-introducing">Introducing Myself</a>
+          <a class="side-tab-item side-tab-item-blog" href="#post-call-background">CALL Background</a>
+          <a class="side-tab-item side-tab-item-blog" href="#post-speech-synthesis">Speech Synthesis</a>
+          <a class="side-tab-item side-tab-item-blog" href="#post-speech-recognition">Speech Recognition</a>
+        </div>
+        <div class="side-tab-group">
+          <a class="side-tab-title" href="#readings">Readings</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-longitudinal">A longitudinal analysis of highly cited papers in four CALL journals</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-sla-history">A short history of SLA: Where have we come from and where are we going?</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-forty-two">Forty-two years of computer-assisted language learning research</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-pedagogical-biases">Pedagogical Biases in AI-Powered Educational Tools</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-self-imitation">After Self-Imitation Prosodic Training</a>
+          <a class="side-tab-item side-tab-item-reading" href="#reading-i-can-speak"><i>I Can Speak</i>: improving English pronunciation</a>
+        </div>
+      </nav>
+      <div class="main-content">
+        <div class="container about">
+          <h2>About This Blog</h2>
+          <p> Welcome to my CALL blog! This blog explores the use of technology in language learning, focusing on practical applications, tools, and insights from my personal experiences as a linguist.</p>
+          <p>Through these posts, I aim to share knowledge and ideas about computer-assisted language learning, bridging the gap between technology and linguistics.</p>
         </div>
 
-        <div class="post">
-          <h3>CALL Background</h3>
-          <p class="post-meta">January 26th 2026 Hilary Term</p>
-          <p>How SLA theories relate to CALL...</p>
-          <a href="./posts/02_call_background.html">Read More →</a>         
+        <div class="container" id="blog-posts">
+
+          <h2>Blog Posts</h2>
+          <div class="post" id="post-introducing">
+            <h3>Introducing Myself</h3>
+            <p class="post-meta">January 26th 2026 Hilary Term</p>
+            <p>A little bit about me!...</p>
+            <a href="./posts/01_about_me.html">Read More →</a>
+          </div>
+
+          <div class="post" id="post-call-background">
+            <h3>CALL Background</h3>
+            <p class="post-meta">January 26th 2026 Hilary Term</p>
+            <p>How SLA theories relate to CALL...</p>
+            <a href="./posts/02_call_background.html">Read More →</a>         
+          </div>
+
+          <div class="post" id="post-speech-synthesis">
+            <h3>Speech Synthesis</h3>
+            <p class="post-meta">February 16th 2026 Hilary Term</p>
+            <p>Exploring speech synthesis in CALL...</p>
+            <a href="./posts/03_speech_synthesis.html">Read More →</a>         
+          </div>
+
+          <div class="post" id="post-speech-recognition">
+            <h3>Speech Recognition</h3>
+            <p class="post-meta">February 21st 2026 Hilary Term</p>
+            <p>Exploring speech recognition in CALL...</p>
+            <a href="./posts/04_speech_recognition.html">Read More →</a>         
+          </div>
+
         </div>
 
-        <div class="post">
-          <h3>Speech Synthesis</h3>
-          <p class="post-meta">February 16th 2026 Hilary Term</p>
-          <p>Exploring speech synthesis in CALL...</p>
-          <a href="./posts/03_speech_synthesis.html">Read More →</a>         
-        </div>
-
-        <div class="post">
-          <h3>Speech Recognition</h3>
-          <p class="post-meta">February 21st 2026 Hilary Term</p>
-          <p>Exploring speech recognition in CALL...</p>
-          <a href="./posts/04_speech_recognition.html">Read More →</a>         
-        </div>
-
-      </div>
-
-      <div class="container">
+        <div class="container" id="readings">
           <h2>Readings</h2>
-          <p>Here are some of the readings that we have had to do during our time in this module with a brief summary attatched underneath</p>
+            <p>Here are some of the readings that we have had to do during our time in this module with a brief summary attatched underneath</p>
 
-          <div class="post">
-            <h3>A longitudinal analysis of highly cited papers in four CALL journals</h3>
-            <p class="post-meta">by Yazdan Choubsaz, Alireza Jalilifar and Alex Boulton</p>
-            <p></p>
-            <a href="./readings/01. Longitudinal analysis of CALL.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-longitudinal">
+              <h3>A longitudinal analysis of highly cited papers in four CALL journals</h3>
+              <p class="post-meta">by Yazdan Choubsaz, Alireza Jalilifar and Alex Boulton</p>
+              <p></p>
+              <a href="./readings/01. Longitudinal analysis of CALL.pdf" target="_blank">Read More →</a>
+            </div>
 
-          <div class="post">
-            <h3>A short history of SLA: Where have we come from and where are we going?</h3>
-            <p class="post-meta">by Rod Ellis</p>
-            <p></p>
-            <a href="./readings/01. A short history of SLA.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-sla-history">
+              <h3>A short history of SLA: Where have we come from and where are we going?</h3>
+              <p class="post-meta">by Rod Ellis</p>
+              <p></p>
+              <a href="./readings/01. A short history of SLA.pdf" target="_blank">Read More →</a>
+            </div>
 
-          <div class="post">
-            <h3>Forty-two years of computer-assisted language learning research: A scientometric study of hotspot research and trending issues</h3>
-            <p class="post-meta">by Mohammed Ali Mohsen, Sultan Althebi, Rawan Alsagour, Albatool Alsalem, Amjad Almudawi, Abdulaziz Alshahrani</p>
-            <p></p>
-            <a href="./readings/01. Forty-two years of CALL.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-forty-two">
+              <h3>Forty-two years of computer-assisted language learning research: A scientometric study of hotspot research and trending issues</h3>
+              <p class="post-meta">by Mohammed Ali Mohsen, Sultan Althebi, Rawan Alsagour, Albatool Alsalem, Amjad Almudawi, Abdulaziz Alshahrani</p>
+              <p></p>
+              <a href="./readings/01. Forty-two years of CALL.pdf" target="_blank">Read More →</a>
+            </div>
 
-          <div class="post">
-            <h3>Pedagogical Biases in AI-Powered Educational Tools: The Case of Lesson Plan Generators</h3>
-            <p class="post-meta">by Bodong Chen, Jiayu Cheng, Chen Wang, Vivian Leung</p>
-            <p></p>
-            <a href="./readings/02. Pedagogical Biases final.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-pedagogical-biases">
+              <h3>Pedagogical Biases in AI-Powered Educational Tools: The Case of Lesson Plan Generators</h3>
+              <p class="post-meta">by Bodong Chen, Jiayu Cheng, Chen Wang, Vivian Leung</p>
+              <p></p>
+              <a href="./readings/02. Pedagogical Biases final.pdf" target="_blank">Read More →</a>
+            </div>
 
-          <div class="post">
-            <h3>After Self-Imitation Prosodic Training L2 Learners Converge Prosodically to the Native Speakers</h3>
-            <p class="post-meta">by Elisa Pellegrino</p>
-            <p></p>
-            <a href="./readings/04. Self-Imitation.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-self-imitation">
+              <h3>After Self-Imitation Prosodic Training L2 Learners Converge Prosodically to the Native Speakers</h3>
+              <p class="post-meta">by Elisa Pellegrino</p>
+              <p></p>
+              <a href="./readings/04. Self-Imitation.pdf" target="_blank">Read More →</a>
+            </div>
 
-          <div class="post">
-            <h3><i>I Can Speak</i>: improving English pronunciation through automatic speech recognition-based language learning systems</h3>
-            <p class="post-meta">by Muzakki Bashori, Roeland van Hout, Helmer Strik & Catia Cucchiarini</p>
-            <p></p>
-            <a href="./readings/06. I Can Speak ASR.pdf" target="_blank">Read More →</a>
-          </div>
+            <div class="post" id="reading-i-can-speak">
+              <h3><i>I Can Speak</i>: improving English pronunciation through automatic speech recognition-based language learning systems</h3>
+              <p class="post-meta">by Muzakki Bashori, Roeland van Hout, Helmer Strik & Catia Cucchiarini</p>
+              <p></p>
+              <a href="./readings/06. I Can Speak ASR.pdf" target="_blank">Read More →</a>
+            </div>
 
 
-        </div>  
+          </div>  
+        </div>
       </div>
     </div>
   </body>
