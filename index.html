@@ -17,6 +17,34 @@
       </div>
     </div>
     <div class="page-container">
+      <nav class="top-dropdown-nav" aria-label="Compact section navigation">
+        <div class="top-dropdown-inner">
+          <a href="#top" class="top-nav-control">Back to Top ↑</a>
+
+          <details class="top-nav-dropdown">
+            <summary class="top-nav-control">Blog Posts</summary>
+            <div class="top-nav-menu">
+              <a class="top-nav-item" href="#post-introducing">Introducing Myself</a>
+              <a class="top-nav-item" href="#post-call-background">CALL Background</a>
+              <a class="top-nav-item" href="#post-speech-synthesis">Speech Synthesis</a>
+              <a class="top-nav-item" href="#post-speech-recognition">Speech Recognition</a>
+            </div>
+          </details>
+
+          <details class="top-nav-dropdown">
+            <summary class="top-nav-control">Readings</summary>
+            <div class="top-nav-menu">
+              <a class="top-nav-item" href="#reading-longitudinal">A longitudinal analysis of highly cited papers in four CALL journals</a>
+              <a class="top-nav-item" href="#reading-sla-history">A short history of SLA: Where have we come from and where are we going?</a>
+              <a class="top-nav-item" href="#reading-forty-two">Forty-two years of computer-assisted language learning research</a>
+              <a class="top-nav-item" href="#reading-pedagogical-biases">Pedagogical Biases in AI-Powered Educational Tools</a>
+              <a class="top-nav-item" href="#reading-self-imitation">After Self-Imitation Prosodic Training</a>
+              <a class="top-nav-item" href="#reading-i-can-speak"><i>I Can Speak</i>: improving English pronunciation</a>
+            </div>
+          </details>
+        </div>
+      </nav>
+
       <nav class="side-tab" aria-label="Section navigation"> <!-- Added aria-label for accessibility -->
         <div class="back-to-top">
           <a href="#top" class="back-to-top-link">Back to Top ↑</a>
@@ -31,7 +59,7 @@
           </div>
         </div>
         <div class="side-tab-group">
-          <a class="side-tab-title" href="#readings" margin="0 0 0.5rem 0">Readings</a>
+          <a class="side-tab-title" href="#readings">Readings</a>
           <div class="side-tab-box">
             <a class="side-tab-item side-tab-item-reading" href="#reading-longitudinal">A longitudinal analysis of highly cited papers in four CALL journals</a>
             <a class="side-tab-item side-tab-item-reading" href="#reading-sla-history">A short history of SLA: Where have we come from and where are we going?</a>
@@ -133,5 +161,71 @@
         </div>
       </div>
     </div>
+
+    <script>
+      (function () {
+        const pageContainer = document.querySelector('.page-container');
+        const sideTab = document.querySelector('.side-tab');
+        const mainContent = document.querySelector('.main-content');
+        const dropdownNav = document.querySelector('.top-dropdown-nav');
+        const mainContentMinimumWidth = 560;
+
+        if (!pageContainer || !sideTab || !mainContent || !dropdownNav) {
+          return;
+        }
+
+        function updateNavigationMode() {
+          pageContainer.classList.remove('nav-dropdown-mode');
+
+          const sideStyles = window.getComputedStyle(sideTab);
+          const sideTotalWidth =
+            sideTab.getBoundingClientRect().width +
+            parseFloat(sideStyles.marginLeft) +
+            parseFloat(sideStyles.marginRight);
+
+          const pageStyles = window.getComputedStyle(pageContainer);
+          const availableWidth =
+            pageContainer.clientWidth -
+            parseFloat(pageStyles.paddingLeft) -
+            parseFloat(pageStyles.paddingRight);
+
+          const remainingMainWidth = availableWidth - sideTotalWidth;
+          const shouldUseDropdownMode = remainingMainWidth < mainContentMinimumWidth;
+
+          if (shouldUseDropdownMode) {
+            pageContainer.classList.add('nav-dropdown-mode');
+          }
+        }
+
+        dropdownNav.addEventListener('click', function (event) {
+          const clickedLink = event.target.closest('.top-nav-item');
+          if (!clickedLink) {
+            return;
+          }
+
+          dropdownNav.querySelectorAll('details[open]').forEach(function (dropdown) {
+            dropdown.removeAttribute('open');
+          });
+        });
+
+        dropdownNav.querySelectorAll('.top-nav-dropdown').forEach(function (dropdown) {
+          dropdown.addEventListener('toggle', function () {
+            if (!dropdown.open) {
+              return;
+            }
+
+            dropdownNav.querySelectorAll('.top-nav-dropdown').forEach(function (otherDropdown) {
+              if (otherDropdown !== dropdown) {
+                otherDropdown.removeAttribute('open');
+              }
+            });
+          });
+        });
+
+        window.addEventListener('resize', updateNavigationMode);
+        window.addEventListener('load', updateNavigationMode);
+        updateNavigationMode();
+      })();
+    </script>
   </body>
 </html>
