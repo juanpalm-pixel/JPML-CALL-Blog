@@ -204,10 +204,11 @@ body {
   padding: 1rem 1.25rem;
   position: sticky; /*Lets it move with the page */
   top: 1rem; /* Allows the side bar to not be above the top main-content */
+  bottom: 7rem; /* Allows the side bar to not be above the bottom main-content */
   align-self: flex-start;
   order: 2;
   margin: 0rem 0rem 1rem 1rem;
-  max-height: calc(100vh - 4rem); /* Allows the side-tab to have a 1rem top and bottom buffer */
+  max-height: calc(100vh - 4.18rem); /* Allows the side-tab to have a 1rem top and bottom buffer */
   overflow-y: auto; /* Allows a vertical scrolling feature */
   overflow-x: hidden; /* Hides ugly horizontal scrollbars */
 }
