@@ -32,18 +32,6 @@ body {
   height: 160px;
 }
 
-.header::after {
-  content: "";
-  display: block;
-  height: 40px;
-  margin-top: 1rem;
-  background: linear-gradient(
-    to bottom,
-    rgba(247, 242, 235, 0),
-    rgba(247, 242, 235, 1)
-  );
-}
-
 .header-content {
   text-align: center; /* Center-align the text within its area */
   flex-grow: 1; /* Take up remaining space so that it stays centered */
@@ -73,16 +61,15 @@ body {
   display: inline-block;
   padding: 0.2rem 0.75rem;
   border-radius: 999px;
-  background-color: rgba(0, 0, 0, 0.55);
+  background-color: rgba(0, 0, 0, 0.55); /* To make it slightly opaque*/
   color: #fff;
-  margin: 0 0 0 0;
+  margin: 0;
 }
 
 .home-button {
   padding: 0.8rem;
-  cursor: pointer;
-  font-size: 1rem;
-  text-decoration: none;
+  cursor: pointer; /* Make the curser a finger... I think it looks cool */
+  font-size: 1rem;  
 }
 
 .home-button:hover {
@@ -94,8 +81,6 @@ body {
   margin: 0 auto;
   padding: 2rem;
   display: flex;
-  gap: 0;
-  align-items: flex-start;
 }
 
 .main-content {
@@ -103,7 +88,7 @@ body {
   min-width: 0;
   max-width: 800px;
   order: 1;
-  word-wrap: break-word;
+  word-wrap: break-word; /* Allow long words to break and wrap to the next line */
   overflow-wrap: break-word;
   width: fit-content;
 }
@@ -114,11 +99,14 @@ body {
   border: 1px solid #e2d6c9;
   border-radius: 8px;
   padding: 1rem 1.25rem;
-  position: sticky;
-  top: 1rem;
+  position: sticky; /*Lets it move with the page */
+  top: 1rem; /* Allows the side bar to not be above the top main-content */
   align-self: flex-start;
   order: 2;
-  margin-left: 1rem;
+  margin: 0rem 0rem 1rem 1rem;
+  max-height: calc(100vh - 4rem); /* Allows the side-tab to have a 1rem top and bottom buffer */
+  overflow-y: auto; /* Allows a vertical scrolling feature */
+  overflow-x: hidden; /* Hides ugly horizontal scrollbars */
 }
 
 .side-tab-group {
@@ -133,6 +121,45 @@ body {
   font-weight: bold;
   text-decoration: none;
   margin: 1rem 0 0 0;
+}
+
+/* Scrollbar styling for side-tab */
+.side-tab::-webkit-scrollbar {
+  width: 8px;
+}
+
+.side-tab::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.side-tab::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 8px;
+}
+
+.side-tab::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Back-to-top button styling */
+.back-to-top {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-bottom: 1.5px solid #000000;
+}
+
+.back-to-top-link {
+  color: var(--text-color);
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.back-to-top-link:hover {
+  text-decoration: underline;
 }
 
 .side-tab-box {

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
 
-  <body>
+  <body id="top">
     <div class="header">
       <div class="header-content">
         <div class="text-container">
@@ -17,7 +17,10 @@
       </div>
     </div>
     <div class="page-container">
-      <nav class="side-tab" aria-label="Section navigation">
+      <nav class="side-tab" aria-label="Section navigation"> <!-- Added aria-label for accessibility -->
+        <div class="back-to-top">
+          <a href="#top" class="back-to-top-link">Back to Top ↑</a>
+        </div>
         <div class="side-tab-group">
           <a class="side-tab-title" href="#blog-posts">Blog Posts</a>
           <div class="side-tab-box">
