@@ -217,7 +217,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
 }
 
 .side-tab-title {
@@ -250,8 +250,9 @@ body {
 .back-to-top {
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
   padding-bottom: 2px;
+  margin-top: -8px;
   border-bottom: 1.5px solid #000000;
 }
 
@@ -468,6 +469,7 @@ footer.footer {
 
 .page-container.nav-dropdown-mode {
   display: block;
+  padding: 0;
 }
 
 .page-container.nav-dropdown-mode .top-dropdown-nav {
