@@ -11,6 +11,9 @@
 html {
   scroll-behavior: smooth;
 }
+html.nav-dropdown-active {
+  scroll-padding-top: 5rem;
+}
 
 body {
   margin: 0;
