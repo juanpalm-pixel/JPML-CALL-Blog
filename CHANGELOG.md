@@ -15,11 +15,17 @@ All notable changes to this CALL Blog project will be documented in this file.
 - **ID Anchor**: Added `id="top"` to body tags on all blog posts for anchor navigation
 - **Top Dropdown Navigation**: Added top dropdown navigation to all blog posts for responsive mobile-friendly navigation
 - **Side-by-Side Layout**: Posts now display side navigation beside the main content when viewport is wide enough
+- **Shared JavaScript File**: Added `scripts/site.js` as a single source of truth for navigation rendering and responsive behavior
+
+#### Changed
+- **Centralized Navigation Content**: Moved side-tab and top-dropdown-nav item definitions into `scripts/site.js` so links/titles are edited in one place
+- **Externalized Page Scripts**: Replaced duplicated inline script blocks in `index.html` and all post pages with external script references
 
 #### Fixed
 - **Main Content Wrapper**: Wrapped `container blog-post-container` in `main-content` div on all blog posts to enable proper side-by-side layout
 - **Responsive Navigation**: Posts now properly implement the `nav-dropdown-mode` class logic to switch between side-tab and top-dropdown-nav based on viewport width
 - **Layout Consistency**: Posts now match index.html's responsive behavior where narrow viewports hide side-tab and show dropdown navigation
+- **Minor CSS Cleanup**: Removed unused `html.nav-dropdown-active` rule and normalized `padding: 0rem` to `padding: 0`
 
 ## [Previous Updates]
 

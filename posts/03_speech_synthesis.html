@@ -17,58 +17,8 @@
       </div>  
     </div>
     <div class="page-container">
-      <nav class="top-dropdown-nav" aria-label="Compact section navigation">
-        <div class="top-dropdown-inner">
-          <a href="#top" class="top-nav-control">Back to Top ↑</a>
-
-          <details class="top-nav-dropdown">
-            <summary class="top-nav-control">Blog Posts</summary>
-            <div class="top-nav-menu">
-              <a class="top-nav-item" href="../index.html#post-introducing">Introducing Myself</a>
-              <a class="top-nav-item" href="../index.html#post-call-background">CALL Background</a>
-              <a class="top-nav-item" href="../index.html#post-speech-synthesis">Speech Synthesis</a>
-              <a class="top-nav-item" href="../index.html#post-speech-recognition">Speech Recognition</a>
-            </div>
-          </details>
-
-          <details class="top-nav-dropdown">
-            <summary class="top-nav-control">Readings</summary>
-            <div class="top-nav-menu">
-              <a class="top-nav-item" href="../index.html#reading-longitudinal">A longitudinal analysis of highly cited papers in four CALL journals</a>
-              <a class="top-nav-item" href="../index.html#reading-sla-history">A short history of SLA: Where have we come from and where are we going?</a>
-              <a class="top-nav-item" href="../index.html#reading-forty-two">Forty-two years of computer-assisted language learning research</a>
-              <a class="top-nav-item" href="../index.html#reading-pedagogical-biases">Pedagogical Biases in AI-Powered Educational Tools</a>
-              <a class="top-nav-item" href="../index.html#reading-self-imitation">After Self-Imitation Prosodic Training</a>
-              <a class="top-nav-item" href="../index.html#reading-i-can-speak"><i>I Can Speak</i>: improving English pronunciation</a>
-            </div>
-          </details>
-        </div>
-      </nav>
-      <nav class="side-tab" aria-label="Section navigation">
-        <div class="back-to-top">
-          <a href="#top" class="back-to-top-link">Back to Top ↑</a>
-        </div>
-        <div class="side-tab-group">
-          <a class="side-tab-title" href="../index.html#blog-posts">Blog Posts</a>
-          <div class="side-tab-box">
-            <a class="side-tab-item side-tab-item-blog" href="../index.html#post-introducing">Introducing Myself</a>
-            <a class="side-tab-item side-tab-item-blog" href="../index.html#post-call-background">CALL Background</a>
-            <a class="side-tab-item side-tab-item-blog" href="../index.html#post-speech-synthesis">Speech Synthesis</a>
-            <a class="side-tab-item side-tab-item-blog" href="../index.html#post-speech-recognition">Speech Recognition</a>
-          </div>
-        </div>
-        <div class="side-tab-group">
-          <a class="side-tab-title" href="../index.html#readings">Readings</a>
-          <div class="side-tab-box">
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-longitudinal">A longitudinal analysis of highly cited papers in four CALL journals</a>
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-sla-history">A short history of SLA: Where have we come from and where are we going?</a>
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-forty-two">Forty-two years of computer-assisted language learning research</a>
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-pedagogical-biases">Pedagogical Biases in AI-Powered Educational Tools</a>
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-self-imitation">After Self-Imitation Prosodic Training</a>
-            <a class="side-tab-item side-tab-item-reading" href="../index.html#reading-i-can-speak"><i>I Can Speak</i>: improving English pronunciation</a>
-          </div>
-        </div>
-      </nav>
+      <nav class="top-dropdown-nav" aria-label="Compact section navigation"></nav>
+      <nav class="side-tab" aria-label="Section navigation"></nav>
 
       <div class="main-content">
         <div class="container blog-post-container">
@@ -89,72 +39,6 @@
       </div>
       </div>
     </div>
-    <script>
-      (function () {
-        const pageContainer = document.querySelector('.page-container');
-        const sideTab = document.querySelector('.side-tab');
-        const mainContent = document.querySelector('.main-content');
-        const dropdownNav = document.querySelector('.top-dropdown-nav');
-        const mainContentMinimumWidth = 560;
-
-        if (!pageContainer || !sideTab || !mainContent || !dropdownNav) {
-          return;
-        }
-
-        function updateNavigationMode() {
-          pageContainer.classList.remove('nav-dropdown-mode');
-          document.documentElement.style.scrollPaddingTop = '0';
-
-          const sideStyles = window.getComputedStyle(sideTab);
-          const sideTotalWidth =
-            sideTab.getBoundingClientRect().width +
-            parseFloat(sideStyles.marginLeft) +
-            parseFloat(sideStyles.marginRight);
-
-          const pageStyles = window.getComputedStyle(pageContainer);
-          const availableWidth =
-            pageContainer.clientWidth -
-            parseFloat(pageStyles.paddingLeft) -
-            parseFloat(pageStyles.paddingRight);
-
-          const remainingMainWidth = availableWidth - sideTotalWidth;
-          const shouldUseDropdownMode = remainingMainWidth < mainContentMinimumWidth;
-
-          if (shouldUseDropdownMode) {
-            pageContainer.classList.add('nav-dropdown-mode');
-            document.documentElement.style.scrollPaddingTop = '4.5rem';
-          }
-        }
-
-        dropdownNav.addEventListener('click', function (event) {
-          const clickedLink = event.target.closest('.top-nav-item');
-          if (!clickedLink) {
-            return;
-          }
-
-          dropdownNav.querySelectorAll('details[open]').forEach(function (dropdown) {
-            dropdown.removeAttribute('open');
-          });
-        });
-
-        dropdownNav.querySelectorAll('.top-nav-dropdown').forEach(function (dropdown) {
-          dropdown.addEventListener('toggle', function () {
-            if (!dropdown.open) {
-              return;
-            }
-
-            dropdownNav.querySelectorAll('.top-nav-dropdown').forEach(function (otherDropdown) {
-              if (otherDropdown !== dropdown) {
-                otherDropdown.removeAttribute('open');
-              }
-            });
-          });
-        });
-
-        window.addEventListener('resize', updateNavigationMode);
-        window.addEventListener('load', updateNavigationMode);
-        updateNavigationMode();
-      })();
-    </script>
+    <script src="../scripts/site.js"></script>
   </body>
 </html>

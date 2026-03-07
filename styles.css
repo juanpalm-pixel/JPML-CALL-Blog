@@ -11,9 +11,6 @@
 html {
   scroll-behavior: smooth;
 }
-html.nav-dropdown-active {
-  scroll-padding-top: 5rem;
-}
 
 body {
   margin: 0;
@@ -472,7 +469,7 @@ footer.footer {
 
 .page-container.nav-dropdown-mode {
   display: block;
-  padding: 0rem;
+  padding: 0;
 }
 
 .page-container.nav-dropdown-mode .top-dropdown-nav {
