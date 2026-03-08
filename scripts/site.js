@@ -111,6 +111,17 @@
   }
 
   function bindDropdownBehavior() {
+    const dropdownInner = dropdownNav.querySelector(".top-dropdown-inner");
+
+    function updateDropdownState() {
+      const anyOpen = dropdownNav.querySelector(".top-nav-dropdown[open]");
+      if (anyOpen) {
+        dropdownInner.classList.add("has-open-dropdown");
+      } else {
+        dropdownInner.classList.remove("has-open-dropdown");
+      }
+    }
+
     dropdownNav.addEventListener("click", function (event) {
       const clickedLink = event.target.closest(".top-nav-item"); // Check if the clicked element (or any of its ancestors) has the class "top-nav-item", which indicates that it's one of the navigation links in the dropdown menu. If it is, we want to allow the default behavior of navigating to the anchor link. If it's not a navigation link (e.g., if the user clicked on the dropdown toggle or somewhere else in the dropdown), we want to close any open dropdowns without navigating.
       if (!clickedLink) {
@@ -120,11 +131,13 @@
       dropdownNav.querySelectorAll("details[open]").forEach(function (dropdown) {
         dropdown.removeAttribute("open");
       });
+      updateDropdownState();
     });
 
     dropdownNav.querySelectorAll(".top-nav-dropdown").forEach(function (dropdown) {
       dropdown.addEventListener("toggle", function () {
         if (!dropdown.open) {
+          updateDropdownState();
           return; // If the dropdown is being closed, we don't need to do anything else. We only want to close other dropdowns when a new one is being opened.
         }
 
@@ -133,6 +146,7 @@
             otherDropdown.removeAttribute("open");
           } // When a dropdown is opened, we want to close any other open dropdowns to ensure that only one dropdown menu is open at a time. This loop goes through all the dropdowns in the navigation and closes any that are not the one that was just opened.
         });
+        updateDropdownState();
       });
     });
   }
