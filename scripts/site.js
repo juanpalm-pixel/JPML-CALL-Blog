@@ -9,6 +9,12 @@
         { id: "post-speech-recognition", label: "Speech Recognition" },
       ],
     },
+    technologies: {
+      title: "Technologies", // To add, simply set id: as the anchor ID, and label: as the display text
+      items: [
+        { id: "technology-speech-synthesis", label: "Speech Synthesis" },
+      ],
+    },
     readings: {
       title: "Readings", // To add, simply set id: as the anchor ID, and label: as the display text 
       items: [
@@ -32,8 +38,25 @@
     return;
   } // This check ensures that the script only runs on pages that have the expected structure (i.e., an element with class "page-container" that contains the necessary child elements). If any of these elements are missing, it likely means we're on a page that doesn't use this navigation setup, so we simply exit the function without doing anything.
 
-  const isPostPage = /\/posts\/[^/]+\.html$/i.test(window.location.pathname.replace(/\\/g, "/")); // Check if the current page is a blog post page based on the URL pattern. This is used to determine how to construct the anchor links for navigation, since post pages are typically one level deeper in the directory structure compared to the index page.
-  const basePrefix = isPostPage ? "../index.html#" : "#"; // If we're on a post page, we need to prefix the anchor links with "../index.html" to navigate back to the index page and then jump to the specific section. If we're already on the index page, we can just use "#" for the anchor links.
+  // Determine the correct path prefix to navigate back to index.html with anchor links
+  // We need to detect if we're on index.html or on a subpage, and calculate the relative path accordingly
+  const pathname = window.location.pathname.replace(/\\/g, "/");
+  const isIndexPage = /\/index\.html$/i.test(pathname) || pathname.endsWith("/");
+  
+  let basePrefix;
+  if (isIndexPage) {
+    // We're on index.html, so just use anchor links
+    basePrefix = "#";
+  } else if (/\/posts\/[^/]+\.html$/i.test(pathname)) {
+    // We're in the /posts/ directory (one level deep)
+    basePrefix = "../index.html#";
+  } else if (/\/technologies\/[^/]+\/[^/]+\.html$/i.test(pathname)) {
+    // We're in a /technologies/subfolder/ directory (two levels deep)
+    basePrefix = "../../index.html#";
+  } else {
+    // Default fallback: assume we're one level deep
+    basePrefix = "../index.html#";
+  }
 
   function hrefFor(anchorId) {
     return `${basePrefix}${anchorId}`;
@@ -43,6 +66,10 @@
     const blogItemsHtml = NAV_CONFIG.blogPosts.items
       .map((item) => `<a class="top-nav-item" href="${hrefFor(item.id)}">${item.label}</a>`)
       .join(""); // This generates the HTML for the blog posts section of the dropdown navigation by mapping over the items defined in the NAV_CONFIG and creating anchor tags for each one. The href for each link is constructed using the hrefFor helper function to ensure it points to the correct location based on the current page context.
+
+    const technologiesItemsHtml = NAV_CONFIG.technologies.items
+      .map((item) => `<a class="top-nav-item" href="${hrefFor(item.id)}">${item.label}</a>`)
+      .join("");
 
     const readingItemsHtml = NAV_CONFIG.readings.items
       .map((item) => `<a class="top-nav-item" href="${hrefFor(item.id)}">${item.label}</a>`)
@@ -56,6 +83,10 @@
           <div class="top-nav-menu">${blogItemsHtml}</div>
         </details>
         <details class="top-nav-dropdown">
+          <summary class="top-nav-control">${NAV_CONFIG.technologies.title}</summary>
+          <div class="top-nav-menu">${technologiesItemsHtml}</div>
+        </details>
+        <details class="top-nav-dropdown">
           <summary class="top-nav-control">${NAV_CONFIG.readings.title}</summary>
           <div class="top-nav-menu">${readingItemsHtml}</div>
         </details>
@@ -66,6 +97,10 @@
     const blogItemsHtml = NAV_CONFIG.blogPosts.items
       .map((item) => `<a class="side-tab-item side-tab-item-blog" href="${hrefFor(item.id)}">${item.label}</a>`)
       .join(""); // This generates the HTML for the blog posts section of the side tab by mapping over the items defined in the NAV_CONFIG and creating anchor tags for each one. The href for each link is constructed using the hrefFor helper function to ensure it points to the correct location based on the current page context.
+
+    const technologiesItemsHtml = NAV_CONFIG.technologies.items
+      .map((item) => `<a class="side-tab-item side-tab-item-blog" href="${hrefFor(item.id)}">${item.label}</a>`)
+      .join("");
 
     const readingItemsHtml = NAV_CONFIG.readings.items
       .map((item) => `<a class="side-tab-item side-tab-item-reading" href="${hrefFor(item.id)}">${item.label}</a>`)
@@ -78,6 +113,10 @@
       <div class="side-tab-group">
         <a class="side-tab-title" href="${hrefFor("blog-posts")}">${NAV_CONFIG.blogPosts.title}</a>
         <div class="side-tab-box">${blogItemsHtml}</div>
+      </div>
+      <div class="side-tab-group">
+        <a class="side-tab-title" href="${hrefFor("technologies")}">${NAV_CONFIG.technologies.title}</a>
+        <div class="side-tab-box">${technologiesItemsHtml}</div>
       </div>
       <div class="side-tab-group">
         <a class="side-tab-title" href="${hrefFor("readings")}">${NAV_CONFIG.readings.title}</a>
