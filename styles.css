@@ -546,6 +546,7 @@ footer.footer {
 
 .page-container.nav-dropdown-mode .blog-post-container {
   max-width: 100%;
+  width: 100%;
   margin: 0;
 }
 
