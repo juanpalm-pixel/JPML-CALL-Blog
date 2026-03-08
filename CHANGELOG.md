@@ -4,6 +4,22 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
+### Latest Changes (March 8, 2026)
+
+#### Added
+- **Speech Synthesis Input UX**: Added text input and submit workflow for the speech synthesis post.
+- **Post Navigation Buttons**: Added previous/next navigation buttons for blog posts 3 and 4.
+
+#### Changed
+- **Speech Synthesis Markup**: Updated `posts/03_speech_synthesis.html` structure for improved layout behavior.
+- **Blog Post Container Layout**: Enhanced blog post container width behavior in responsive/dropdown mode.
+- **Dropdown Navigation Styling**: Improved top dropdown interaction styling and open-state visual feedback.
+
+#### Fixed
+- **Speech Synthesis Variable Typo**: Corrected variable naming in `scripts/synthesis.js`.
+- **API Key Formatting**: Updated API key format reference in `my-API-keys.txt`.
+- **Audio Playback/Error Handling**: Refined speech synthesis request flow and playback reliability.
+
 ### Latest Changes (March 7, 2026)
 
 #### Added
