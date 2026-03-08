@@ -1,1 +1,1 @@
-synthesis-elevenlabs-01: sk_6edfad91cee943654a817954c818357d0bcedbdaae21b450
+API_KEY = "sk_6edfad91cee943654a817954c818357d0bcedbdaae21b450"
