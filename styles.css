@@ -429,6 +429,13 @@ h2 {
   vertical-align: middle;
 }
 
+#submittedText {
+  margin-bottom: -6px;
+  text-align: center;
+  font-style: italic;
+  color: #888;
+}
+
 .blog-post-container {
   max-width: 800px;
   margin: 0 auto;

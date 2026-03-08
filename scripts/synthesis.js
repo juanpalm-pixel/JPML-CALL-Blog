@@ -1,9 +1,16 @@
+let API_KEY;
+window.onload = function () {
+API_KEY = prompt("Please enter your API key:");
+} // This code prompts the user to enter their API key when the webpage loads and stores it in the variable API_KEY for later use in making requests to the text-to-speech API.
+
 function submitText() {
 const input = document.getElementById("inputText").value;
 document.getElementById("submittedText").textContent = input;
-} // This function is called when the user clicks the "Submit" button. It retrieves the value from the input text box with the ID "inputText" and then sets the text content of the paragraph with the ID "submittedText" to that value, effectively displaying the submitted text on the page.
+synthesiseSpeech(input);
+}
 
 let synthesisURL = "https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb?output_format=mp3_44100_128" // This variable holds the URL for the text-to-speech API endpoint. It includes a specific voice ID (JBFqnCBsd6RMkjVDRZzb) and specifies the output format for the synthesized audio (mp3 with a sample rate of 44100 Hz and a bitrate of 128 kbps).
+
 function synthesiseSpeech(input) {
     const url = synthesisURL;
     
