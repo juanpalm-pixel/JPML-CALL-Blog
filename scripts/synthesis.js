@@ -68,7 +68,7 @@ function synthesiseSpeech(input) {
     };
 
     // Send a POST request to the ElevenLabs API
-    fetch(synthesisURL, {
+    fetch(synthesisURL, { 
         method: "POST",
         headers: {
             "xi-api-key": API_KEY, // Authentication header with the user's API key
@@ -163,7 +163,20 @@ function clearSynthesisHistory() {
 //   result - an object with text and audioDataUrl properties
 //   autoPlay - boolean indicating whether to automatically play the audio
 function appendSynthesisResult(result, autoPlay) {
-    // Find the container where synthesis results should be displayed
+    // First, check if we're on the main synthesis page with a direct audio element
+    const directAudio = document.getElementById("synthesisAudio");
+    if (directAudio) {
+        // We're on synthesis.html - directly set and play the audio element
+        directAudio.src = result.audioDataUrl;
+        
+        // If autoPlay is true, automatically start playing the audio
+        if (autoPlay) {
+            directAudio.play().catch(() => {}); // Catch and ignore any autoplay restrictions
+        }
+        return;
+    }
+
+    // Otherwise, find the container where synthesis results should be displayed (for history.html)
     let resultsContainer = document.getElementById("synthesisResults");
     if (!resultsContainer) {
         // If the container doesn't exist on this page, exit early

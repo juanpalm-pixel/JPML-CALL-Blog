@@ -481,6 +481,7 @@ h2 {
 .blog-post p {
   line-height: 1.25;
   margin: 0.5rem 0 0.5rem 0;
+  text-indent: 1rem;
 }
 
 .blog-post h3 {
