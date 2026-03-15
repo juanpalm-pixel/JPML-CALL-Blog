@@ -4,6 +4,19 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
+### Latest Changes (March 15, 2026)
+
+#### Added
+- **Speech Recognition Recorder Assets**: Added `technologies/speech-recognition/recorder.js` and `technologies/speech-recognition/recorder.css` to support in-page audio recording UI/logic.
+- **Technology Navigation Item**: Added "Speech Recognition" to the Technologies navigation config in `scripts/site.js`.
+
+#### Changed
+- **Speech Recognition Page Template**: Updated `technologies/speech-recognition/recognition.html` to use the shared page structure (`top-dropdown-nav`, `side-tab`, `main-content`, and `blog-post` container) and shared site navigation script.
+- **Technology-to-Technology Flow**: Added the "Next Technology" link in `technologies/speech-synthesis/synthesis.html` to point to `technologies/speech-recognition/recognition.html`.
+
+#### Fixed
+- **Index Technologies Markup**: Corrected/normalized Technologies section structure in `index.html` so the Speech Recognition technology card is properly wrapped and rendered consistently.
+
 ### Latest Changes (March 8, 2026)
 
 #### Added

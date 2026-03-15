@@ -13,6 +13,7 @@
       title: "Technologies", // To add, simply set id: as the anchor ID, and label: as the display text
       items: [
         { id: "technology-speech-synthesis", label: "Speech Synthesis" },
+        { id: "technology-speech-recognition", label: "Speech Recognition" },
       ],
     },
     readings: {
