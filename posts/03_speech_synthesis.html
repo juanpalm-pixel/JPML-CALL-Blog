@@ -37,33 +37,24 @@
               />
               </a> 
             </div>
-            <h2>Goodbye Robot Voices, Hello Real Talk!</h2>
+            
+            <h3>Goodbye Robot Voices, Hello Real Talk!</h3>
             <p>Over the past five years, advances in text‑to‑speech (TTS) have moved from “good enough” synthetic voices to highly natural, controllable speech that CALL designers can use in new ways. Modern TTS is no longer just a convenience for generating audio, but rather a pedagogical tool that can be adapted for pronunciation models, multimodal reading tasks, and scalable listening practice.</p>
             <h3>Why is TTS Suddenly So Good?</h3>
             <p>Two technical trends have driven this shift. First, neural TTS architectures (<a href="https://www.shadecoder.com/topics/neural-vocoder-a-comprehensive-guide-for-2025" target="_blank" rel="noopener">waveform neural vocoders</a> and <a href="..\readings\End-to-End Training.pdf" target="_blank">end‑to‑end acoustic models</a>) have dramatically improved naturalness and prosodic control. If you want to read an indpeth summary of all the development that occured up to 2021, I highly recommend <a href="..\readings\A Survey on Neural Speech Synthesis.pdf" target="_blank"">A Survey on Neural Speech Synthesis</a>. It summarizes these breakthroughs up to 2021, and their implications for downstream applications, however, be warned, it is very dense.</p>
-            <p>Second, research into controllable and multi‑speaker TTS (including accent and emotion control, see <a href="https://medium.com/@brijeshrn/from-robotic-to-relatable-how-natural-prosody-is-powering-the-new-generation-of-voice-bots-14f5821713a2" target="_blank" rel="noopener">here</a>) has made it possinle to generate targeted models for pedagogical aims, such as exaggerating the prosody for perception training, slowed but natural speech for early learners, or multiple accents for exposure tasks. Work on modular, self‑supervised TTS models shows how smaller datasets and disentangled representations can produce flexible voices suitable for CALL prototypes. <a href="https://aclanthology.org/2024.findings-eacl.79/" target="_blank" rel="noopener">ParrotTTS: Disentangled Representations for TTS (2024)</a>.</p>
-            <p>Pedagogically, three affordances stand out. First, TTS enables rapid creation of parallel audio for graded reading: the same text can be rendered in different speaking rates, prosodic styles, or accents so learners can compare and notice differences. Second, TTS can be integrated with visual feedback (waveforms, pitch contours) to support pronunciation training without requiring a native speaker for every recording. Third, TTS scales: large reading corpora with aligned audio are now feasible for classroom platforms and adaptive apps.</p>
-            <p>Empirical work from the last few years suggests learners accept and benefit from AI‑powered TTS when it is well‑designed and paired with tasks that make listening active rather than passive. A mixed‑methods study of EFL learners’ perceptions of AI TTS apps found positive engagement and perceived gains in pronunciation when learners used TTS alongside guided practice sessions. <a href="https://migrationletters.com/index.php/ml/article/view/6905" target="_blank" rel="noopener">EFL Students' Perception of AI TTS Apps (2024)</a>.</p>
-            <p>There are caveats. Many current CALL apps still use TTS as a drop‑in audio source rather than as a controllable pedagogical variable; feedback mechanisms remain uneven (binary scores vs. actionable guidance); and ethical questions about voice cloning and consent are emerging as TTS becomes more lifelike. Designers should pair TTS with explicit listening tasks, visual prosody displays, and opportunities for production and negotiation so that synthetic audio becomes a springboard for interaction rather than a passive resource.</p>
-            <h3>Further reading</h3>
-            <p>For a full evolution of TTS and its applications in language learning, I highly recommend reading <a href="https://yourvoic.com/blogs/basics/evolution-of-tts" target="_blank" rel="noopener">this article</a>.</p>
-
-            <figure>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Spectrogram.png" alt="Spectrogram and pitch contour example" width="720" >
-              <figcaption><strong>Label:</strong> Spectrogram and pitch contour used in pronunciation feedback (example visualization).</figcaption>
-            </figure>
-
-            <h3>Related resources</h3>
-            <ul>
-              <li><a href="https://arxiv.org/abs/2106.15561" target="_blank" rel="noopener">Survey on Neural Speech Synthesis (arXiv)</a></li>
-              <li><a href="https://aclanthology.org/2024.findings-eacl.79/" target="_blank" rel="noopener">ParrotTTS: Disentangled Self‑Supervised TTS (ACL findings 2024)</a></li>
-              <li><a href="https://migrationletters.com/index.php/ml/article/view/6905" target="_blank" rel="noopener">EFL Students' Perception of AI TTS Apps (Migration Letters, 2024)</a></li>
-            </ul>
-
-            <h3>Embedded demo</h3>
-            <p>Short explainer on modern TTS and its use in language learning:</p>
-            <iframe src="https://www.youtube.com/embed/3q3wQ2w8Gk8" title="TTS explainer video" allowfullscreen></iframe>
-
+            <p>Second, research into controllable and multi‑speaker TTS (including accent and emotion control [<a href="https://medium.com/@brijeshrn/from-robotic-to-relatable-how-natural-prosody-is-powering-the-new-generation-of-voice-bots-14f5821713a2" target="_blank" rel="noopener"><i>see here</i></a>]) has made it possinle to generate targeted models for pedagogical aims, such as exaggerating the prosody for perception training; slowing speech for early learners; or containing multiple accents for exposure tasks. In fact, work on modular, self‑supervised TTS models has shown how multilingual datasets produced by an individual speaker can produce flexible voices suitable for CALL prototypes <a href="..\readings\ParrotTTS.pdf" target="_blank" rel="noopener">[<i>see ParrotTTS</i>]</a>.</p>
+            <h3>Ways This Changes the Game for Learners</h3>
+            <p>Pedagogically, three things stand out: 
+              <ol style="margin: 0;">
+                <li>TTS enables rapid creation of parallel audio, meaning that the same text can be rendered at different speaking rates, prosodic styles, or accents, allowing the learners to compare variations and (potentially) notice differences between each edition.</li>
+                <li>TTS can be integrated with visual feedback (e.g. <a href="..\readings\Text-to-Speech Synthesis with Articulatory Movement Prediction.pdf" target="_blank">tongue MRIs</a>) to support pronunciation training without requiring a native speaker for every recording.</li>
+                <li>TTS scales means that large reading corpora with aligned audio are now feasible for classroom platforms and adaptive apps.</li>
+              </ol>
+            </p>
+            <h3>But... Do People Actually Like This?</h3>
+            <p>Empirical work from the last few years suggests learners accept and benefit from AI‑powered TTS when it is well‑designed and paired with listening actives rather than passive ones. A mixed‑methods study of EFL learners’ perceptions of AI TTS apps found positive engagement and perceived gains in pronunciation when learners used TTS alongside guided practice sessions [<a href="..\readings\Perception of Using AI Text-to-Speech.pdf" target="_blank" rel="noopener"><i>see here</i></a>].</p>
+            <p>However, like anything, there are a few caveats. Many current CALL apps still use TTS as a drop‑in audio source rather than as a controllable pedagogical variable, meaning that feedback mechanisms remain uneven, and <a href="https://speechactors.com/article/voice-cloning-and-tts-ethical-considerations/" target="_blank" rel="noopener">ethical questions</a> about voice cloning and consent are emerging as TTS becomes more lifelike. Designers should pair TTS with explicit listening tasks, visual prosody displays, and opportunities for production and negotiation so that synthetic audio becomes a springboard for interaction rather than a passive resource.</p>
+            
             <div class="center">
               <p>
                 <a href="./02_call_background.html" class="back-button">← Previous Blog</a> 
