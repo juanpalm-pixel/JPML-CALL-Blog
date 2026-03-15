@@ -69,6 +69,14 @@ if (navigator.mediaDevices.getUserMedia) {
       audio.src = audioURL;
       console.log("recorder stopped");
 
+      // Show immediate status in UI so the user knows processing has started.
+      if (typeof setTranscriptText === "function") {
+        setTranscriptText("Processing recording...");
+      }
+
+      // Send recorded audio blob for upload + transcription.
+      sendToAssemblyAI(blob, API_KEY);
+
       deleteButton.onclick = function (e) {
         e.target.closest(".clip").remove();
       };

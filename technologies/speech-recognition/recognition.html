@@ -6,7 +6,8 @@
     <title>CALL Blog</title>
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="../../styles.css" />
-  </head>
+    <link href="./recorder.css" rel="stylesheet" />
+   </head>
 
   <body id="top">
     <div class="header">
@@ -32,15 +33,26 @@
               On this page, you can record your voice and use Speech Recognition to see it as text.
             </p>
 
+            <section class="main-controls">
+              <canvas class="visualizer" height="60px"></canvas>
+              <div id="buttons">
+                <button class="record">Record</button>
+                <button class="stop">Stop</button>
+              </div>
+            </section>
+
             <!-- Insert audio recorder below this line  -->
             <p id="speechRecognitionText"></p>
+            <section class="sound-clips"></section>
+
           </article>
+
         </div>
       </div>
-      <!-- Insert audio recorder below this line  -->
-   
-      <p id="speechRecognitionText"></p>
     </div>
+    <script src="./convert-audio.js"></script>
+    <script src="./recognition.js"></script>
+    <script src="./recorder.js"></script>
     <script src="../../scripts/site.js"></script>
   </body>
 </html>

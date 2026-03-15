@@ -1,1 +1,2 @@
 API_KEY = "sk_6edfad91cee943654a817954c818357d0bcedbdaae21b450"
+recognition-assemblyai = "c8a4954cef734c53a4fe4895d407be36"

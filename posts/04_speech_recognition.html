@@ -21,34 +21,48 @@
       <nav class="side-tab" aria-label="Section navigation"></nav>
 
       <div class="main-content">
-        <div class="container blog-post-container">
-          <article class="blog-post">
-            <div class="center">
-              <a href="../index.html" class="back-button">← Back to Home</a>
-              <h2 style="margin-bottom: 16px;">Speech Recognition</h2>
-              <p class="post-meta" style="margin-top: 12.8px; margin-bottom: 14px;">February 16th 2026 Hilary Term</p>
-              <img
-                src=""
-                alt=""
-                class="post-image"
-                style="width: 350px; height: auto; max-width: 100%;"
-                title=""
-              />
-            </div>
+          <div class="container blog-post-container">
+            <article class="blog-post">
+              <div class="center">
+                <a href="../index.html" class="back-button">← Back to Home</a>
+                <h2 style="margin-bottom: 16px;">The Evolution of Speech Recognition</h2>
+                <p class="post-meta" style="margin-top: 12.8px; margin-bottom: 14px;">February 23rd 2026 Hilary Term</p>
+                <a href="https://www.cartoonstock.com/cartoon?searchID=CS618170" target="_blank" rel="noopener">
+                <img
+                  src="../images/gemini-speech-recog-meme.png"
+                  alt="Speech Recognition Meme"
+                  class="post-image"
+                  style="width: 350px; height: auto; max-width: 100%; cursor: pointer;"
+                  title=""
+                  /></a>
+              </div>
 
-            <p><i>Text Here</i></p>
+              <h3>From "Can’t Understand" to "Can Converse"</h3>
+              <p>If Speech Synthesis (TTS) is the "mouth" of CALL, then <b>Automatic Speech Recognition (ASR)</b> is its "ears." For years, these ears were notoriously hard of hearing, especially when dealing with the accented, hesitant speech of a language learner. However, the last five years have seen a paradigm shift. We have moved from simple "pattern matching"—where the computer just checks if you said a specific word—to systems that can actually evaluate the quality of your communication.</p>
 
-            <div class="center">
-              <p>
-                <a href="./03_speech_synthesis.html" class="back-button">← Previous Blog</a> 
-                <a href="" class="next-button">Next Blog →</a>
-              </p>
-            </div>
+              <h3>The Transformer Revolution and Accuracy</h3>
+              <p>The biggest technical leap since 2021 has been the widespread adoption of <b>Transformer-based models</b>. Unlike older systems that processed sound in a linear sequence, transformers allow for parallel processing of audio data, meaning the AI can look at the "whole" sentence to understand context. As explored in <a href="[https://ieeexplore.ieee.org/document/10924161](https://ieeexplore.ieee.org/document/10924161)" target="_blank" rel="noopener">recent systematic reviews of Deep Learning in ASR</a>, this has drastically reduced Word Error Rates (WER) in noisy environments, which was previously the "death knell" for classroom-based CALL tools.</p>
 
-          </article>
+              <h3>Impact on Pronunciation and Anxiety</h3>
+              <p>Recent empirical evidence suggests that ASR is no longer just a gimmick. A <a href="[https://doi.org/10.3389/fpsyg.2023.1210187](https://doi.org/10.3389/fpsyg.2023.1210187)" target="_blank" rel="noopener">2023 mixed-methods investigation</a> found that consistent use of ASR technology significantly improved both the accentedness and the general comprehensibility of EFL learners. Perhaps more importantly, it addressed the "Affective Filter" I mentioned in Post 02; learners reported that the immediate, private feedback from an ASR system allowed them to "fail safely" without the social cost of a human listener’s judgment.</p>
+              
+              <p>However, more recent studies, such as this <a href="[https://www.tandfonline.com/doi/full/10.1080/09588221.2025.2534498](https://www.tandfonline.com/doi/full/10.1080/09588221.2025.2534498)" target="_blank" rel="noopener">2025 report on speech-to-text gains</a>, highlight a fascinating paradox: while ASR improves phoneme-level accuracy (how you say your 'p's and 'b's), it can actually <i>lower</i> speaking confidence if the feedback is too critical or "game-ified." This suggests that the next five years of CALL design shouldn't just focus on "perfect" recognition, but on "supportive" recognition.</p>
+
+              <h3>The Move Toward Corrective Feedback</h3>
+              <p>We are now seeing ASR move beyond simple transcription. Modern systems are being integrated with <b>Automated Corrective Feedback (ACF)</b>. According to <a href="[https://doi.org/10.1080/17501229.2024.2315101](https://doi.org/10.1080/17501229.2024.2315101)" target="_blank" rel="noopener">research comparing different ASR-based systems</a>, the most effective tools are those that provide "phonetic-level" feedback—pointing out exactly <i>where</i> the tongue should have been—rather than just giving a global "Correct/Incorrect" score. This bridges the gap between simply being understood by a machine and actually improving as a speaker.</p>
+
+              <h3>The Road Ahead</h3>
+              <p>As we look toward the end of 2026, the challenge for ASR in CALL remains the "long tail" of diversity—capturing the speech of children, non-standard dialects, and highly emotional speech. While we've mastered the "ears," we are still learning how to make those ears empathetic.</p>
+
+              <div class="center">
+                <p>
+                  <a href="./03_speech_synthesis.html" class="back-button">← Previous Blog</a> 
+                </p>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
-    </div>
-    <script src="../scripts/site.js"></script>
+      <script src="../scripts/site.js"></script>
   </body>
 </html>
