@@ -50,6 +50,36 @@ button:active {
   overflow: auto;
 }
 
+.recognition-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.5rem;
+}
+
+.recognition-status p {
+  margin: 0;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #b7d6e7;
+  border-top-color: #0088cc;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 section,
 article {
   display: block;
@@ -118,6 +148,12 @@ aside p {
 
 aside a {
   color: #666;
+}
+
+.visualizer {
+  width: 100%;
+  height: 60px;
+  display: block;
 }
 
 /* Toggled State of information box */

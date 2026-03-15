@@ -41,10 +41,17 @@
               </div>
             </section>
 
-            <!-- Insert audio recorder below this line  -->
-            <p id="speechRecognitionText"></p>
             <section class="sound-clips"></section>
+            <div class="recognition-status" aria-live="polite">
+              <span id="speechRecognitionSpinner" class="spinner hidden" aria-hidden="true"></span>
+              <p id="speechRecognitionText"></p>
+            
+            </div>
 
+            <p>
+              <a href="./history.html" class="back-button">View Recognition History →</a>
+            </p>
+            
           </article>
 
         </div>

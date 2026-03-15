@@ -1,14 +1,40 @@
 let API_KEY;
-window.onload = function () {
- API_KEY = prompt("Please enter your API key:");
- if (API_KEY) API_KEY = API_KEY.trim();
-};
+
+const recognitionHistoryStorageKey = "speechRecognitionHistory";
+const recognitionHistoryLimit = 10;
+
+window.addEventListener("load", function () {
+    const recordButton = document.querySelector(".record");
+
+    // Only prompt for key on the live recording page.
+    if (recordButton) {
+        API_KEY = prompt("Please enter your API key:");
+        if (API_KEY) API_KEY = API_KEY.trim();
+    }
+
+    renderRecognitionHistory();
+
+    const clearHistoryButton = document.getElementById("clearRecognitionHistory");
+    if (clearHistoryButton) {
+        clearHistoryButton.addEventListener("click", function () {
+            clearRecognitionHistory();
+            renderRecognitionHistory();
+        });
+    }
+});
 
 function setTranscriptText(message) {
   const output = document.getElementById("speechRecognitionText");
+    const spinner = document.getElementById("speechRecognitionSpinner");
   if (output) {
     output.innerText = message;
   }
+
+    // Show spinner while API work is in progress.
+    if (spinner) {
+        const isLoading = /^(Processing|Uploading|Transcribing)/i.test(message || "");
+        spinner.classList.toggle("hidden", !isLoading);
+    }
 }
 
 async function sendToAssemblyAI(audioBlob, API_KEY) {
@@ -62,6 +88,14 @@ async function sendToAssemblyAI(audioBlob, API_KEY) {
             const transcription = await getTranscription(transcriptData.id, API_KEY);
             if (transcription) {
                 setTranscriptText(transcription);
+
+                // Save successful recognition result (audio + transcription) in local history.
+                const audioDataUrl = await blobToDataUrl(wavBlob);
+                saveRecognitionResult({
+                  transcription: transcription,
+                  audioDataUrl: audioDataUrl,
+                  createdAt: new Date().toISOString(),
+                });
             } else {
                 setTranscriptText("Transcription failed. Check console for API details.");
             }
@@ -102,3 +136,73 @@ async function sendToAssemblyAI(audioBlob, API_KEY) {
         }
     }
   }
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
+
+function getRecognitionHistory() {
+    try {
+        const rawHistory = localStorage.getItem(recognitionHistoryStorageKey);
+        return rawHistory ? JSON.parse(rawHistory) : [];
+    } catch (error) {
+        console.error("Unable to read recognition history:", error);
+        return [];
+    }
+}
+
+function saveRecognitionResult(result) {
+    try {
+        const history = getRecognitionHistory();
+        history.unshift(result);
+
+        // Keep at most 10 entries; newest entries stay, oldest are overwritten.
+        const cappedHistory = history.slice(0, recognitionHistoryLimit);
+        localStorage.setItem(recognitionHistoryStorageKey, JSON.stringify(cappedHistory));
+    } catch (error) {
+        console.error("Unable to save recognition history:", error);
+    }
+}
+
+function clearRecognitionHistory() {
+    localStorage.removeItem(recognitionHistoryStorageKey);
+}
+
+function renderRecognitionHistory() {
+    const historyList = document.getElementById("recognitionHistoryList");
+    if (!historyList) {
+        return;
+    }
+
+    historyList.innerHTML = "";
+    const history = getRecognitionHistory();
+
+    if (history.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.textContent = "No previous recognition results yet.";
+        historyList.appendChild(emptyMessage);
+        return;
+    }
+
+    history.forEach((entry) => {
+        const item = document.createElement("div");
+        item.className = "synthesis-result-item";
+
+        const text = document.createElement("p");
+        text.className = "synthesis-result-text";
+        text.textContent = entry.transcription || "(No transcription text available)";
+
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = entry.audioDataUrl;
+
+        item.appendChild(text);
+        item.appendChild(audio);
+        historyList.appendChild(item);
+    });
+}
