@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ga">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Practice - Cleachtadh Earráidí</title>
+    <link rel="stylesheet" href="styles/errors.css">
+    <link rel="stylesheet" href="styles/pronunciation-feedback.css">
+</head>
+<body>
+    <header>
+        <h1>Error Practice</h1>
+        <nav>
+            <button id="back-to-reader">← Back to Reader</button>
+            <button id="export-errors">Export Errors</button>
+            <button id="clear-errors">Clear All Errors</button>
+        </nav>
+    </header>
+    
+    <main id="error-practice-container">
+        <!-- Statistics Overview -->
+        <section id="error-statistics">
+            <div class="stat-card">
+                <h3>Total Errors</h3>
+                <span id="total-errors-count">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Unresolved</h3>
+                <span id="unresolved-errors-count">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Practice Streak</h3>
+                <span id="practice-streak">0 days</span>
+            </div>
+            <div class="stat-card">
+                <h3>Average Accuracy</h3>
+                <span id="average-accuracy">0%</span>
+            </div>
+        </section>
+
+        <!-- Error Filters -->
+        <section id="error-filters">
+            <div class="filter-group">
+                <label for="error-type-filter">Filter by Type:</label>
+                <select id="error-type-filter">
+                    <option value="all">All Types</option>
+                    <option value="pronunciation">Pronunciation</option>
+                    <option value="word">Word Recognition</option>
+                    <option value="phrase">Phrase Structure</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort-by">Sort by:</label>
+                <select id="sort-by">
+                    <option value="priority">Priority</option>
+                    <option value="date">Date</option>
+                    <option value="frequency">Frequency</option>
+                    <option value="confidence">Confidence</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>
+                    <input type="checkbox" id="show-resolved"> Show Resolved
+                </label>
+            </div>
+        </section>
+        
+        <!-- Error List -->
+        <section id="error-list-section">
+            <h2>Error History</h2>
+            <div id="error-list" class="error-grid">
+                <!-- Error items will be populated here -->
+            </div>
+            <div id="no-errors" class="no-errors-message" style="display: none;">
+                <h3>No pronunciation errors yet!</h3>
+                <p>Start reading and practicing to track your pronunciation progress.</p>
+                <button id="start-reading">Start Reading</button>
+            </div>
+        </section>
+        
+        <!-- Practice Panel -->
+        <section id="practice-panel">
+            <div id="practice-content">
+                <h2>Error Practice</h2>
+                <div id="practice-instructions">
+                    <p>Select an error from the list to start practicing.</p>
+                </div>
+                <div id="current-practice" style="display: none;">
+                    <div class="practice-item">
+                        <div class="target-text">
+                            <h3>Practice Text:</h3>
+                            <div id="practice-text-display"></div>
+                        </div>
+                        <div class="practice-controls">
+                            <button id="play-target">🔊 Hear Target</button>
+                            <button id="record-practice">🎤 Record Practice</button>
+                            <button id="mark-resolved">✓ Mark Resolved</button>
+                        </div>
+                        <div id="practice-feedback" class="practice-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Tracking -->
+        <section id="progress-stats">
+            <h2>Progress Statistics</h2>
+            <div class="progress-grid">
+                <div class="progress-item">
+                    <h4>Recent Activity</h4>
+                    <div class="activity-chart" id="activity-chart">
+                        <!-- Progress visualization -->
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <h4>Error Patterns</h4>
+                    <div id="error-patterns">
+                        <!-- Common error patterns -->
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <h4>Improvement Areas</h4>
+                    <div id="improvement-areas">
+                        <!-- Suggested focus areas -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Import/Export Modal -->
+    <div id="import-export-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import/Export Error Data</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="export">Export</button>
+                        <button class="tab-btn" data-tab="import">Import</button>
+                    </div>
+                    <div id="export-tab" class="tab-content active">
+                        <p>Download your error data for backup or sharing:</p>
+                        <button id="download-errors">Download Error Data</button>
+                        <div id="export-stats"></div>
+                    </div>
+                    <div id="import-tab" class="tab-content">
+                        <p>Upload previously saved error data:</p>
+                        <input type="file" id="import-file" accept=".json">
+                        <button id="upload-errors">Import Data</button>
+                        <div id="import-status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts/error-manager.js"></script>
+    <script src="scripts/tts-service.js"></script>
+    <script src="scripts/stt-service.js"></script>
+    <script src="scripts/audio-processor.js"></script>
+    <script src="scripts/ui-animations.js"></script>
+    <script>
+        // Initialize error practice page
+        document.addEventListener('DOMContentLoaded', function() {
+            const errorPracticePage = new ErrorPracticePage();
+            errorPracticePage.initialize();
+        });
+    </script>
+    <script src="scripts/error-practice-page.js"></script>
+</body>
+</html>

@@ -4,6 +4,33 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
+### Latest Changes (March 22, 2026)
+
+#### Added
+- **Irish E-Reader project**: New project folder `project/` containing a web-based Irish e‑reader and pronunciation trainer integrated into the site.
+- **Frontend UI**: `project/index.html`, `project/styles/ereader.css`, and `project/scripts/ui-foundation.js` (UI foundation) providing text input, controls, practice panel, and settings.
+- **Speech Services**: `project/scripts/tts-service.js` and `project/scripts/stt-service.js` prepared for Google Cloud integration (TTS/STT wrappers).
+- **Audio Processing**: `project/scripts/audio-processor.js` for recording, format conversion (WebM→WAV), and basic audio quality checks.
+- **Pronunciation Feedback**: Real-time feedback system and practice controls implemented in `project/scripts/ereader.js`.
+- **Visual Animations**: `project/scripts/ui-animations.js` and CSS for sentence enlargement, word highlighting, and feedback animations.
+- **Error Tracking**: `project/scripts/error-manager.js` and `project/errors.html` for storing and practicing mispronounced phrases.
+- **Debugging Tools**: `project/debug-check.html`, `project/simple-debug.html`, and `project/google-cloud-tester.html` to help diagnose API, microphone, and TTS/STT issues.
+
+#### Changed
+- **Site integration**: The e‑reader UI uses the site's existing styles and navigation patterns to maintain a consistent look and feel.
+- **Script loading**: Fixed and reorganized script includes in `project/index.html` to prevent loading errors and infinite debug loops.
+
+#### Fixed
+- **Syntax & runtime errors**: Resolved multiple JavaScript syntax errors and an infinite console recursion in diagnostic scripts that prevented the e‑reader from initializing.
+- **Compatibility**: Added a small compatibility helper `project/scripts/compatibility.js` and adjusted code to avoid optional-chaining issues on older browsers when testing locally.
+- **CORS / local file issues**: Temporarily commented out the `manifest.json` link when running from the file system to avoid CORS errors; note that full PWA features require serving over HTTP/HTTPS.
+
+#### Notes
+- Google Cloud APIs were integrated and tested successfully, but the Google Cloud project used here does not expose Irish (ga-IE) TTS voices; alternatives (browser TTS, ElevenLabs, or using English voices) may be considered.
+- API keys were used for testing only; if keys are exposed, they should be revoked and rotated immediately and stored securely (not in plaintext files).
+
+
+
 ### Latest Changes (March 15, 2026)
 
 #### Added

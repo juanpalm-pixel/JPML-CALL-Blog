@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ga">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irish Text Segmentation Test</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles/ereader.css">
+    <style>
+        .test-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border: 1px solid #e2d6c9;
+            border-radius: 6px;
+        }
+        
+        .test-results {
+            background-color: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .sentence-list {
+            margin: 1rem 0;
+        }
+        
+        .sentence-item {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        
+        .sentence-meta {
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        
+        .test-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+        
+        .test-button:hover {
+            opacity: 0.9;
+        }
+        
+        .irish-indicator {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .long-indicator {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .error-text {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Irish Text Segmentation Test</h1>
+        <p>Test the enhanced Irish text segmentation functionality with various text samples.</p>
+
+        <!-- Basic Irish Text Test -->
+        <div class="test-section">
+            <h3>Test 1: Basic Irish Text</h3>
+            <button class="test-button" onclick="testBasicIrish()">Run Test</button>
+            <div id="test1-results" class="test-results" style="display: none;">
+                <div id="test1-output"></div>
+            </div>
+        </div>
+
+        <!-- Abbreviations Test -->
+        <div class="test-section">
+            <h3>Test 2: Irish Abbreviations</h3>
+            <button class="test-button" onclick="testAbbreviations()">Run Test</button>
+            <div id="test2-results" class="test-results" style="display: none;">
+                <div id="test2-output"></div>
+            </div>
+        </div>
+
+        <!-- Mixed Language Test -->
+        <div class="test-section">
+            <h3>Test 3: Mixed Language Content</h3>
+            <button class="test-button" onclick="testMixedLanguage()">Run Test</button>
+            <div id="test3-results" class="test-results" style="display: none;">
+                <div id="test3-output"></div>
+            </div>
+        </div>
+
+        <!-- Edge Cases Test -->
+        <div class="test-section">
+            <h3>Test 4: Edge Cases</h3>
+            <button class="test-button" onclick="testEdgeCases()">Run Test</button>
+            <div id="test4-results" class="test-results" style="display: none;">
+                <div id="test4-output"></div>
+            </div>
+        </div>
+
+        <!-- Interactive Test Area -->
+        <div class="test-section">
+            <h3>Interactive Test</h3>
+            <p>Enter your own text to test the segmentation:</p>
+            <textarea id="custom-text" placeholder="Enter Irish text here..." 
+                      style="width: 100%; height: 120px; padding: 0.75rem; border: 1px solid #e2d6c9; border-radius: 4px;"></textarea>
+            <br>
+            <button class="test-button" onclick="testCustomText()">Analyze Text</button>
+            <div id="custom-results" class="test-results" style="display: none;">
+                <div id="custom-output"></div>
+            </div>
+        </div>
+
+        <!-- Performance Test -->
+        <div class="test-section">
+            <h3>Performance Test</h3>
+            <button class="test-button" onclick="testPerformance()">Run Performance Test</button>
+            <div id="performance-results" class="test-results" style="display: none;">
+                <div id="performance-output"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the e-reader script -->
+    <script src="scripts/ereader.js"></script>
+
+    <script>
+        // Create a test instance of the e-reader
+        let testEReader;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            testEReader = new IrishEReader();
+        });
+
+        function testBasicIrish() {
+            const text = `Tá mé ag foghlaim na Gaeilge. Is breá liom an teanga seo! Cad é mar atá tú? Táim go maith, go raibh maith agat. An bhfuil tú ag dul abhaile anocht? Beidh mé ag obair amárach. Tá an aimsir go hálainn inniu.`;
+            
+            runSegmentationTest(text, 'test1-results', 'test1-output');
+        }
+
+        function testAbbreviations() {
+            const text = `Bhí mé ag caint le Dr. Ó Síocháin inné. Fuair mé litir ó Ucht. na hÉireann. Tá an oifig suite ar Rd. Uí Dhomhnaill. Bhí cruinniú ag 3.30 p.m. Chonaic mé é ar an tSráid srl. Is féidir leat teagmháil a dhéanamh liom tríd an r-phost.`;
+            
+            runSegmentationTest(text, 'test2-results', 'test2-output');
+        }
+
+        function testMixedLanguage() {
+            const text = `Hello, my name is Seán. Táim ag foghlaim na Gaeilge. I live in Dublin. Is as Baile Átha Cliath mé. We can speak English or Irish. An féidir leat Gaeilge a labhairt?`;
+            
+            runSegmentationTest(text, 'test3-results', 'test3-output');
+        }
+
+        function testEdgeCases() {
+            const text = `Sentence with numbers like 3.14 and 2.5. URL like https://www.google.com should not split. Email test@example.com too. Very short. A! B? C. Multiple   spaces    and    weird... punctuation!!!`;
+            
+            runSegmentationTest(text, 'test4-results', 'test4-output');
+        }
+
+        function testCustomText() {
+            const text = document.getElementById('custom-text').value;
+            if (!text.trim()) {
+                alert('Please enter some text to test');
+                return;
+            }
+            
+            runSegmentationTest(text, 'custom-results', 'custom-output');
+        }
+
+        function testPerformance() {
+            const largeText = generateLargeText(1000); // Generate 1000 sentences
+            
+            const startTime = performance.now();
+            const sentences = testEReader.parseTextToSentences(largeText);
+            const endTime = performance.now();
+            
+            const resultsDiv = document.getElementById('performance-results');
+            const outputDiv = document.getElementById('performance-output');
+            
+            resultsDiv.style.display = 'block';
+            outputDiv.innerHTML = `
+                <h4>Performance Results</h4>
+                <p><strong>Text size:</strong> ${largeText.length} characters</p>
+                <p><strong>Sentences parsed:</strong> ${sentences.length}</p>
+                <p><strong>Processing time:</strong> ${(endTime - startTime).toFixed(2)} ms</p>
+                <p><strong>Rate:</strong> ${(sentences.length / ((endTime - startTime) / 1000)).toFixed(1)} sentences/second</p>
+            `;
+        }
+
+        function runSegmentationTest(text, resultsId, outputId) {
+            console.log('Testing text:', text.substring(0, 100) + '...');
+            
+            const sentences = testEReader.parseTextToSentences(text);
+            
+            const resultsDiv = document.getElementById(resultsId);
+            const outputDiv = document.getElementById(outputId);
+            
+            resultsDiv.style.display = 'block';
+            
+            let html = `
+                <h4>Segmentation Results</h4>
+                <p><strong>Input text:</strong> ${text.length} characters</p>
+                <p><strong>Sentences found:</strong> ${sentences.length}</p>
+                <p><strong>Irish sentences:</strong> ${sentences.filter(s => s.hasIrishContent).length}</p>
+                <p><strong>Long sentences:</strong> ${sentences.filter(s => s.isLong).length}</p>
+                <div class="sentence-list">
+            `;
+            
+            sentences.forEach((sentence, index) => {
+                html += `
+                    <div class="sentence-item">
+                        <div><strong>Sentence ${sentence.number}:</strong> ${sentence.content}</div>
+                        <div class="sentence-meta">
+                            <span>Words: ${sentence.wordCount}</span>
+                            <span class="${sentence.hasIrishContent ? 'irish-indicator' : ''}">
+                                Irish: ${sentence.hasIrishContent ? 'Yes' : 'No'}
+                            </span>
+                            <span class="${sentence.isLong ? 'long-indicator' : ''}">
+                                ${sentence.isLong ? 'Long sentence' : 'Normal length'}
+                            </span>
+                            <span>Position: ${sentence.startPosition}-${sentence.endPosition}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            outputDiv.innerHTML = html;
+        }
+
+        function generateLargeText(numSentences) {
+            const templates = [
+                "Tá mé ag dul go dtí an siopa.",
+                "Is breá liom an ceol traidisiúnta.",
+                "Bhí mé ag caint le mo chara.",
+                "Táim ag obair sa choláiste.",
+                "An bhfuil tú ag teacht liom?",
+                "Beidh mé ar ais amárach.",
+                "Chonaic mé film iontach aréir.",
+                "Tá an aimsir go hálainn inniu."
+            ];
+            
+            let text = '';
+            for (let i = 0; i < numSentences; i++) {
+                text += templates[i % templates.length] + ' ';
+            }
+            return text.trim();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Irish E-Reader Simple Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .test-section { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>Irish E-Reader Simple Debug</h1>
+    <div id="results"></div>
+    
+    <div class="test-section">
+        <h2>Quick Tests</h2>
+        <button onclick="testBasics()">Test Basics</button>
+        <button onclick="testAPIKey()">Test API Key</button>
+        <button onclick="testMicrophone()">Test Microphone</button>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        const testResults = document.getElementById('test-results');
+        
+        function log(message, type = 'status') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        // Check basic functionality
+        log('Starting simple debug check...');
+
+        // Check for main classes without loading them
+        setTimeout(() => {
+            log('Checking if scripts will load...');
+            
+            // Try to load one script at a time
+            const script = document.createElement('script');
+            script.src = 'scripts/ereader.js';
+            script.onload = () => {
+                log('✓ ereader.js loaded successfully', 'success');
+                checkAfterLoad();
+            };
+            script.onerror = () => {
+                log('✗ Failed to load ereader.js', 'error');
+            };
+            document.head.appendChild(script);
+        }, 1000);
+
+        function checkAfterLoad() {
+            if (typeof IrishEReader !== 'undefined') {
+                log('✓ IrishEReader class is available', 'success');
+            } else {
+                log('✗ IrishEReader class is not available', 'error');
+            }
+        }
+
+        function testBasics() {
+            testResults.innerHTML = '<div class="status">Testing basic browser features...</div>';
+            
+            let results = [];
+            
+            // Test Web Audio API
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                results.push('✓ Microphone API available');
+            } else {
+                results.push('✗ Microphone API not available');
+            }
+            
+            // Test Speech Synthesis
+            if ('speechSynthesis' in window) {
+                results.push('✓ Speech Synthesis available');
+            } else {
+                results.push('✗ Speech Synthesis not available');
+            }
+            
+            // Test localStorage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                results.push('✓ localStorage working');
+            } catch (e) {
+                results.push('✗ localStorage not working');
+            }
+            
+            testResults.innerHTML = '<div class="status success">' + results.join('<br>') + '</div>';
+        }
+
+        function testAPIKey() {
+            const key = prompt('Enter your Google Cloud API key (it will be saved):');
+            if (key) {
+                localStorage.setItem('google-cloud-api-key', key);
+                localStorage.setItem('ereader-tts-key', key);
+                localStorage.setItem('ereader-stt-key', key);
+                testResults.innerHTML = '<div class="status success">✓ API key saved to localStorage</div>';
+            } else {
+                testResults.innerHTML = '<div class="status warning">No API key entered</div>';
+            }
+        }
+
+        async function testMicrophone() {
+            testResults.innerHTML = '<div class="status">Testing microphone...</div>';
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                testResults.innerHTML = '<div class="status success">✓ Microphone permission granted</div>';
+            } catch (error) {
+                testResults.innerHTML = '<div class="status error">✗ Microphone error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

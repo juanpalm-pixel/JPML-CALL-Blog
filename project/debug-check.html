@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Irish E-Reader Debug Check</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .test-section { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>Irish E-Reader Debug Check</h1>
+    <div id="results"></div>
+    
+    <div class="test-section">
+        <h2>Quick Tests</h2>
+        <button onclick="testGoogleCloudAPI()">Test Google Cloud API</button>
+        <button onclick="testMicrophone()">Test Microphone</button>
+        <button onclick="testSpeechSynthesis()">Test Speech Synthesis</button>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        const testResults = document.getElementById('test-results');
+        
+        function log(message, type = 'status') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        // Check if all scripts are loading
+        log('Starting debug check...');
+
+        // Check for missing ui-foundation.js
+        if (typeof UIFoundation === 'undefined') {
+            log('WARNING: ui-foundation.js is missing or not loaded', 'warning');
+        }
+
+        // Check Google Cloud API key
+        const googleAPIKey = localStorage.getItem('ereader-tts-key') || localStorage.getItem('google-cloud-key');
+        if (googleAPIKey) {
+            log('✓ Google Cloud API key found in localStorage', 'success');
+        } else {
+            log('✗ No Google Cloud API key found in localStorage', 'error');
+            log('You need to enter your API key in the main interface', 'warning');
+        }
+
+        // Check if main classes are available
+        setTimeout(() => {
+            if (typeof IrishEReader !== 'undefined') {
+                log('✓ IrishEReader class is available', 'success');
+            } else {
+                log('✗ IrishEReader class is not available', 'error');
+            }
+
+            if (typeof GoogleTTSService !== 'undefined') {
+                log('✓ GoogleTTSService class is available', 'success');
+            } else {
+                log('✗ GoogleTTSService class is not available', 'error');
+            }
+
+            if (typeof GoogleSTTService !== 'undefined') {
+                log('✓ GoogleSTTService class is available', 'success');
+            } else {
+                log('✗ GoogleSTTService class is not available', 'error');
+            }
+
+            // Check for Web Audio API support
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                log('✓ Microphone API is available', 'success');
+            } else {
+                log('✗ Microphone API is not available', 'error');
+            }
+
+            // Check for Speech Synthesis API
+            if ('speechSynthesis' in window) {
+                log('✓ Speech Synthesis API is available', 'success');
+            } else {
+                log('✗ Speech Synthesis API is not available', 'error');
+            }
+        }, 1000);
+
+        async function testGoogleCloudAPI() {
+            testResults.innerHTML = '<div class="status">Testing Google Cloud API...</div>';
+            
+            // Check if we have an API key
+            let apiKey = localStorage.getItem('ereader-tts-key');
+            if (!apiKey) {
+                apiKey = prompt('Please enter your Google Cloud API key:');
+                if (apiKey) {
+                    localStorage.setItem('ereader-tts-key', apiKey);
+                    localStorage.setItem('ereader-stt-key', apiKey);
+                }
+            }
+            
+            if (!apiKey) {
+                testResults.innerHTML = '<div class="status error">No API key provided</div>';
+                return;
+            }
+
+            // Test TTS API
+            try {
+                const ttsResponse = await fetch(
+                    `https://texttospeech.googleapis.com/v1/voices?key=${apiKey}`
+                );
+                
+                if (ttsResponse.ok) {
+                    const voices = await ttsResponse.json();
+                    const irishVoices = voices.voices.filter(v => v.languageCodes.includes('ga') || v.languageCodes.includes('ga-IE'));
+                    testResults.innerHTML = `<div class="status success">✓ Google Cloud TTS API working! Found ${irishVoices.length} Irish voices</div>`;
+                } else {
+                    testResults.innerHTML = `<div class="status error">✗ Google Cloud API error: ${ttsResponse.status}</div>`;
+                }
+            } catch (error) {
+                testResults.innerHTML = `<div class="status error">✗ Network error: ${error.message}</div>`;
+            }
+        }
+
+        async function testMicrophone() {
+            testResults.innerHTML = '<div class="status">Testing microphone access...</div>';
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop()); // Stop the stream
+                testResults.innerHTML = '<div class="status success">✓ Microphone access granted</div>';
+            } catch (error) {
+                testResults.innerHTML = `<div class="status error">✗ Microphone access denied: ${error.message}</div>`;
+            }
+        }
+
+        async function testSpeechSynthesis() {
+            testResults.innerHTML = '<div class="status">Testing speech synthesis...</div>';
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('Dia dhuit - Hello in Irish');
+                utterance.lang = 'ga-IE';
+                speechSynthesis.speak(utterance);
+                testResults.innerHTML = '<div class="status success">✓ Speech synthesis test started (you should hear audio)</div>';
+            } else {
+                testResults.innerHTML = '<div class="status error">✗ Speech synthesis not available</div>';
+            }
+        }
+    </script>
+
+    <!-- Include the same scripts as the main page -->
+    <script src="scripts/tts-service.js"></script>
+    <script src="scripts/stt-service.js"></script>
+    <script src="scripts/audio-processor.js"></script>
+    <script src="scripts/error-manager.js"></script>
+    <script src="scripts/ui-animations.js"></script>
+    <script src="scripts/ereader.js"></script>
+</body>
+</html>

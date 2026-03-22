@@ -1,0 +1,2013 @@
+/*
+ * Irish E-Reader Styles
+ * Enhanced styles that integrate with the main website design
+ */
+
+/* Import main site variables and styling foundation */
+
+/* Enhanced sentence styling with Irish language considerations and animations */
+.sentence {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0.1rem 0;
+    line-height: 1.8;
+    user-select: none;
+    position: relative;
+    transform-origin: center;
+}
+
+.sentence:hover {
+    background-color: var(--secondary-color);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Sentence Focus Animation - Main reading sentence */
+.sentence.active {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+    padding-left: 0.6rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+    z-index: 10;
+    position: relative;
+}
+
+/* Enhanced sentence focus with backdrop */
+.sentence.sentence-focus {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 0.5rem 0.8rem;
+    margin: 0.2rem 0;
+    z-index: 20;
+    position: relative;
+    font-weight: 600;
+}
+
+/* Semi-transparent backdrop for reading focus */
+.sentence.sentence-focus::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    z-index: -1;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Current playing sentence with enhanced pulse */
+.sentence.current-playing {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding-left: 0.6rem;
+    animation: sentence-pulse 2s infinite;
+    transform: scale(1.02);
+    position: relative;
+    z-index: 15;
+}
+
+/* Dimmed surrounding sentences during focus */
+.reading-area.focus-mode .sentence:not(.sentence-focus):not(.current-playing) {
+    opacity: 0.6;
+    transform: scale(0.98);
+    filter: blur(0.5px);
+    transition: all 0.4s ease;
+}
+
+.sentence.completed {
+    background-color: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+    padding-left: 0.6rem;
+    opacity: 0.8;
+}
+
+.sentence.error {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+    padding-left: 0.6rem;
+}
+
+/* Special styling for Irish content */
+.sentence.irish-content {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 500;
+}
+
+/* ============ PRONUNCIATION FEEDBACK SYSTEM STYLES ============ */
+
+/* Word-level highlighting for pronunciation feedback */
+.word-element {
+    display: inline;
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+/* Pronunciation accuracy color coding */
+.word-highlight.excellent-pronunciation {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+    animation: pronunciation-success 0.6s ease;
+}
+
+.word-highlight.good-pronunciation {
+    background-color: #20c997;
+    color: white;
+    box-shadow: 0 2px 4px rgba(32, 201, 151, 0.3);
+    animation: pronunciation-good 0.6s ease;
+}
+
+.word-highlight.fair-pronunciation {
+    background-color: #ffc107;
+    color: #212529;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+    animation: pronunciation-warning 0.6s ease;
+}
+
+.word-highlight.poor-pronunciation {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    animation: pronunciation-error 0.6s ease;
+}
+
+/* Pronunciation feedback animations */
+@keyframes pronunciation-success {
+    0% { transform: scale(1); background-color: #28a745; }
+    50% { transform: scale(1.1); background-color: #34ce57; }
+    100% { transform: scale(1); background-color: #28a745; }
+}
+
+@keyframes pronunciation-good {
+    0% { transform: scale(1); background-color: #20c997; }
+    50% { transform: scale(1.05); background-color: #40d5a7; }
+    100% { transform: scale(1); background-color: #20c997; }
+}
+
+@keyframes pronunciation-warning {
+    0% { transform: scale(1); background-color: #ffc107; }
+    25% { transform: scale(1.05); background-color: #ffcd39; }
+    75% { transform: scale(1.05); background-color: #ffcd39; }
+    100% { transform: scale(1); background-color: #ffc107; }
+}
+
+@keyframes pronunciation-error {
+    0% { transform: scale(1) translateX(0); }
+    25% { transform: scale(1.05) translateX(-2px); }
+    75% { transform: scale(1.05) translateX(2px); }
+    100% { transform: scale(1) translateX(0); }
+}
+
+/* Comprehensive pronunciation results panel */
+.pronunciation-results {
+    padding: 1rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.overall-score {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.score-circle.a {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.score-circle.b {
+    background: linear-gradient(135deg, #20c997, #17a2b8);
+}
+
+.score-circle.c {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.score-circle.d {
+    background: linear-gradient(135deg, #fd7e14, #dc3545);
+}
+
+.score-circle.f {
+    background: linear-gradient(135deg, #dc3545, #6f42c1);
+}
+
+.score-circle .grade {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.score-circle .score {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.score-description h4 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+}
+
+.score-description p {
+    margin: 0;
+    color: #6c757d;
+}
+
+/* Word-by-word analysis grid */
+.word-analysis {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.word-analysis h5 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+}
+
+.word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+}
+
+.word-result {
+    padding: 0.5rem;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    border: 2px solid;
+    transition: transform 0.2s ease;
+}
+
+.word-result:hover {
+    transform: translateY(-2px);
+}
+
+.word-result.excellent {
+    background-color: #d4edda;
+    border-color: #28a745;
+}
+
+.word-result.good {
+    background-color: #d1ecf1;
+    border-color: #20c997;
+}
+
+.word-result.fair {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.word-result.poor {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+}
+
+.word-result .word {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.word-result .confidence {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.word-result .status {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* Improvement suggestions */
+.improvements {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.improvements h5 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+}
+
+.improvements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.improvements li.improvement {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+
+.improvement.high {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+}
+
+.improvement.medium {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+
+.improvement.low {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+}
+
+/* Irish pronunciation tips */
+.irish-tips {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: linear-gradient(135deg, #e8f5e8, #d4edda);
+    border-radius: 8px;
+    border: 1px solid #28a745;
+}
+
+.irish-tips h5 {
+    margin: 0 0 1rem 0;
+    color: #155724;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.irish-tips h5::before {
+    content: '🍀';
+    font-size: 1.2rem;
+}
+
+.tips-grid {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.tip {
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.tip strong {
+    color: #155724;
+}
+
+/* Practice options buttons */
+.practice-options {
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+.practice-options h5 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+    text-align: center;
+}
+
+.option-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+}
+
+.practice-option-btn {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #6c757d;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.practice-option-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.practice-option-btn.recommended {
+    background-color: #007bff;
+    animation: pulse-recommended 2s infinite;
+}
+
+.practice-option-btn:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+@keyframes pulse-recommended {
+    0% { box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3); }
+    50% { box-shadow: 0 4px 12px rgba(0, 123, 255, 0.6); }
+    100% { box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3); }
+}
+
+/* Pronunciation status indicators */
+.pronunciation-status {
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.pronunciation-status.analyzing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.pronunciation-status.playing {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.pronunciation-status.ready {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.pronunciation-status.success {
+    background-color: #d4edda;
+    color: #155724;
+    animation: success-pulse 1s ease;
+}
+
+.pronunciation-status.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+@keyframes success-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Enhanced practice options styling */
+.practice-shortcuts-hint {
+    font-size: 0.8em;
+    margin-bottom: 10px;
+    color: #666;
+    text-align: center;
+    padding: 5px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 3px;
+}
+
+.practice-session-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    font-size: 0.9em;
+    border-left: 3px solid #007bff;
+}
+
+.session-stats-quick {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ============ ERROR TRACKING MODAL STYLES ============ */
+
+/* Error tracking modal overlay */
+.error-tracking-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(3px);
+}
+
+.error-tracking-modal .modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-30px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+.error-tracking-modal .modal-header {
+    background: linear-gradient(135deg, #c82333, #e04854);
+    color: white;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error-tracking-modal .modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.error-tracking-modal .close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: all 0.2s ease;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-tracking-modal .close-modal:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.error-tracking-modal .modal-body {
+    padding: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.error-tracking-modal .modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.error-tracking-modal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.error-tracking-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+/* Modal error items */
+.modal-error-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    border-left: 4px solid #c82333;
+}
+
+.modal-error-item:hover {
+    background: #f0f0f0;
+    border-color: #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modal-error-item:last-child {
+    margin-bottom: 0;
+}
+
+.modal-error-item .error-text {
+    font-weight: 700;
+    color: #c82333;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.modal-error-item .error-details {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+    flex-wrap: wrap;
+}
+
+.modal-error-item .error-details span {
+    background: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.modal-error-item .error-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.modal-error-item button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.modal-error-item .retry-error {
+    background: #007bff;
+    color: white;
+}
+
+.modal-error-item .retry-error:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.modal-error-item .resolve-error {
+    background: #28a745;
+    color: white;
+}
+
+.modal-error-item .resolve-error:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+/* Modal footer */
+.error-tracking-modal .modal-footer {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    border-top: 1px solid #e9ecef;
+}
+
+.error-tracking-modal .btn-primary {
+    background: linear-gradient(135deg, #c82333, #e04854);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    max-width: 200px;
+}
+
+.error-tracking-modal .btn-primary:hover {
+    background: linear-gradient(135deg, #a01e2a, #c82333);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(200, 35, 51, 0.3);
+}
+
+.error-tracking-modal .btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.error-tracking-modal .btn-secondary:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+/* No errors in modal */
+.modal-no-errors {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: #6c757d;
+}
+
+.modal-no-errors h4 {
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+/* Modal animation variants */
+.error-tracking-modal.fade-in {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.error-tracking-modal.fade-out {
+    animation: modalFadeOut 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { 
+        opacity: 0; 
+        backdrop-filter: blur(0px);
+    }
+    to { 
+        opacity: 1; 
+        backdrop-filter: blur(3px);
+    }
+}
+
+@keyframes modalFadeOut {
+    from { 
+        opacity: 1; 
+        backdrop-filter: blur(3px);
+    }
+    to { 
+        opacity: 0; 
+        backdrop-filter: blur(0px);
+    }
+}
+
+/* Responsive modal design */
+@media (max-width: 768px) {
+    .error-tracking-modal .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 1rem;
+        max-height: 90vh;
+    }
+    
+    .error-tracking-modal .modal-header {
+        padding: 1rem;
+    }
+    
+    .error-tracking-modal .modal-body {
+        padding: 1rem;
+        max-height: 50vh;
+    }
+    
+    .error-tracking-modal .modal-footer {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .error-tracking-modal .btn-primary,
+    .error-tracking-modal .btn-secondary {
+        max-width: none;
+    }
+    
+    .modal-error-item .error-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .modal-error-item .error-actions {
+        justify-content: stretch;
+    }
+    
+    .modal-error-item button {
+        flex: 1;
+        min-width: auto;
+    }
+}
+
+/* Error modal trigger button styles (if needed) */
+.show-errors-btn {
+    background: linear-gradient(135deg, #c82333, #e04854);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.show-errors-btn:hover {
+    background: linear-gradient(135deg, #a01e2a, #c82333);
+    transform: translateY(-1px);
+}
+
+/* Error count badge */
+.error-count-badge {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    min-width: 20px;
+    text-align: center;
+    animation: pulse-error 2s infinite;
+}
+
+@keyframes pulse-error {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Integration with existing pronunciation styles */
+.pronunciation-panel .error-tracking-section {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+}
+
+.pronunciation-panel .error-tracking-section h6 {
+    color: #721c24;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.pronunciation-panel .recent-errors-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.pronunciation-panel .recent-error-item {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid #dc3545;
+    font-size: 0.8rem;
+}
+
+.pronunciation-panel .recent-error-item .error-word {
+    font-weight: 600;
+    color: #c82333;
+}
+
+.pronunciation-panel .recent-error-item .error-time {
+    color: #6c757d;
+    font-size: 0.7rem;
+}
+
+/* Smooth transitions for all modal interactions */
+.error-tracking-modal * {
+    transition: all 0.2s ease;
+}
+
+.error-tracking-modal button:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Statistics display enhancements */
+.accuracy-excellent {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.accuracy-good {
+    color: #20c997;
+    font-weight: bold;
+}
+
+.accuracy-fair {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.accuracy-poor {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.confidence-excellent {
+    color: #28a745;
+}
+
+.confidence-good {
+    color: #20c997;
+}
+
+.confidence-fair {
+    color: #ffc107;
+}
+
+.confidence-poor {
+    color: #dc3545;
+}
+
+/* Session management indicators */
+.session-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 15px;
+    font-size: 0.75em;
+    color: #007bff;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+}
+
+.session-indicator.saving {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.session-indicator.saved {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+/* Keyboard shortcut tooltips */
+.practice-option-btn[title] {
+    position: relative;
+}
+
+.practice-option-btn[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    z-index: 1001;
+    margin-bottom: 5px;
+}
+
+.practice-option-btn[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+    z-index: 1001;
+}
+
+/* Enhanced progress indicators */
+.streak-indicator {
+    display: inline-block;
+    padding: 2px 6px;
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.improvement-trend {
+    height: 20px;
+    background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.improvement-trend::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Loading states for practice actions */
+.practice-option-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.practice-option-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Responsive design for pronunciation feedback */
+@media (max-width: 768px) {
+    .overall-score {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .word-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .option-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for entrance effects */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-out;
+}
+
+.slide-down {
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 0; 
+        transform: translateY(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+    font-weight: 500;
+}
+
+.sentence.irish-content::after {
+    content: "🍀";
+    font-size: 0.8em;
+    margin-left: 0.2rem;
+    opacity: 0.6;
+}
+
+/* Warning styling for long sentences */
+.sentence.long-sentence {
+    border-bottom: 2px dotted #ffc107;
+}
+
+.sentence.long-sentence:hover::after {
+    content: " (long sentence)";
+    font-size: 0.8em;
+    color: #856404;
+    font-style: italic;
+}
+
+/* Segmentation info panel */
+.segmentation-info {
+    margin-top: 1rem; 
+    padding: 0.75rem; 
+    background-color: #f8f9fa; 
+    border-radius: 4px; 
+    font-size: 0.9rem; 
+    color: #666;
+    border-left: 3px solid var(--primary-color);
+}
+
+.segmentation-info strong {
+    color: var(--primary-color);
+}
+
+/* ============ ANIMATION KEYFRAMES ============ */
+
+/* Enhanced sentence pulse animation */
+@keyframes sentence-pulse {
+    0% { 
+        background-color: #fff3cd; 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    50% { 
+        background-color: #ffeaa7; 
+        box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+        transform: scale(1.03);
+    }
+    100% { 
+        background-color: #fff3cd; 
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: scale(1.02);
+    }
+}
+
+/* Word-by-word highlighting animation */
+@keyframes word-highlight {
+    0% { 
+        background-color: transparent;
+        transform: scale(1);
+    }
+    50% {
+        background-color: #fff3cd;
+        transform: scale(1.05);
+        box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+    }
+    100% {
+        background-color: #ffeb3b;
+        transform: scale(1);
+    }
+}
+
+/* Pronunciation feedback - correct */
+@keyframes correct-pronunciation {
+    0% { 
+        background-color: transparent;
+        transform: scale(1);
+    }
+    50% {
+        background-color: #c8e6c9;
+        transform: scale(1.08);
+        box-shadow: 0 3px 8px rgba(76, 175, 80, 0.4);
+    }
+    100% {
+        background-color: #a5d6a7;
+        transform: scale(1);
+    }
+}
+
+/* Pronunciation feedback - incorrect */
+@keyframes incorrect-pronunciation {
+    0% { 
+        background-color: transparent;
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        background-color: #ffcdd2;
+        transform: scale(1.05) rotate(-1deg);
+    }
+    50% {
+        background-color: #f8bbd9;
+        transform: scale(1.08) rotate(1deg);
+    }
+    75% {
+        background-color: #ffcdd2;
+        transform: scale(1.05) rotate(-0.5deg);
+    }
+    100% {
+        background-color: #ef9a9a;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Sentence entrance animation */
+@keyframes sentence-entrance {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Reading progress wave effect */
+@keyframes reading-wave {
+    0% { 
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% { 
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Loading spinner for TTS processing */
+@keyframes tts-loading {
+    0% { 
+        transform: rotate(0deg) scale(1);
+        border-color: #007bff transparent transparent transparent;
+    }
+    25% {
+        border-color: transparent #28a745 transparent transparent;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+        border-color: transparent transparent #ffc107 transparent;
+    }
+    75% {
+        border-color: transparent transparent transparent #dc3545;
+    }
+    100% { 
+        transform: rotate(360deg) scale(1);
+        border-color: #007bff transparent transparent transparent;
+    }
+}
+
+/* Smooth focus transition */
+@keyframes focus-zoom {
+    0% {
+        transform: scale(1);
+        background-color: transparent;
+    }
+    100% {
+        transform: scale(1.1);
+        background-color: rgba(248, 249, 250, 0.9);
+    }
+}
+
+/* Button hover effects following site design */
+button {
+    transition: all 0.2s ease;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Form elements styling to match site */
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    font-family: 'Times New Roman', Times, serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 255, 0.1);
+}
+
+/* Range slider styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--background-color);
+    outline: none;
+    border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--hover-color);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0.25rem;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Loading and progress indicators */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        display: block !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] > div {
+        margin-bottom: 1rem;
+    }
+    
+    div[style*="display: flex"][style*="flex-wrap: wrap"] {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    div[style*="display: flex"][style*="flex-wrap: wrap"] > button {
+        margin: 0.25rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem !important;
+    }
+    
+    .post {
+        padding: 1rem !important;
+    }
+    
+    button {
+        padding: 0.6rem 1.2rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    textarea {
+        height: 120px !important;
+    }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+    .sentence.active {
+        background-color: #000;
+        color: #fff;
+    }
+    
+    .sentence.error {
+        background-color: #ff0000;
+        color: #fff;
+    }
+    
+    .sentence.current-playing {
+        background-color: #ffff00;
+        color: #000;
+    }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus indicators for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Print styles */
+
+/* Recording status styles */
+.status-recording {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+    font-weight: bold;
+    animation: pulse-recording 1.5s ease-in-out infinite;
+}
+
+.status-processing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    font-style: italic;
+}
+
+@keyframes pulse-recording {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Quality feedback styles */
+.quality-feedback {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.quality-feedback.too_short,
+.quality-feedback.too_quiet {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.quality-feedback.too_loud {
+    background-color: #f8d7da;
+    border-left-color: #dc3545;
+}
+
+.quality-feedback h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #856404;
+}
+
+.quality-feedback ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.quality-feedback .quality-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.quality-feedback .quality-details p {
+    margin: 0.25rem 0;
+}
+
+/* ============ WORD-LEVEL HIGHLIGHTING ============ */
+
+/* Word highlighting classes */
+.word-highlight {
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    position: relative;
+}
+
+/* Active word being spoken */
+.word-highlight.active {
+    animation: word-highlight 0.3s ease-in-out forwards;
+}
+
+/* Correct pronunciation feedback */
+.word-highlight.correct {
+    animation: correct-pronunciation 0.6s ease-out forwards;
+}
+
+/* Incorrect pronunciation feedback */
+.word-highlight.incorrect {
+    animation: incorrect-pronunciation 0.8s ease-out forwards;
+}
+
+/* Word timing sync indicator */
+.word-highlight.tts-sync::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ffc107, #ffeb3b);
+    animation: reading-wave 0.8s ease-in-out;
+}
+
+/* ============ READING AREA ENHANCEMENTS ============ */
+
+/* Reading area background changes */
+.reading-area {
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.reading-area.reading-active {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.reading-area.reading-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #007bff, #28a745, #ffc107);
+    animation: reading-wave 3s ease-in-out infinite;
+}
+
+/* ============ PROGRESS AND LOADING INDICATORS ============ */
+
+/* TTS loading spinner */
+.tts-loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: tts-loading 1.2s linear infinite;
+    margin: 0 0.5rem;
+    vertical-align: middle;
+}
+
+/* Reading progress bar */
+.reading-progress {
+    position: relative;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.reading-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #28a745);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.reading-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -20px;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5));
+    animation: reading-wave 2s ease-in-out infinite;
+}
+
+/* Audio level visualizer */
+.audio-visualizer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 40px;
+    padding: 0.5rem;
+}
+
+.audio-bar {
+    width: 4px;
+    min-height: 4px;
+    background-color: #007bff;
+    border-radius: 2px;
+    transition: all 0.1s ease;
+    transform-origin: bottom;
+}
+
+/* ============ MOBILE RESPONSIVENESS ============ */
+
+@media (max-width: 768px) {
+    .sentence.sentence-focus {
+        transform: scale(1.05);
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .sentence.current-playing {
+        transform: scale(1.01);
+    }
+    
+    .word-highlight {
+        padding: 0.05rem 0.1rem;
+    }
+    
+    .reading-area.focus-mode .sentence:not(.sentence-focus):not(.current-playing) {
+        opacity: 0.7;
+        transform: scale(0.99);
+        filter: blur(0.3px);
+    }
+}
+
+@media (max-width: 480px) {
+    .sentence.sentence-focus {
+        transform: scale(1.02);
+        padding: 0.2rem 0.3rem;
+    }
+    
+    .sentence.current-playing {
+        transform: scale(1);
+    }
+    
+    .audio-visualizer {
+        height: 30px;
+    }
+    
+    .audio-bar {
+        width: 3px;
+    }
+
+    /* ENHANCED MOBILE OPTIMIZATIONS */
+    
+    /* Ensure minimum touch targets (44px) */
+    button {
+        min-height: 44px !important;
+        padding: 12px 16px !important;
+        margin: 8px 4px !important;
+    }
+    
+    /* Optimize text sizes for mobile */
+    #text-display {
+        font-size: clamp(1.1rem, 4vw, 1.3rem) !important;
+        line-height: 1.8 !important;
+    }
+    
+    /* Better spacing for mobile interactions */
+    .sentence {
+        padding: 8px 4px !important;
+        margin: 4px 0 !important;
+        min-height: 40px !important;
+        touch-action: manipulation;
+    }
+    
+    /* Practice panel mobile optimization */
+    #practice-panel {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        max-height: 60vh !important;
+        overflow-y: auto !important;
+        transform: none !important;
+        border-radius: 16px 16px 0 0 !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+        z-index: 1000 !important;
+    }
+    
+    /* Practice options in a mobile-friendly grid */
+    .practice-options {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 16px !important;
+    }
+    
+    /* Input field optimizations */
+    input[type="password"],
+    textarea {
+        font-size: 16px !important; /* Prevents zoom on iOS */
+        padding: 12px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Audio controls mobile layout */
+    #audio-controls {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 12px !important;
+    }
+    
+    /* Recording button prominent on mobile */
+    #record-btn {
+        grid-column: 1 / -1 !important;
+        min-height: 56px !important;
+        font-size: 1.2rem !important;
+        background: linear-gradient(45deg, #dc3545, #c82333) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    /* Progress bar mobile optimization */
+    .reading-progress {
+        position: sticky !important;
+        top: 0 !important;
+        background: white !important;
+        z-index: 10 !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #e2d6c9 !important;
+    }
+    
+    /* Error modal full screen on mobile */
+    .error-modal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+    }
+    
+    /* Feedback area mobile optimization */
+    #feedback-area {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        max-height: 50vh !important;
+        overflow-y: auto !important;
+        border-radius: 16px 16px 0 0 !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+    }
+    
+    /* Sentence highlighting mobile-friendly */
+    .word-highlight {
+        padding: 2px 1px !important;
+        border-radius: 2px !important;
+        margin: 0 1px !important;
+    }
+    
+    /* API configuration mobile layout */
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+/* LANDSCAPE MODE MOBILE OPTIMIZATIONS */
+@media (max-width: 812px) and (orientation: landscape) {
+    #practice-panel,
+    #feedback-area {
+        max-height: 70vh !important;
+    }
+    
+    .sentence {
+        font-size: 0.95rem !important;
+        padding: 4px 2px !important;
+    }
+    
+    button {
+        min-height: 36px !important;
+        padding: 8px 12px !important;
+    }
+}
+
+/* TOUCH DEVICE OPTIMIZATIONS */
+@media (hover: none) and (pointer: coarse) {
+    .sentence:hover {
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+    
+    .sentence:active {
+        background-color: var(--secondary-color) !important;
+        transform: scale(0.98) !important;
+    }
+    
+    button:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    button:active {
+        transform: scale(0.95) !important;
+        background-color: rgba(0,0,0,0.1) !important;
+    }
+}
+
+/* PWA SAFE AREA SUPPORT */
+@supports (padding: max(0px)) {
+    .header {
+        padding-top: max(1rem, env(safe-area-inset-top)) !important;
+    }
+    
+    #practice-panel,
+    #feedback-area {
+        padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    }
+}
+
+/* ============ ACCESSIBILITY AND MOTION PREFERENCES ============ */
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .sentence,
+    .word-highlight,
+    .reading-progress-bar,
+    .tts-loading-spinner {
+        animation: none !important;
+        transition: opacity 0.2s ease !important;
+    }
+    
+    .sentence.sentence-focus {
+        transform: none !important;
+        background-color: #e3f2fd !important;
+        border: 2px solid #2196f3 !important;
+    }
+    
+    .word-highlight.active {
+        background-color: #fff3cd !important;
+        animation: none !important;
+    }
+    
+    .word-highlight.correct {
+        background-color: #d4edda !important;
+        animation: none !important;
+    }
+    
+    .word-highlight.incorrect {
+        background-color: #f8d7da !important;
+        animation: none !important;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .sentence.sentence-focus {
+        background-color: #000 !important;
+        color: #fff !important;
+        border: 3px solid #fff !important;
+    }
+    
+    .word-highlight.active {
+        background-color: #ffff00 !important;
+        color: #000 !important;
+    }
+    
+    .word-highlight.correct {
+        background-color: #00ff00 !important;
+        color: #000 !important;
+    }
+    
+    .word-highlight.incorrect {
+        background-color: #ff0000 !important;
+        color: #fff !important;
+    }
+}
+
+/* ============ PRINT STYLES ============ */
+
+@media print {
+    .header,
+    button,
+    input,
+    select,
+    #api-config-section,
+    #practice-panel,
+    #audio-controls,
+    .tts-loading-spinner,
+    .audio-visualizer,
+    .reading-progress {
+        display: none !important;
+    }
+    
+    .container {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+    }
+    
+    #text-display {
+        font-size: 14pt !important;
+        line-height: 1.4 !important;
+    }
+    
+    .sentence.sentence-focus {
+        background-color: #f0f0f0 !important;
+        border: 1px solid #000 !important;
+        transform: none !important;
+    }
+    
+    .word-highlight {
+        background-color: #f5f5f5 !important;
+        border-bottom: 1px solid #666 !important;
+    }
+}

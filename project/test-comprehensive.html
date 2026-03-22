@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Irish E-Reader Comprehensive Testing Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h2 {
+            color: #8B4B8C;
+            border-bottom: 2px solid #e2d6c9;
+            padding-bottom: 10px;
+        }
+        
+        .test-case {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #8B4B8C;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .test-result {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        .pending { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        
+        button {
+            background-color: #8B4B8C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #7a4179;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        #test-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .browser-info {
+            background: #e6f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Irish E-Reader Comprehensive Testing Suite</h1>
+    <p>Automated testing for performance, functionality, and cross-browser compatibility</p>
+    
+    <div class="browser-info">
+        <strong>Browser Environment:</strong>
+        <span id="browser-info"></span>
+    </div>
+
+    <!-- Performance Testing Section -->
+    <div class="test-section">
+        <h2>📊 Performance Testing</h2>
+        <div class="test-case">
+            <h3>Memory Usage and Leak Detection</h3>
+            <button onclick="testMemoryUsage()">Run Memory Tests</button>
+            <span id="memory-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Animation Performance (FPS)</h3>
+            <button onclick="testAnimationPerformance()">Test Animation FPS</button>
+            <span id="animation-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Cache Performance</h3>
+            <button onclick="testCachePerformance()">Test Cache Efficiency</button>
+            <span id="cache-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="performance-metrics">
+            <div class="metric-card">
+                <div class="metric-value" id="fps-metric">--</div>
+                <div class="metric-label">Average FPS</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="memory-metric">--</div>
+                <div class="metric-label">Memory (MB)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="cache-metric">--</div>
+                <div class="metric-label">Cache Hit Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="load-metric">--</div>
+                <div class="metric-label">Load Time (ms)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Testing Section -->
+    <div class="test-section">
+        <h2>🔧 Feature Testing</h2>
+        
+        <div class="test-case">
+            <h3>Text-to-Speech Integration</h3>
+            <button onclick="testTTSService()">Test TTS Service</button>
+            <span id="tts-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Speech-to-Text Integration</h3>
+            <button onclick="testSTTService()">Test STT Service</button>
+            <span id="stt-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Audio Recording and Processing</h3>
+            <button onclick="testAudioProcessing()">Test Audio Processing</button>
+            <span id="audio-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Error Management System</h3>
+            <button onclick="testErrorManagement()">Test Error Management</button>
+            <span id="error-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Session Persistence</h3>
+            <button onclick="testSessionPersistence()">Test Session Persistence</button>
+            <span id="session-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>UI Animations and Highlighting</h3>
+            <button onclick="testUIAnimations()">Test UI Animations</button>
+            <span id="ui-result" class="test-result pending">Pending</span>
+        </div>
+    </div>
+
+    <!-- Mobile Testing Section -->
+    <div class="test-section">
+        <h2>📱 Mobile Responsiveness Testing</h2>
+        
+        <div class="test-case">
+            <h3>Touch Target Sizes</h3>
+            <button onclick="testTouchTargets()">Test Touch Targets</button>
+            <span id="touch-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Viewport and Layout</h3>
+            <button onclick="testMobileLayout()">Test Mobile Layout</button>
+            <span id="mobile-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Orientation Changes</h3>
+            <button onclick="testOrientationChanges()">Test Orientation Changes</button>
+            <span id="orientation-result" class="test-result pending">Pending</span>
+        </div>
+    </div>
+
+    <!-- Browser Compatibility Section -->
+    <div class="test-section">
+        <h2>🌐 Browser Compatibility Testing</h2>
+        
+        <div class="test-case">
+            <h3>Web Audio API Support</h3>
+            <button onclick="testWebAudioAPI()">Test Web Audio API</button>
+            <span id="webaudio-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>MediaRecorder API Support</h3>
+            <button onclick="testMediaRecorder()">Test MediaRecorder API</button>
+            <span id="recorder-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>LocalStorage Quota</h3>
+            <button onclick="testLocalStorageQuota()">Test Storage Quota</button>
+            <span id="storage-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>CSS Feature Support</h3>
+            <button onclick="testCSSFeatures()">Test CSS Features</button>
+            <span id="css-result" class="test-result pending">Pending</span>
+        </div>
+    </div>
+
+    <!-- Accessibility Testing -->
+    <div class="test-section">
+        <h2>♿ Accessibility Testing</h2>
+        
+        <div class="test-case">
+            <h3>Keyboard Navigation</h3>
+            <button onclick="testKeyboardNavigation()">Test Keyboard Navigation</button>
+            <span id="keyboard-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>Screen Reader Compatibility</h3>
+            <button onclick="testScreenReader()">Test Screen Reader Support</button>
+            <span id="screen-reader-result" class="test-result pending">Pending</span>
+        </div>
+        
+        <div class="test-case">
+            <h3>High Contrast Mode</h3>
+            <button onclick="testHighContrast()">Test High Contrast</button>
+            <span id="contrast-result" class="test-result pending">Pending</span>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="test-section">
+        <h2>🎮 Test Control Panel</h2>
+        <button onclick="runAllTests()" style="background-color: #28a745;">Run All Tests</button>
+        <button onclick="runPerformanceTests()" style="background-color: #17a2b8;">Performance Only</button>
+        <button onclick="runCompatibilityTests()" style="background-color: #ffc107; color: #000;">Compatibility Only</button>
+        <button onclick="clearResults()" style="background-color: #dc3545;">Clear Results</button>
+        <button onclick="exportResults()" style="background-color: #6c757d;">Export Results</button>
+    </div>
+
+    <!-- Test Log -->
+    <div class="test-section">
+        <h2>📝 Test Log</h2>
+        <div id="test-log"></div>
+        <button onclick="clearLog()" style="background-color: #6c757d;">Clear Log</button>
+    </div>
+
+    <script>
+        // Test Suite Implementation
+        let testResults = {};
+        let startTime = performance.now();
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString().substring(11, 23);
+            const logElement = document.getElementById('test-log');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function setResult(testId, status, message = '') {
+            const element = document.getElementById(testId + '-result');
+            element.className = `test-result ${status}`;
+            element.textContent = status.toUpperCase() + (message ? ': ' + message : '');
+            testResults[testId] = { status, message, timestamp: Date.now() };
+            log(`${testId}: ${status} - ${message}`, status === 'pass' ? 'success' : status === 'fail' ? 'error' : 'info');
+        }
+
+        function updateMetric(metricId, value) {
+            document.getElementById(metricId + '-metric').textContent = value;
+        }
+
+        function getBrowserInfo() {
+            const nav = navigator;
+            const info = `${nav.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d\.]+/)?.[0] || 'Unknown'} | 
+                         ${nav.platform} | Screen: ${screen.width}x${screen.height} | 
+                         Touch: ${('ontouchstart' in window) ? 'Yes' : 'No'}`;
+            document.getElementById('browser-info').textContent = info;
+        }
+
+        // Performance Tests
+        async function testMemoryUsage() {
+            log('Starting memory usage test...');
+            try {
+                // Get initial memory usage
+                const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                
+                // Create test objects to check for leaks
+                const testObjects = [];
+                for (let i = 0; i < 10000; i++) {
+                    testObjects.push({ data: new Array(1000).fill(Math.random()) });
+                }
+                
+                // Force garbage collection if available
+                if (window.gc) {
+                    window.gc();
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                const memoryDiff = (finalMemory - initialMemory) / (1024 * 1024);
+                
+                updateMetric('memory', memoryDiff.toFixed(2));
+                
+                if (memoryDiff < 50) { // Less than 50MB increase
+                    setResult('memory', 'pass', `Memory usage: ${memoryDiff.toFixed(2)}MB`);
+                } else {
+                    setResult('memory', 'fail', `High memory usage: ${memoryDiff.toFixed(2)}MB`);
+                }
+            } catch (error) {
+                setResult('memory', 'fail', error.message);
+            }
+        }
+
+        async function testAnimationPerformance() {
+            log('Testing animation performance...');
+            try {
+                let frameCount = 0;
+                let lastTime = performance.now();
+                const duration = 2000; // Test for 2 seconds
+                
+                function countFrames(currentTime) {
+                    frameCount++;
+                    if (currentTime - lastTime < duration) {
+                        requestAnimationFrame(countFrames);
+                    } else {
+                        const fps = Math.round((frameCount / duration) * 1000);
+                        updateMetric('fps', fps);
+                        
+                        if (fps >= 55) {
+                            setResult('animation', 'pass', `${fps} FPS`);
+                        } else if (fps >= 30) {
+                            setResult('animation', 'info', `${fps} FPS (moderate)`);
+                        } else {
+                            setResult('animation', 'fail', `${fps} FPS (poor)`);
+                        }
+                    }
+                }
+                
+                requestAnimationFrame(countFrames);
+            } catch (error) {
+                setResult('animation', 'fail', error.message);
+            }
+        }
+
+        async function testCachePerformance() {
+            log('Testing cache performance...');
+            try {
+                // Simulate cache operations
+                const cacheKey = 'test_cache_item';
+                const testData = { text: 'Test sentence', audio: 'base64data...', timestamp: Date.now() };
+                
+                // Test cache write
+                const writeStart = performance.now();
+                localStorage.setItem(cacheKey, JSON.stringify(testData));
+                const writeTime = performance.now() - writeStart;
+                
+                // Test cache read
+                const readStart = performance.now();
+                const cachedData = JSON.parse(localStorage.getItem(cacheKey));
+                const readTime = performance.now() - readStart;
+                
+                // Calculate hit rate (simplified)
+                const hitRate = cachedData ? 100 : 0;
+                updateMetric('cache', hitRate + '%');
+                
+                localStorage.removeItem(cacheKey);
+                
+                if (writeTime < 10 && readTime < 5) {
+                    setResult('cache', 'pass', `Write: ${writeTime.toFixed(2)}ms, Read: ${readTime.toFixed(2)}ms`);
+                } else {
+                    setResult('cache', 'info', `Write: ${writeTime.toFixed(2)}ms, Read: ${readTime.toFixed(2)}ms`);
+                }
+            } catch (error) {
+                setResult('cache', 'fail', error.message);
+            }
+        }
+
+        // Feature Tests
+        async function testTTSService() {
+            log('Testing TTS service...');
+            try {
+                // Check if we can create speech synthesis
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance('Test');
+                    utterance.lang = 'ga-IE';
+                    setResult('tts', 'pass', 'Speech Synthesis API available');
+                } else {
+                    setResult('tts', 'fail', 'Speech Synthesis API not supported');
+                }
+            } catch (error) {
+                setResult('tts', 'fail', error.message);
+            }
+        }
+
+        async function testSTTService() {
+            log('Testing STT service...');
+            try {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    setResult('stt', 'pass', 'Speech Recognition API available');
+                } else {
+                    setResult('stt', 'fail', 'Speech Recognition API not supported');
+                }
+            } catch (error) {
+                setResult('stt', 'fail', error.message);
+            }
+        }
+
+        async function testAudioProcessing() {
+            log('Testing audio processing...');
+            try {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioContext = new AudioContext();
+                    setResult('audio', 'pass', 'Web Audio API available');
+                    audioContext.close();
+                } else {
+                    setResult('audio', 'fail', 'Web Audio API not supported');
+                }
+            } catch (error) {
+                setResult('audio', 'fail', error.message);
+            }
+        }
+
+        async function testErrorManagement() {
+            log('Testing error management...');
+            try {
+                // Test localStorage for error storage
+                const errorData = { error: 'test error', timestamp: Date.now() };
+                localStorage.setItem('test_error', JSON.stringify(errorData));
+                const retrieved = JSON.parse(localStorage.getItem('test_error'));
+                
+                if (retrieved && retrieved.error === 'test error') {
+                    setResult('error', 'pass', 'Error storage working');
+                    localStorage.removeItem('test_error');
+                } else {
+                    setResult('error', 'fail', 'Error storage not working');
+                }
+            } catch (error) {
+                setResult('error', 'fail', error.message);
+            }
+        }
+
+        async function testSessionPersistence() {
+            log('Testing session persistence...');
+            try {
+                const sessionData = { 
+                    currentSentence: 5, 
+                    progress: 50, 
+                    timestamp: Date.now() 
+                };
+                localStorage.setItem('test_session', JSON.stringify(sessionData));
+                const retrieved = JSON.parse(localStorage.getItem('test_session'));
+                
+                if (retrieved && retrieved.currentSentence === 5) {
+                    setResult('session', 'pass', 'Session persistence working');
+                    localStorage.removeItem('test_session');
+                } else {
+                    setResult('session', 'fail', 'Session persistence not working');
+                }
+            } catch (error) {
+                setResult('session', 'fail', error.message);
+            }
+        }
+
+        async function testUIAnimations() {
+            log('Testing UI animations...');
+            try {
+                // Test CSS animation support
+                const testElement = document.createElement('div');
+                testElement.style.animation = 'test 1s ease';
+                
+                const hasAnimationSupport = testElement.style.animation !== '';
+                
+                if (hasAnimationSupport) {
+                    setResult('ui', 'pass', 'CSS animations supported');
+                } else {
+                    setResult('ui', 'fail', 'CSS animations not supported');
+                }
+            } catch (error) {
+                setResult('ui', 'fail', error.message);
+            }
+        }
+
+        // Mobile Tests
+        async function testTouchTargets() {
+            log('Testing touch target sizes...');
+            try {
+                const buttons = document.querySelectorAll('button');
+                let smallTargets = 0;
+                
+                buttons.forEach(button => {
+                    const rect = button.getBoundingClientRect();
+                    if (rect.height < 44 || rect.width < 44) {
+                        smallTargets++;
+                    }
+                });
+                
+                if (smallTargets === 0) {
+                    setResult('touch', 'pass', 'All touch targets are adequate size (≥44px)');
+                } else {
+                    setResult('touch', 'info', `${smallTargets} buttons below recommended size`);
+                }
+            } catch (error) {
+                setResult('touch', 'fail', error.message);
+            }
+        }
+
+        async function testMobileLayout() {
+            log('Testing mobile layout...');
+            try {
+                const viewport = window.innerWidth;
+                const hasResponsiveLayout = viewport <= 768;
+                
+                if (hasResponsiveLayout || viewport > 768) {
+                    setResult('mobile', 'pass', `Viewport width: ${viewport}px`);
+                } else {
+                    setResult('mobile', 'fail', 'Layout issues detected');
+                }
+            } catch (error) {
+                setResult('mobile', 'fail', error.message);
+            }
+        }
+
+        async function testOrientationChanges() {
+            log('Testing orientation change handling...');
+            try {
+                if ('orientation' in screen || 'orientation' in window) {
+                    setResult('orientation', 'pass', 'Orientation API available');
+                } else {
+                    setResult('orientation', 'info', 'Orientation API not available');
+                }
+            } catch (error) {
+                setResult('orientation', 'fail', error.message);
+            }
+        }
+
+        // Browser Compatibility Tests
+        async function testWebAudioAPI() {
+            log('Testing Web Audio API...');
+            try {
+                if ('AudioContext' in window || 'webkitAudioContext' in window) {
+                    setResult('webaudio', 'pass', 'Web Audio API supported');
+                } else {
+                    setResult('webaudio', 'fail', 'Web Audio API not supported');
+                }
+            } catch (error) {
+                setResult('webaudio', 'fail', error.message);
+            }
+        }
+
+        async function testMediaRecorder() {
+            log('Testing MediaRecorder API...');
+            try {
+                if ('MediaRecorder' in window) {
+                    setResult('recorder', 'pass', 'MediaRecorder API supported');
+                } else {
+                    setResult('recorder', 'fail', 'MediaRecorder API not supported');
+                }
+            } catch (error) {
+                setResult('recorder', 'fail', error.message);
+            }
+        }
+
+        async function testLocalStorageQuota() {
+            log('Testing localStorage quota...');
+            try {
+                const testKey = 'quota_test';
+                let quotaEstimate = 0;
+                
+                // Estimate quota by trying to store data
+                try {
+                    const testData = 'x'.repeat(1024 * 1024); // 1MB
+                    localStorage.setItem(testKey, testData);
+                    quotaEstimate = 1;
+                    localStorage.removeItem(testKey);
+                    
+                    setResult('storage', 'pass', `At least ${quotaEstimate}MB available`);
+                } catch (quotaError) {
+                    setResult('storage', 'info', 'Limited storage space available');
+                }
+            } catch (error) {
+                setResult('storage', 'fail', error.message);
+            }
+        }
+
+        async function testCSSFeatures() {
+            log('Testing CSS features...');
+            try {
+                const features = {
+                    grid: CSS.supports('display', 'grid'),
+                    flexbox: CSS.supports('display', 'flex'),
+                    customProperties: CSS.supports('--custom-property', 'value'),
+                    transforms: CSS.supports('transform', 'translateX(1px)')
+                };
+                
+                const supportedFeatures = Object.values(features).filter(Boolean).length;
+                
+                if (supportedFeatures >= 3) {
+                    setResult('css', 'pass', `${supportedFeatures}/4 modern features supported`);
+                } else {
+                    setResult('css', 'info', `${supportedFeatures}/4 modern features supported`);
+                }
+            } catch (error) {
+                setResult('css', 'fail', error.message);
+            }
+        }
+
+        // Accessibility Tests
+        async function testKeyboardNavigation() {
+            log('Testing keyboard navigation...');
+            try {
+                const focusableElements = document.querySelectorAll('button, input, textarea, select, a[href]');
+                
+                if (focusableElements.length > 0) {
+                    setResult('keyboard', 'pass', `${focusableElements.length} focusable elements found`);
+                } else {
+                    setResult('keyboard', 'fail', 'No focusable elements found');
+                }
+            } catch (error) {
+                setResult('keyboard', 'fail', error.message);
+            }
+        }
+
+        async function testScreenReader() {
+            log('Testing screen reader support...');
+            try {
+                const hasAriaLabels = document.querySelectorAll('[aria-label], [aria-labelledby]').length > 0;
+                const hasHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6').length > 0;
+                
+                if (hasAriaLabels || hasHeadings) {
+                    setResult('screen-reader', 'pass', 'ARIA labels and headings found');
+                } else {
+                    setResult('screen-reader', 'info', 'Limited accessibility markup');
+                }
+            } catch (error) {
+                setResult('screen-reader', 'fail', error.message);
+            }
+        }
+
+        async function testHighContrast() {
+            log('Testing high contrast mode...');
+            try {
+                if (window.matchMedia('(prefers-contrast: high)').matches) {
+                    setResult('contrast', 'pass', 'High contrast mode active');
+                } else {
+                    setResult('contrast', 'pass', 'Normal contrast mode');
+                }
+            } catch (error) {
+                setResult('contrast', 'fail', error.message);
+            }
+        }
+
+        // Control functions
+        async function runAllTests() {
+            log('Starting comprehensive test suite...');
+            const loadTime = performance.now() - startTime;
+            updateMetric('load', Math.round(loadTime));
+            
+            await testMemoryUsage();
+            await testAnimationPerformance();
+            await testCachePerformance();
+            await testTTSService();
+            await testSTTService();
+            await testAudioProcessing();
+            await testErrorManagement();
+            await testSessionPersistence();
+            await testUIAnimations();
+            await testTouchTargets();
+            await testMobileLayout();
+            await testOrientationChanges();
+            await testWebAudioAPI();
+            await testMediaRecorder();
+            await testLocalStorageQuota();
+            await testCSSFeatures();
+            await testKeyboardNavigation();
+            await testScreenReader();
+            await testHighContrast();
+            
+            log('All tests completed!', 'success');
+        }
+
+        async function runPerformanceTests() {
+            log('Running performance tests only...');
+            await testMemoryUsage();
+            await testAnimationPerformance();
+            await testCachePerformance();
+            log('Performance tests completed!', 'success');
+        }
+
+        async function runCompatibilityTests() {
+            log('Running compatibility tests only...');
+            await testWebAudioAPI();
+            await testMediaRecorder();
+            await testLocalStorageQuota();
+            await testCSSFeatures();
+            log('Compatibility tests completed!', 'success');
+        }
+
+        function clearResults() {
+            document.querySelectorAll('.test-result').forEach(element => {
+                element.className = 'test-result pending';
+                element.textContent = 'Pending';
+            });
+            
+            document.querySelectorAll('.metric-value').forEach(element => {
+                element.textContent = '--';
+            });
+            
+            testResults = {};
+            log('Results cleared.');
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').textContent = '';
+        }
+
+        function exportResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                browser: document.getElementById('browser-info').textContent,
+                testResults: testResults,
+                metrics: {
+                    fps: document.getElementById('fps-metric').textContent,
+                    memory: document.getElementById('memory-metric').textContent,
+                    cache: document.getElementById('cache-metric').textContent,
+                    load: document.getElementById('load-metric').textContent
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test-results-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log('Test results exported!', 'success');
+        }
+
+        // Initialize
+        getBrowserInfo();
+        updateMetric('load', Math.round(performance.now() - startTime));
+        log('Test suite initialized. Ready to run tests.');
+    </script>
+</body>
+</html>

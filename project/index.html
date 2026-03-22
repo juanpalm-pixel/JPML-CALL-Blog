@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ga">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#8B4B8C">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Irish E-Reader">
+    <title>Irish E-Reader - Léitheoir Gaeilge</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles/ereader.css">
+    
+    <!-- PWA and mobile optimization -->
+    <!--<link rel="manifest" href="../manifest.json">-->
+    <link rel="apple-touch-icon" href="../images/icon-192.png">
+    <meta name="description" content="Interactive Irish language e-reader with pronunciation training">
+</head>
+
+<body id="top">
+    <!-- Session Status Indicator -->
+    <div id="session-indicator" class="session-indicator" style="display: none;">
+        Session Active
+    </div>
+    
+    <!-- Header matching main site -->
+    <div class="header">
+        <div class="home-button">
+            <a href="../index.html" style="color: white; text-decoration: none;">← Home</a>
+        </div>
+        <div class="header-content">
+            <div class="text-container">
+                <h1 class="banner-pill">Irish E-Reader</h1>
+                <p class="banner-pill"><em>Léitheoir Gaeilge le cleachtadh fuaimnithe</em></p>
+            </div>
+        </div>
+        <div style="width: 64px;"></div> <!-- Spacer for centered content -->
+    </div>
+
+    <div class="page-container">
+        <nav class="top-dropdown-nav" aria-label="E-Reader Navigation"></nav>
+        
+        <div class="main-content">
+            <!-- API Configuration Section -->
+            <div class="container" id="api-config-section" style="margin-bottom: 1.5rem;">
+                <div class="post">
+                    <h3>API Configuration</h3>
+                    <p class="post-meta">Configure your Google Cloud API keys for speech services</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <label for="tts-api-key" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Text-to-Speech API Key:</label>
+                            <input type="password" id="tts-api-key" placeholder="Enter TTS API key" 
+                                   style="width: 100%; padding: 0.5rem; border: 1px solid #e2d6c9; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                        <div>
+                            <label for="stt-api-key" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech-to-Text API Key:</label>
+                            <input type="password" id="stt-api-key" placeholder="Enter STT API key" 
+                                   style="width: 100%; padding: 0.5rem; border: 1px solid #e2d6c9; border-radius: 4px; box-sizing: border-box;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button id="save-api-keys" 
+                                style="background-color: var(--primary-color); color: var(--button-text-color); 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                            Save API Keys
+                        </button>
+                        <div id="api-status" style="margin-top: 0.5rem; font-style: italic; color: #666;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Input Section -->
+            <div class="container" id="text-input-section">
+                <div class="post">
+                    <h3>Irish Text Input</h3>
+                    <p class="post-meta">Enter Irish text to practice reading and pronunciation</p>
+                    
+                    <div style="margin-top: 1rem;">
+                        <label for="irish-text-input" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">
+                            Cuir isteach téacs Gaeilge:
+                        </label>
+                        <textarea id="irish-text-input" 
+                                  placeholder="Scríobh nó greamaigh téacs Gaeilge anseo..."
+                                  style="width: 100%; height: 150px; padding: 1rem; border: 1px solid #e2d6c9; 
+                                         border-radius: 4px; box-sizing: border-box; font-size: 1rem; 
+                                         font-family: 'Times New Roman', Times, serif; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button id="start-reading-btn" 
+                                style="background-color: var(--primary-color); color: var(--button-text-color); 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                            Start Reading
+                        </button>
+                        <button id="clear-text-btn" 
+                                style="background-color: #6c757d; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                            Clear Text
+                        </button>
+                        <button id="load-sample-btn" 
+                                style="background-color: #17a2b8; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                            Load Sample
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading Area -->
+            <div class="container" id="reading-area" style="display: none;">
+                <div class="post">
+                    <h3>Reading Area - Limistéar Léitheoireachta</h3>
+                    <p class="post-meta">Click on sentences to hear pronunciation, practice speaking</p>
+                    
+                    <div id="text-display" style="font-size: 1.2rem; line-height: 2; margin: 1.5rem 0; 
+                                                  padding: 1.5rem; background-color: #fffaf3; 
+                                                  border: 1px solid #e2d6c9; border-radius: 8px; 
+                                                  min-height: 200px;">
+                        <!-- Text content will be populated here -->
+                    </div>
+                    
+                    <!-- Audio Controls -->
+                    <div id="audio-controls" style="text-align: center; margin: 1.5rem 0; display: flex; 
+                                                    justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                        <button id="play-all-btn" 
+                                style="background-color: #28a745; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            ▶ Play All
+                        </button>
+                        <button id="play-sentence-btn" disabled
+                                style="background-color: #17a2b8; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            ▶ Play Selected
+                        </button>
+                        <button id="stop-audio-btn" 
+                                style="background-color: #dc3545; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            ⏹ Stop
+                        </button>
+                        <button id="repeat-btn" 
+                                style="background-color: #ffc107; color: black; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            🔁 Repeat
+                        </button>
+                    </div>
+                    
+                    <!-- Reading Progress -->
+                    <div id="reading-progress" style="margin: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold;">Reading Progress:</span>
+                            <span id="progress-text">0 / 0 sentences</span>
+                        </div>
+                        <div style="width: 100%; background-color: #e2d6c9; border-radius: 4px; height: 8px;">
+                            <div id="progress-bar" style="width: 0%; background-color: var(--primary-color); 
+                                                          height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice Controls Panel -->
+            <div class="container" id="practice-panel" style="display: none;">
+                <div class="post">
+                    <h3>Pronunciation Practice - Cleachtadh Fuaimnithe</h3>
+                    <p class="post-meta">Practice speaking the selected sentence and get feedback</p>
+                    
+                    <div id="practice-content" style="text-align: center;">
+                        <div id="target-sentence" style="font-size: 1.3rem; font-weight: bold; 
+                                                        margin: 1.5rem 0; padding: 1rem; 
+                                                        background-color: #e8f5e8; border-radius: 8px;
+                                                        border-left: 4px solid #28a745;">
+                            Select a sentence to practice pronunciation
+                        </div>
+                        
+                        <div id="recording-controls" style="margin: 1.5rem 0; display: flex; 
+                                                           justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                            <button id="record-btn" 
+                                    style="background-color: #dc3545; color: white; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                                🎤 Record Pronunciation
+                            </button>
+                            <button id="playback-btn" disabled
+                                    style="background-color: #6c757d; color: white; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                                ▶ Playback Recording
+                            </button>
+                            <button id="compare-btn" disabled
+                                    style="background-color: #17a2b8; color: white; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                                📊 Compare
+                            </button>
+                        </div>
+                        
+                        <div id="recording-status" style="margin: 1rem 0; font-style: italic; color: #666;">
+                            Ready to record
+                        </div>
+                        
+                        <!-- Audio Level Visualization -->
+                        <div id="audio-level-container" style="margin: 1rem 0; display: none;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 0.875rem; color: #666;">Audio Level:</span>
+                                <div style="flex: 1; height: 8px; background-color: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div id="audio-level-bar" style="height: 100%; width: 0%; background-color: #4ecdc4; transition: width 0.1s ease;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="feedback-area" style="margin-top: 1.5rem; padding: 1rem; 
+                                                      background-color: #f8f9fa; border-radius: 8px; display: none;">
+                            <h4 style="margin-top: 0;">Pronunciation Feedback</h4>
+                            <div id="feedback-content"></div>
+                        </div>
+                        
+                        <!-- Practice Options -->
+                        <div id="practice-options" style="margin-top: 1rem; display: none;">
+                            <!-- Dynamic content populated by JS -->
+                        </div>
+                        
+                        <!-- Session Statistics -->
+                        <div id="pronunciation-stats" style="margin-top: 1rem; padding: 1rem; 
+                                                            background-color: #e8f5e8; border-radius: 8px;">
+                            <h5>Session Statistics</h5>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; text-align: center;">
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="pronunciation-accuracy">0%</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Accuracy</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;" id="avg-confidence">0%</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Avg Confidence</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;" id="practice-attempts">0</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Attempts</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;" id="current-streak">0</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Current Streak</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Extended Session Info -->
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; text-align: center; font-size: 0.9rem;">
+                                    <div>
+                                        <strong>Best Streak:</strong> <span id="best-streak">0</span>
+                                    </div>
+                                    <div>
+                                        <strong>Session Time:</strong> <span id="session-duration">0:00</span>
+                                    </div>
+                                    <div>
+                                        <strong>Total Attempts:</strong> <span id="total-attempts">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Session Controls -->
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button id="export-session-btn" style="padding: 5px 12px; margin: 0 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85em;">
+                                    📊 Export Session
+                                </button>
+                                <button id="clear-session-btn" style="padding: 5px 12px; margin: 0 5px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85em;">
+                                    🗑️ Clear Session
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings and Error Management -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                <div class="container">
+                    <div class="post">
+                        <h3>Settings - Socruithe</h3>
+                        <div style="margin-top: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech Rate:</label>
+                            <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1" 
+                                   style="width: 100%; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+                                <span>Slow</span>
+                                <span id="rate-value">1.0x</span>
+                                <span>Fast</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Voice:</label>
+                            <select id="voice-select" style="width: 100%; padding: 0.5rem; 
+                                                              border: 1px solid #e2d6c9; border-radius: 4px;">
+                                <option value="ga-IE-Standard-A">Irish Female (A)</option>
+                                <option value="ga-IE-Standard-B">Irish Male (B)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="auto-advance" style="margin-right: 0.5rem;">
+                                Auto-advance to next sentence
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="post">
+                        <h3>Error Tracking - Rianú Earráidí</h3>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <div id="error-stats" style="margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="total-attempts">0</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Total Attempts</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: #dc3545;" id="error-count">0</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Errors</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="view-errors-btn" 
+                                    style="background-color: #fd7e14; color: white; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;"
+                                    onclick="window.location.href='errors.html'">
+                                View Error Practice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="container" style="margin-top: 1.5rem;">
+                <div class="post">
+                    <h3>Quick Actions - Gníomhartha Tapa</h3>
+                    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                        <button id="export-session-btn" 
+                                style="background-color: #6f42c1; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            📁 Export Session
+                        </button>
+                        <button id="import-text-btn" 
+                                style="background-color: #20c997; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            📄 Import Text File
+                        </button>
+                        <button id="share-progress-btn" 
+                                style="background-color: #e83e8c; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            📊 Share Progress
+                        </button>
+                        <button id="reset-session-btn" 
+                                style="background-color: #6c757d; color: white; 
+                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                            🔄 Reset Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for text import -->
+    <input type="file" id="file-input" accept=".txt" style="display: none;">
+
+    <!-- Scripts -->
+    <script src="scripts/compatibility.js"></script>
+    <script src="../scripts/site.js"></script>
+    <!-- Include all service scripts -->
+    <script src="scripts/tts-service.js"></script>
+    <script src="scripts/stt-service.js"></script>
+    <script src="scripts/audio-processor.js"></script>
+    <script src="scripts/error-manager.js"></script>
+    <script src="scripts/ui-animations.js"></script>
+    <script src="scripts/ereader.js"></script>
+    
+    <!-- Include test script for development (temporarily disabled to prevent loops) -->
+    <!--<script src="scripts/google-cloud-test.js"></script>-->
+</body>
+</html>
