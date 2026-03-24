@@ -2081,3 +2081,85 @@ select:focus-visible {
     margin-top: 0.25rem;
     font-style: italic;
 }
+
+/* ============ UI LAYOUT FIXES ============ */
+
+/* Fix pronunciation stats visibility */
+#pronunciation-stats {
+    position: relative;
+    z-index: 100;
+    background-color: #e8f5e8;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #c3e6cb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure practice panel doesn't interfere */
+#practice-panel {
+    position: relative;
+    z-index: 90;
+}
+
+/* Ensure feedback area is properly layered */
+#feedback-area {
+    position: relative;
+    z-index: 95;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Settings container positioning */
+.settings-container {
+    position: relative;
+    z-index: 85;
+}
+
+/* Error management container positioning */
+.error-management-container {
+    position: relative;
+    z-index: 85;
+}
+
+/* Modal overlays should be highest */
+.settings-modal {
+    z-index: 2000 !important;
+}
+
+.error-tracking-modal {
+    z-index: 2001 !important;
+}
+
+/* Ensure no negative margins cause overlap */
+.container .post {
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 80;
+}
+
+/* Grid layout improvements */
+.main-grid {
+    display: grid;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive adjustments for UI layers */
+@media (max-width: 768px) {
+    #pronunciation-stats {
+        margin-bottom: 2rem; /* Extra space on mobile */
+        z-index: 110; /* Higher priority on mobile */
+    }
+    
+    .settings-container,
+    .error-management-container {
+        z-index: 75; /* Lower on mobile to prevent conflicts */
+    }
+}

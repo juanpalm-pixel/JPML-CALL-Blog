@@ -14,6 +14,10 @@ class AbairTTSService {
         this.playbackStartTime = null;
         this.wordTimings = [];
         
+        // Voice and speech settings
+        this.currentVoice = null;
+        this.speechRate = 1.0;
+        
         // Initialize the service
         this.initialize();
     }
@@ -112,6 +116,41 @@ class AbairTTSService {
     }
 
     /**
+     * Set the current voice for synthesis
+     */
+    setVoice(voiceId) {
+        const voice = this.availableVoices.find(v => v.id === voiceId);
+        if (voice) {
+            this.currentVoice = voice;
+            console.log('Voice changed to:', voice.name);
+        } else {
+            console.warn('Voice not found:', voiceId);
+        }
+    }
+
+    /**
+     * Get the currently selected voice
+     */
+    getCurrentVoice() {
+        return this.currentVoice || this.getDefaultVoice();
+    }
+
+    /**
+     * Set speech rate/speed
+     */
+    setSpeechRate(rate) {
+        this.speechRate = Math.max(0.5, Math.min(2.0, rate)); // Clamp between 0.5 and 2.0
+        console.log('Speech rate set to:', this.speechRate);
+    }
+
+    /**
+     * Get current speech rate
+     */
+    getSpeechRate() {
+        return this.speechRate || 1.0;
+    }
+
+    /**
      * Synthesize Irish text to speech
      */
     async synthesize(text, voiceId = null, options = {}) {
@@ -119,26 +158,34 @@ class AbairTTSService {
             throw new Error('Text cannot be empty');
         }
 
-        // Use default voice if none specified
-        const selectedVoice = voiceId || this.getDefaultVoice().id;
+        // Use current voice if none specified, or default
+        const selectedVoice = voiceId || (this.currentVoice ? this.currentVoice.id : this.getDefaultVoice().id);
         
-        // Check cache first
-        const cacheKey = `${text}_${selectedVoice}`;
+        // Use current speech rate if not specified in options
+        const speechRate = options.speed || this.speechRate || 1.0;
+        
+        // Create cache key including rate for proper caching
+        const cacheKey = `${text}_${selectedVoice}_${speechRate}`;
         if (this.cache.has(cacheKey)) {
             console.log('Returning cached audio for:', text.substring(0, 30) + '...');
             return this.cache.get(cacheKey);
         }
 
         try {
-            console.log(`Synthesizing Irish text with voice ${selectedVoice}:`, text.substring(0, 50) + '...');
+            console.log(`Synthesizing Irish text with voice ${selectedVoice} at rate ${speechRate}:`, text.substring(0, 50) + '...');
             
             // Construct API URL with parameters
             const apiUrl = new URL(`${this.baseUrl}/synthesis`);
             apiUrl.searchParams.append('input', text);
             apiUrl.searchParams.append('voice', selectedVoice);
             
-            // Add optional parameters
-            if (options.speed) apiUrl.searchParams.append('speed', options.speed);
+            // Add speech rate if supported by API (may need to check Abair.ie docs)
+            if (speechRate !== 1.0) {
+                apiUrl.searchParams.append('speed', speechRate.toString());
+            }
+            
+            // Add other optional parameters
+            if (options.pitch) apiUrl.searchParams.append('pitch', options.pitch);
             if (options.pitch) apiUrl.searchParams.append('pitch', options.pitch);
 
             const response = await fetch(apiUrl.toString(), {
@@ -330,6 +377,7 @@ class AbairTTSService {
             });
 
             await this.currentAudio.play();
+            return this.currentAudio;
             
         } catch (error) {
             console.error('Failed to play audio:', error);

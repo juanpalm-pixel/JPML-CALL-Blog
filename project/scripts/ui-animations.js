@@ -282,7 +282,19 @@ class UIAnimations {
         
         for (let i = 0; i < this.wordTimingData.length; i++) {
             const timing = this.wordTimingData[i];
-            const timeOffset = parseFloat(timing.timeOffset.replace('s', ''));
+            
+            // Handle different timing formats from different TTS services
+            let timeOffset;
+            if (timing.timeOffset) {
+                // Old Google Cloud format with 's' suffix
+                timeOffset = parseFloat(timing.timeOffset.replace('s', ''));
+            } else if (timing.startTime !== undefined) {
+                // New Abair.ie format with startTime/endTime
+                timeOffset = timing.startTime;
+            } else {
+                // Fallback: use index-based estimation
+                timeOffset = i * 0.5; // 0.5 seconds per word estimate
+            }
             
             if (currentTime >= timeOffset) {
                 targetWordIndex = i;

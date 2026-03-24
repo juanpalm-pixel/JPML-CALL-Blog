@@ -100,6 +100,9 @@ class IrishEReader {
             this.errorManager = new ErrorManager();
             this.uiAnimations = new UIAnimations(); // Add animation system
             
+            // Apply saved settings to services
+            this.applySettings();
+            
             // Try to load previous session
             if (this.loadSavedSession()) {
                 console.log('Loaded previous practice session');
@@ -892,8 +895,17 @@ class IrishEReader {
             
             this.updateStatus('Converting text to speech...');
             
-            // Get TTS audio with timing data
-            const ttsResult = await this.ttsService.textToSpeech(sentence.content);
+            // Get TTS audio with timing data using configured playback speed
+            const playbackSpeed = Math.max(
+                0.5,
+                Math.min(
+                    2,
+                    Number(this.pronunciationSession?.ttsSettings?.speakingRate || this.settings?.speechRate || 1)
+                )
+            );
+            const ttsResult = await this.ttsService.synthesize(sentence.content, null, {
+                speed: playbackSpeed
+            });
             
             // Hide loading indicator
             if (loadingSpinner && this.uiAnimations) {
@@ -910,19 +922,18 @@ class IrishEReader {
             // Play audio with enhanced word highlighting
             // OPTIMIZED: Use bound method to prevent memory leaks and add cleanup
             const highlightCallback = this.createHighlightCallback();
-            this.currentAudio = await this.ttsService.playAudio(
-                ttsResult,
-                highlightCallback.callback
-            );
+            this.ttsService.setWordHighlightCallback(highlightCallback.callback);
+            this.currentAudio = await this.ttsService.play(ttsResult);
 
             // Store cleanup function for later use
             this.currentHighlightCleanup = highlightCallback.cleanup;
 
             // Setup word synchronization if timing data is available
-            if (this.uiAnimations && ttsResult.timepoints) {
+            const timingData = ttsResult.timepoints || ttsResult.wordTimings;
+            if (this.uiAnimations && timingData) {
                 const syncCallback = this.createSyncCallback();
                 await this.uiAnimations.syncWordHighlighting(
-                    ttsResult.timepoints,
+                    timingData,
                     this.currentAudio,
                     syncCallback.callback
                 );
@@ -1938,18 +1949,7 @@ class IrishEReader {
         this.showPronunciationStatus('Playing target pronunciation...', 'playing');
         
         try {
-            // Apply TTS settings for enhanced playback
-            const originalRate = this.ttsService?.speakingRate;
-            if (this.ttsService && this.pronunciationSession.ttsSettings.speakingRate !== 1.0) {
-                this.ttsService.speakingRate = this.pronunciationSession.ttsSettings.speakingRate;
-            }
-            
             await this.playSentence();
-            
-            // Restore original rate
-            if (this.ttsService && originalRate !== undefined) {
-                this.ttsService.speakingRate = originalRate;
-            }
             
             this.showPronunciationStatus('Ready to practice', 'ready');
         } catch (error) {
@@ -2504,14 +2504,13 @@ class IrishEReader {
         try {
             if (this.ttsService) {
                 this.showPronunciationStatus('Playing target pronunciation...', 'playing');
-                const ttsResult = await this.ttsService.synthesizeText(text);
-                
-                if (ttsResult.audioContent) {
-                    const audio = new Audio(ttsResult.audioContent);
+                const playbackSpeed = Math.max(0.5, Math.min(2, Number(this.settings?.speechRate || 1)));
+                const ttsResult = await this.ttsService.synthesize(text, null, { speed: playbackSpeed });
+                const audio = await this.ttsService.play(ttsResult);
+                if (audio) {
                     await new Promise(resolve => {
                         audio.onended = resolve;
                         audio.onerror = resolve;
-                        audio.play();
                     });
                 }
             }
@@ -2579,24 +2578,6 @@ class IrishEReader {
         }
         
         console.log(`Practice mode ${this.isPracticeMode ? 'enabled' : 'disabled'}`);
-    }
-        
-        if (this.isPracticeMode) {
-            practicePanel.style.display = 'block';
-            practiceBtn.textContent = 'Exit Practice';
-            recordBtn.style.display = 'inline-block';
-            
-            // Set current sentence as practice text
-            this.currentPracticeText = this.sentences[this.currentSentenceIndex] || '';
-            this.setupPracticeSession();
-            
-            this.updateStatus('Practice mode enabled. Click Record to practice pronunciation.');
-        } else {
-            practicePanel.style.display = 'none';
-            practiceBtn.textContent = 'Practice Mode';
-            recordBtn.style.display = 'none';
-            this.updateStatus('Practice mode disabled');
-        }
     }
 
     /**
@@ -3080,6 +3061,26 @@ class IrishEReader {
     }
 
     /**
+     * Apply settings to services
+     */
+    applySettings() {
+        try {
+            if (this.settings && this.ttsService) {
+                this.ttsService.setVoice(this.settings.selectedVoice);
+                this.ttsService.setSpeechRate(this.settings.speechRate);
+                console.log(`Applied settings: voice=${this.settings.selectedVoice}, rate=${this.settings.speechRate}`);
+            }
+            
+            if (this.settings && this.sttService) {
+                this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
+                console.log(`Applied STT threshold: ${this.settings.pronunciationThreshold}`);
+            }
+        } catch (error) {
+            console.warn('Failed to apply settings:', error);
+        }
+    }
+
+    /**
      * Load settings from localStorage
      */
     loadSettings() {
@@ -3125,6 +3126,13 @@ class IrishEReader {
             
             // Apply settings to services
             this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
+            
+            // Apply TTS settings
+            if (this.ttsService) {
+                this.ttsService.setVoice(this.settings.selectedVoice);
+                this.ttsService.setSpeechRate(this.settings.speechRate);
+                console.log(`Applied TTS settings: voice=${this.settings.selectedVoice}, rate=${this.settings.speechRate}`);
+            }
 
             this.showStatus('Settings saved successfully', 'success');
             this.closeSettings();
@@ -3132,25 +3140,6 @@ class IrishEReader {
         } catch (error) {
             console.error('Failed to save settings:', error);
             this.showStatus('Failed to save settings', 'error');
-        }
-    }
-            const speechRate = document.getElementById('speech-rate');
-            if (speechRate) {
-                this.ttsService.updateAudioConfig({ speakingRate: parseFloat(speechRate.value) });
-            }
-            
-            // Save pronunciation threshold
-            const pronunciationThreshold = document.getElementById('pronunciation-threshold');
-            if (pronunciationThreshold) {
-                this.sttService.updateConfidenceThresholds({
-                    good: parseFloat(pronunciationThreshold.value)
-                });
-            }
-            
-            this.closeSettings();
-            this.showStatus('Settings saved successfully');
-        } catch (error) {
-            this.showError('Failed to save settings: ' + error.message);
         }
     }
 
@@ -3292,7 +3281,6 @@ class IrishEReader {
             }
         }
     }
-}
 }
 
 // Initialize the e-reader when DOM is loaded

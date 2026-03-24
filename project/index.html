@@ -15,8 +15,6 @@
     
     <!-- PWA and mobile optimization -->
     <!--<link rel="manifest" href="../manifest.json">-->
-    <link rel="apple-touch-icon" href="../images/icon-192.png">
-    <meta name="description" content="Interactive Irish language e-reader with pronunciation training">
 </head>
 
 <body id="top">
@@ -44,34 +42,6 @@
         
         <div class="main-content">
             <!-- API Configuration Section -->
-            <div class="container" id="api-config-section" style="margin-bottom: 1.5rem;">
-                <div class="post">
-                    <h3>API Configuration</h3>
-                    <p class="post-meta">Configure your Google Cloud API keys for speech services</p>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div>
-                            <label for="tts-api-key" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Text-to-Speech API Key:</label>
-                            <input type="password" id="tts-api-key" placeholder="Enter TTS API key" 
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid #e2d6c9; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                        <div>
-                            <label for="stt-api-key" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech-to-Text API Key:</label>
-                            <input type="password" id="stt-api-key" placeholder="Enter STT API key" 
-                                   style="width: 100%; padding: 0.5rem; border: 1px solid #e2d6c9; border-radius: 4px; box-sizing: border-box;">
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 1rem; text-align: center;">
-                        <button id="save-api-keys" 
-                                style="background-color: var(--primary-color); color: var(--button-text-color); 
-                                       border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
-                            Save API Keys
-                        </button>
-                        <div id="api-status" style="margin-top: 0.5rem; font-style: italic; color: #666;"></div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Text Input Section -->
             <div class="container" id="text-input-section">
