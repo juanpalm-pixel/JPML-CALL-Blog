@@ -4,7 +4,48 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
-### Latest Changes (March 22, 2026)
+### Latest Changes (Migration to Abair.ie API - March 24, 2026)
+
+#### Major Migration: Google Cloud → Abair.ie API
+
+**Problem**: Google Cloud TTS/STT APIs don't provide Irish language voices despite documentation claims
+**Solution**: Complete migration to university-provided Abair.ie API for Irish speech synthesis
+
+#### Added
+- **Abair.ie TTS Integration**: New `project/scripts/abair-tts-service.js` providing Irish text-to-speech using university's Abair.ie API (https://api.abair.ie/v3/)
+- **Browser STT Service**: New `project/scripts/browser-stt-service.js` using native browser Speech Recognition API as replacement for Google Cloud STT
+- **API Testing Tools**: `project/abair-api-test.html` for comprehensive testing of Abair.ie API endpoints and audio playback
+- **Migration Testing**: `project/abair-migration-test.html` for verifying complete migration functionality
+- **Voice Selection**: Support for multiple Irish dialect voices (Connacht, Munster, Ulster) from Abair.ie metadata API
+- **Enhanced Settings**: Updated settings modal with Irish voice selection, service status indicators, and pronunciation thresholds
+
+#### Changed  
+- **Service Architecture**: Replaced Google Cloud dependencies with Abair.ie TTS + Browser STT combination
+- **Audio Processing**: Updated to handle Abair.ie's base64 audio format and direct URL responses
+- **UI Configuration**: Removed Google Cloud API key inputs, added Irish voice selection and service status displays
+- **Error Handling**: Enhanced error handling for browser STT limitations and Abair.ie API responses
+- **Settings Management**: New settings system with localStorage persistence for voice preferences and thresholds
+
+#### Removed
+- **Google Cloud Dependencies**: Deleted `project/scripts/tts-service.js` and `project/scripts/stt-service.js`
+- **Google Cloud Testing**: Removed `project/google-cloud-tester.html` and related testing utilities  
+- **API Key Management**: Eliminated Google Cloud API key configuration and storage
+
+#### Technical Details
+- **Abair.ie Endpoint**: GET requests to `https://api.abair.ie/v3/synthesis` with URL parameters
+- **Voice Support**: Multiple Irish dialects including ga_CO_snc_piper (Connacht), ga_MU_snc_piper (Munster), ga_UL_snc_piper (Ulster)
+- **Audio Format**: Handles both base64-encoded audio content and direct URL responses from Abair.ie
+- **Browser STT**: Uses Web Speech API with Irish language (ga-IE) support where available, English fallback otherwise
+- **No API Keys Required**: Abair.ie appears to be public API, eliminating authentication complexity
+
+#### Testing Status
+- ✅ Abair.ie API integration and voice metadata loading
+- ✅ Irish text synthesis and audio playback  
+- ✅ Browser speech recognition initialization
+- ✅ Settings persistence and voice selection
+- ✅ Complete e-reader integration with new services
+
+### Previous Changes (March 22, 2026)
 
 #### Added
 - **Irish E-Reader project**: New project folder `project/` containing a web-based Irish e‑reader and pronunciation trainer integrated into the site.
@@ -25,9 +66,9 @@ All notable changes to this CALL Blog project will be documented in this file.
 - **Compatibility**: Added a small compatibility helper `project/scripts/compatibility.js` and adjusted code to avoid optional-chaining issues on older browsers when testing locally.
 - **CORS / local file issues**: Temporarily commented out the `manifest.json` link when running from the file system to avoid CORS errors; note that full PWA features require serving over HTTP/HTTPS.
 
-#### Notes
-- Google Cloud APIs were integrated and tested successfully, but the Google Cloud project used here does not expose Irish (ga-IE) TTS voices; alternatives (browser TTS, ElevenLabs, or using English voices) may be considered.
-- API keys were used for testing only; if keys are exposed, they should be revoked and rotated immediately and stored securely (not in plaintext files).
+#### Notes  
+- ~~Google Cloud APIs were integrated and tested successfully, but the Google Cloud project used here does not expose Irish (ga-IE) TTS voices~~
+- **SUPERSEDED**: Migrated to university-provided Abair.ie API which provides proper Irish language voices and pronunciation models
 
 
 

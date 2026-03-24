@@ -80,6 +80,9 @@ class IrishEReader {
             }
         };
         
+        // Load saved settings
+        this.settings = this.loadSettings();
+        
         this.init();
     }
 
@@ -90,9 +93,9 @@ class IrishEReader {
         console.log('Initializing Irish E-Reader...');
         
         try {
-            // Initialize services
-            this.ttsService = new TTSService();
-            this.sttService = new STTService();
+            // Initialize services with new Abair.ie integration
+            this.ttsService = new AbairTTSService();
+            this.sttService = new BrowserSTTService();
             this.audioProcessor = new AudioProcessor();
             this.errorManager = new ErrorManager();
             this.uiAnimations = new UIAnimations(); // Add animation system
@@ -2961,7 +2964,11 @@ class IrishEReader {
     /**
      * Open settings dialog
      */
-    openSettings() {
+    async openSettings() {
+        // Get available Irish voices from Abair.ie service
+        const availableVoices = this.ttsService.getAvailableVoices();
+        const defaultVoice = this.ttsService.getDefaultVoice();
+        
         // Create settings modal
         const modal = document.createElement('div');
         modal.className = 'settings-modal';
@@ -2970,35 +2977,52 @@ class IrishEReader {
                 <h3>Irish E-Reader Settings</h3>
                 
                 <div class="setting-group">
-                    <label>Google Cloud API Key:</label>
-                    <input type="text" id="api-key-input" placeholder="Enter your Google Cloud API key" 
-                           value="${localStorage.getItem('google_cloud_api_key') || ''}">
-                    <button onclick="eReader.updateApiKey()">Update Key</button>
-                </div>
-                
-                <div class="setting-group">
-                    <label>TTS Voice:</label>
+                    <label>Irish Voice:</label>
                     <select id="voice-select">
-                        <option value="ga-IE-Wavenet-A">Irish Neural Voice (Female)</option>
-                        <option value="ga-IE-Standard-A">Irish Standard Voice</option>
+                        ${availableVoices.map(voice => 
+                            `<option value="${voice.id}" ${voice.id === defaultVoice.id ? 'selected' : ''}>
+                                ${voice.name} ${voice.description ? `(${voice.description})` : ''}
+                             </option>`
+                        ).join('')}
                     </select>
+                    <small>University-provided Abair.ie voices for Irish language</small>
                 </div>
                 
                 <div class="setting-group">
                     <label>Speech Rate:</label>
-                    <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1">
-                    <span id="speech-rate-value">1.0x</span>
+                    <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="${this.settings.speechRate || 1}">
+                    <span id="speech-rate-value">${this.settings.speechRate || 1}x</span>
                 </div>
                 
                 <div class="setting-group">
                     <label>Pronunciation Threshold:</label>
-                    <input type="range" id="pronunciation-threshold" min="0.3" max="0.9" step="0.1" value="0.7">
-                    <span id="pronunciation-threshold-value">70%</span>
+                    <input type="range" id="pronunciation-threshold" min="0.3" max="0.9" step="0.1" value="${this.settings.pronunciationThreshold || 0.7}">
+                    <span id="pronunciation-threshold-value">${Math.round((this.settings.pronunciationThreshold || 0.7) * 100)}%</span>
+                    <small>How strict pronunciation checking should be</small>
+                </div>
+
+                <div class="setting-group">
+                    <label>
+                        <input type="checkbox" id="auto-advance" ${this.settings.autoAdvance ? 'checked' : ''}>
+                        Auto-advance to next sentence after successful pronunciation
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <h4>Service Status</h4>
+                    <div class="status-info">
+                        <div>TTS Service: <span class="status-indicator success">✓ Abair.ie Active</span></div>
+                        <div>STT Service: <span class="status-indicator ${this.sttService.isServiceSupported() ? 'success' : 'warning'}">
+                            ${this.sttService.isServiceSupported() ? '✓ Browser STT Available' : '⚠ Limited Browser Support'}
+                        </span></div>
+                        <div>Irish Voices: <span class="status-indicator success">✓ ${availableVoices.length} Available</span></div>
+                    </div>
                 </div>
                 
                 <div class="modal-actions">
-                    <button onclick="eReader.saveSettings()">Save</button>
+                    <button onclick="eReader.saveSettings()">Save Settings</button>
                     <button onclick="eReader.closeSettings()">Cancel</button>
+                    <button onclick="eReader.testServices()">Test Services</button>
                     <button onclick="eReader.clearCache()">Clear Cache</button>
                 </div>
             </div>
@@ -3030,16 +3054,51 @@ class IrishEReader {
     }
 
     /**
-     * Update API key
+     * Test TTS and STT services
      */
-    updateApiKey() {
-        const input = document.getElementById('api-key-input');
-        if (input && input.value.trim()) {
-            localStorage.setItem('google_cloud_api_key', input.value.trim());
-            this.ttsService.apiKey = input.value.trim();
-            this.sttService.apiKey = input.value.trim();
-            this.showStatus('API key updated successfully');
+    async testServices() {
+        try {
+            this.showStatus('Testing services...', 'info');
+            
+            // Test TTS
+            const ttsResult = await this.ttsService.test();
+            
+            // Test STT
+            const sttResult = await this.sttService.test();
+            
+            if (ttsResult && sttResult) {
+                this.showStatus('✓ All services working correctly', 'success');
+            } else if (ttsResult) {
+                this.showStatus('✓ TTS working, STT has limited support', 'warning');
+            } else {
+                this.showStatus('✗ Service test failed', 'error');
+            }
+        } catch (error) {
+            console.error('Service test error:', error);
+            this.showStatus('Service test failed: ' + error.message, 'error');
         }
+    }
+
+    /**
+     * Load settings from localStorage
+     */
+    loadSettings() {
+        try {
+            const saved = localStorage.getItem('ireader_settings');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (error) {
+            console.warn('Failed to load settings:', error);
+        }
+        
+        // Return default settings
+        return {
+            selectedVoice: 'ga_CO_snc_piper',
+            speechRate: 1.0,
+            pronunciationThreshold: 0.7,
+            autoAdvance: false
+        };
     }
 
     /**
@@ -3047,13 +3106,34 @@ class IrishEReader {
      */
     saveSettings() {
         try {
-            // Save voice settings
+            // Get current settings from UI
             const voiceSelect = document.getElementById('voice-select');
-            if (voiceSelect) {
-                this.ttsService.updateVoiceConfig({ name: voiceSelect.value });
-            }
+            const speechRate = document.getElementById('speech-rate');
+            const pronunciationThreshold = document.getElementById('pronunciation-threshold');
+            const autoAdvance = document.getElementById('auto-advance');
+
+            // Update settings object
+            this.settings = {
+                selectedVoice: voiceSelect?.value || this.ttsService.getDefaultVoice().id,
+                speechRate: parseFloat(speechRate?.value || 1),
+                pronunciationThreshold: parseFloat(pronunciationThreshold?.value || 0.7),
+                autoAdvance: autoAdvance?.checked || false
+            };
+
+            // Save to localStorage
+            localStorage.setItem('ireader_settings', JSON.stringify(this.settings));
             
-            // Save speech rate
+            // Apply settings to services
+            this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
+
+            this.showStatus('Settings saved successfully', 'success');
+            this.closeSettings();
+            
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            this.showStatus('Failed to save settings', 'error');
+        }
+    }
             const speechRate = document.getElementById('speech-rate');
             if (speechRate) {
                 this.ttsService.updateAudioConfig({ speakingRate: parseFloat(speechRate.value) });

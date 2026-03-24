@@ -2011,3 +2011,73 @@ select:focus-visible {
         border-bottom: 1px solid #666 !important;
     }
 }
+
+/* ============ ABAIR.IE SERVICE STATUS STYLES ============ */
+
+/* Status indicators for new Abair.ie service */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-indicator.success {
+    color: #155724;
+}
+
+.status-indicator.success::before {
+    content: '✓';
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-indicator.warning {
+    color: #856404;
+}
+
+.status-indicator.warning::before {
+    content: '⚠';
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.status-indicator.error {
+    color: #721c24;
+}
+
+.status-indicator.error::before {
+    content: '✗';
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Settings modal enhancements for Abair.ie */
+.status-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.status-info > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.status-info > div:last-child {
+    border-bottom: none;
+}
+
+.setting-group small {
+    display: block;
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}

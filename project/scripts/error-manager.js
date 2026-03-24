@@ -1,4 +1,4 @@
-/**
+/*
  * Error Tracking and Management
  * Handles storage and analysis of pronunciation errors for targeted practice
  */
