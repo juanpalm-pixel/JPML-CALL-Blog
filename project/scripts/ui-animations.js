@@ -285,12 +285,15 @@ class UIAnimations {
             
             // Handle different timing formats from different TTS services
             let timeOffset;
-            if (timing.timeOffset) {
+            if (timing.timeOffset && typeof timing.timeOffset === 'string') {
                 // Old Google Cloud format with 's' suffix
                 timeOffset = parseFloat(timing.timeOffset.replace('s', ''));
             } else if (timing.startTime !== undefined) {
                 // New Abair.ie format with startTime/endTime
                 timeOffset = timing.startTime;
+            } else if (timing.timeOffset && typeof timing.timeOffset === 'number') {
+                // Direct numeric timeOffset
+                timeOffset = timing.timeOffset;
             } else {
                 // Fallback: use index-based estimation
                 timeOffset = i * 0.5; // 0.5 seconds per word estimate

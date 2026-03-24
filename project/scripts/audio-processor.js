@@ -661,12 +661,17 @@ class AudioProcessor {
      */
     waitForRecordingStop() {
         return new Promise((resolve, reject) => {
-            if (!this.isRecording) {
-                reject(new Error('No recording in progress'));
-                return;
-            }
+            // Wait a moment for recording state to be properly set
+            const checkRecording = () => {
+                if (!this.isRecording) {
+                    reject(new Error('No recording in progress'));
+                    return;
+                }
+                this.recordingStopResolver = resolve;
+            };
             
-            this.recordingStopResolver = resolve;
+            // Small delay to ensure isRecording is properly set
+            setTimeout(checkRecording, 50);
         });
     }
 

@@ -133,7 +133,7 @@
             </div>
 
             <!-- Practice Controls Panel -->
-            <div class="container" id="practice-panel" style="display: none;">
+            <div class="container practice-container" id="practice-panel" style="display: none;">
                 <div class="post">
                     <h3>Pronunciation Practice - Cleachtadh Fuaimnithe</h3>
                     <p class="post-meta">Practice speaking the selected sentence and get feedback</p>
@@ -152,6 +152,11 @@
                                     style="background-color: #dc3545; color: white; 
                                            border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
                                 🎤 Record Pronunciation
+                            </button>
+                            <button id="stop-recording-btn" disabled
+                                    style="background-color: #ffc107; color: #212529; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
+                                ⏹ Stop Recording
                             </button>
                             <button id="playback-btn" disabled
                                     style="background-color: #6c757d; color: white; 
@@ -243,7 +248,7 @@
             </div>
 
             <!-- Settings and Error Management -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="settings-error-grid"">
                 <div class="container">
                     <div class="post">
                         <h3>Settings - Socruithe</h3>

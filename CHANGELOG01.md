@@ -4,7 +4,7 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
-### Latest Changes (Migration to Abair.ie API - March 24, 2026)
+### Latest Changes (Migration to Abair.ie API - January 2025)
 
 #### Major Migration: Google Cloud → Abair.ie API
 
@@ -44,30 +44,6 @@ All notable changes to this CALL Blog project will be documented in this file.
 - ✅ Browser speech recognition initialization
 - ✅ Settings persistence and voice selection
 - ✅ Complete e-reader integration with new services
-
-#### Latest Bug Fixes (Post-Migration)
-
-**Problem**: Several UI and functionality issues discovered after migration to Abair.ie API
-**Solution**: Comprehensive fixes for layout, recording, and interaction issues
-
-#### Fixed  
-- **Word Highlighting TypeError**: Fixed `Cannot read properties of undefined (reading 'replace')` error in `ui-animations.js` by adding proper null checks and type validation for timing data
-- **Container Overflow**: Fixed practice container overlapping settings/error management areas by adding proper z-index layering and CSS classes
-- **Sentence Clicking During Playback**: Prevented users from clicking other sentences while TTS is playing by adding `this.isPlaying` state check
-- **Recording System Errors**: Fixed "No recording in progress" errors by adding timing delays in `audio-processor.js` and improving state management
-- **Button State Management**: Enhanced recording controls with dedicated stop button and proper enable/disable states
-
-#### Added
-- **Stop Recording Button**: New dedicated stop button between record and playback buttons with proper styling and state management
-- **Enhanced CSS Classes**: Added `.practice-container` and `.settings-error-grid` classes for better layout control
-- **Improved Error Handling**: Better null checking in timing data processing for word highlighting compatibility
-- **Comprehensive Testing**: New `project/comprehensive-fix-test.html` for automated testing of all bug fixes
-
-#### Technical Details
-- **Z-Index Layering**: Practice container (90), pronunciation stats (100), settings/error containers (80)
-- **Recording State Management**: Added 50ms delay in `waitForRecordingStop()` to prevent race conditions
-- **Timing Format Support**: Enhanced compatibility for Google Cloud (`timeOffset` with 's') and Abair.ie (`startTime`/`endTime`) formats
-- **Button State Styling**: Proper disabled/enabled states with color changes for recording controls
 
 ### Previous Changes (March 22, 2026)
 

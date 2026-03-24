@@ -182,6 +182,7 @@ class IrishEReader {
         
         // Recording controls
         document.getElementById('record-btn')?.addEventListener('click', () => this.toggleRecording());
+        document.getElementById('stop-recording-btn')?.addEventListener('click', () => this.stopRecording());
         document.getElementById('playback-btn')?.addEventListener('click', () => this.playbackRecording());
         document.getElementById('compare-btn')?.addEventListener('click', () => this.analyzePronunciation());
         
@@ -392,6 +393,11 @@ class IrishEReader {
         // Add click handler for sentence selection
         span.addEventListener('click', (e) => {
             e.preventDefault();
+            // Prevent selecting different sentence while TTS is playing
+            if (this.isPlaying) {
+                console.log('Cannot select sentence while audio is playing');
+                return;
+            }
             this.selectSentence(index);
         });
 
@@ -2611,7 +2617,9 @@ class IrishEReader {
     async toggleRecording() {
         try {
             if (this.audioProcessor.isRecording) {
-                await this.stopRecording();
+                // Do nothing - use the dedicated stop button now
+                console.log('Use the Stop Recording button to stop recording');
+                return;
             } else {
                 await this.startRecording();
             }
@@ -2632,12 +2640,23 @@ class IrishEReader {
             await this.audioProcessor.requestMicrophoneAccess();
             
             const recordBtn = document.getElementById('record-btn');
+            const stopBtn = document.getElementById('stop-recording-btn');
             const recordingStatus = document.getElementById('recording-status');
             const audioLevelBar = document.getElementById('audio-level-bar');
             const audioLevelContainer = document.getElementById('audio-level-container');
             
             // Show audio level container during recording
             if (audioLevelContainer) audioLevelContainer.style.display = 'block';
+            
+            // Update button states
+            if (recordBtn) {
+                recordBtn.disabled = true;
+                recordBtn.style.backgroundColor = '#6c757d';
+            }
+            if (stopBtn) {
+                stopBtn.disabled = false;
+                stopBtn.style.backgroundColor = '#ffc107';
+            }
             
             // Set up audio level monitoring
             const onLevelUpdate = (level) => {
@@ -2651,7 +2670,6 @@ class IrishEReader {
             // Start recording with timeout and level monitoring
             this.recordingPromise = this.audioProcessor.recordWithTimeout(30, onLevelUpdate);
             
-            if (recordBtn) recordBtn.textContent = 'Stop Recording';
             if (recordingStatus) {
                 recordingStatus.textContent = 'Recording... Speak clearly!';
                 recordingStatus.className = 'status-recording';
@@ -2661,7 +2679,7 @@ class IrishEReader {
             
             // Auto-stop after timeout
             this.recordingPromise.then(async (audioBlob) => {
-                if (audioBlob && this.audioProcessor.isRecording) {
+                if (audioBlob) {
                     await this.handleRecordingComplete(audioBlob);
                 }
             }).catch(error => {
@@ -2702,12 +2720,20 @@ class IrishEReader {
     async handleRecordingComplete(audioBlob) {
         try {
             const recordBtn = document.getElementById('record-btn');
+            const stopBtn = document.getElementById('stop-recording-btn');
             const recordingStatus = document.getElementById('recording-status');
             const audioLevelBar = document.getElementById('audio-level-bar');
             const audioLevelContainer = document.getElementById('audio-level-container');
             
             // Reset UI
-            if (recordBtn) recordBtn.textContent = 'Record';
+            if (recordBtn) {
+                recordBtn.disabled = false;
+                recordBtn.style.backgroundColor = '#dc3545';
+            }
+            if (stopBtn) {
+                stopBtn.disabled = true;
+                stopBtn.style.backgroundColor = '#6c757d';
+            }
             if (recordingStatus) {
                 recordingStatus.textContent = 'Processing...';
                 recordingStatus.className = 'status-processing';
@@ -2781,12 +2807,20 @@ class IrishEReader {
      */
     handleRecordingError(error) {
         const recordBtn = document.getElementById('record-btn');
+        const stopBtn = document.getElementById('stop-recording-btn');
         const recordingStatus = document.getElementById('recording-status');
         const audioLevelBar = document.getElementById('audio-level-bar');
         const audioLevelContainer = document.getElementById('audio-level-container');
         
         // Reset UI
-        if (recordBtn) recordBtn.textContent = 'Record';
+        if (recordBtn) {
+            recordBtn.disabled = false;
+            recordBtn.style.backgroundColor = '#dc3545';
+        }
+        if (stopBtn) {
+            stopBtn.disabled = true;
+            stopBtn.style.backgroundColor = '#6c757d';
+        }
         if (recordingStatus) {
             recordingStatus.textContent = 'Recording failed - try again';
             recordingStatus.className = 'status-error';

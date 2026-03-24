@@ -2103,6 +2103,21 @@ select:focus-visible {
     z-index: 90;
 }
 
+/* Fix practice container overflow */
+.practice-container {
+    position: relative;
+    z-index: 85;
+    margin-bottom: 2rem; /* Add space before settings section */
+    overflow: hidden; /* Prevent content overflow */
+}
+
+/* Practice content specific fixes */
+#practice-content {
+    position: relative;
+    z-index: 85;
+    margin-bottom: 2rem;
+}
+
 /* Ensure feedback area is properly layered */
 #feedback-area {
     position: relative;
@@ -2118,13 +2133,36 @@ select:focus-visible {
 /* Settings container positioning */
 .settings-container {
     position: relative;
-    z-index: 85;
+    z-index: 80; /* Lower than practice elements */
+    margin-top: 2rem; /* Add space from practice section */
 }
 
 /* Error management container positioning */
 .error-management-container {
     position: relative;
-    z-index: 85;
+    z-index: 80; /* Lower than practice elements */
+}
+
+/* Grid layout for settings and error management */
+.settings-error-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 80;
+}
+
+/* Prevent practice elements from overlapping settings */
+.main-content {
+    position: relative;
+    z-index: 1;
+}
+
+.main-content .container .post {
+    position: relative;
+    z-index: 82;
+    margin-bottom: 2rem; /* Extra space for proper separation */
 }
 
 /* Modal overlays should be highest */
@@ -2136,30 +2174,65 @@ select:focus-visible {
     z-index: 2001 !important;
 }
 
-/* Ensure no negative margins cause overlap */
+/* Container separation fixes */
 .container .post {
     margin-bottom: 1rem;
     position: relative;
     z-index: 80;
 }
 
-/* Grid layout improvements */
-.main-grid {
-    display: grid;
-    gap: 1.5rem;
+/* Recording controls spacing */
+#recording-controls {
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
     position: relative;
-    z-index: 1;
+    z-index: 85;
+}
+
+/* Target sentence styling */
+#target-sentence {
+    position: relative;
+    z-index: 85;
+    margin-bottom: 1rem;
 }
 
 /* Responsive adjustments for UI layers */
 @media (max-width: 768px) {
     #pronunciation-stats {
-        margin-bottom: 2rem; /* Extra space on mobile */
+        margin-bottom: 3rem; /* Extra space on mobile */
         z-index: 110; /* Higher priority on mobile */
     }
     
     .settings-container,
     .error-management-container {
         z-index: 75; /* Lower on mobile to prevent conflicts */
+        margin-top: 3rem;
     }
+    
+    .settings-error-grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .practice-container {
+        margin-bottom: 3rem; /* Extra separation on mobile */
+        z-index: 90 !important;
+        position: relative;
+    }
+}
+
+/* Practice Container Overflow Fix */
+.practice-container {
+    z-index: 90 !important;
+    position: relative;
+    overflow: visible;
+}
+
+.practice-container .post {
+    z-index: 91;
+    position: relative;
 }
