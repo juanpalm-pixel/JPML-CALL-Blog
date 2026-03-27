@@ -156,27 +156,44 @@ All notable changes to this CALL Blog project will be documented in this file.
 - **Solution**: Made `startRecording()` return a Promise that resolves only when `onstart` fires and removed the 50ms delay workaround
 - **Impact**: Eliminates "No recording in progress" errors and ensures proper recording state management
 
-#### Latest STT Service Fix (March 27, 2026)
+#### Latest STT Service Fixes and Voice/Rate Control (March 27, 2026)
 
-**Problem**: Missing methods in BrowserSTTService causing "this.sttService.updateConfigForFormat is not a function" error
-**Solution**: Added missing interface methods for compatibility with ereader.js expectations
+**Problems**:
+- Missing methods in BrowserSTTService causing "this.sttService.updateConfigForFormat is not a function" error
+- Abair.ie STT API integration: 413 (Content Too Large) errors, fallback to browser STT, and missing comparison/feedback
+- Voice dropdown not populated with Abair.ie voices; speech rate slider not updating dynamically or reflecting true rate
+
+**Solutions**:
+- Added missing interface methods for compatibility with ereader.js expectations
+- Implemented correct two-step Abair.ie STT workflow: POST base64 audio, GET transcription, with error handling for large files and fallback to browser STT
+- Refactored voice dropdown population: dynamically loads all Abair.ie voices (with dialect, name, gender, and engine type HTS/PIPER) and updates TTS voice in real time
+- Speech rate slider now updates in 0.01 increments, range 0.5x–1.5x, and displays current value in UI; changes are applied instantly to TTS
+- Improved error handling and user feedback for STT failures and voice/rate changes
 
 ##### Fixed
 - **Missing Methods**: Added `updateConfigForFormat()`, `speechToText()`, and `identifyPronunciationIssues()` methods to BrowserSTTService
 - **Interface Compatibility**: Ensured BrowserSTTService matches the API expected by ereader.js from the original Google Cloud implementation
 - **Browser STT Limitations**: Added clear documentation about browser Speech Recognition API limitations with pre-recorded audio blobs
+- **Voice Dropdown**: Now fully populated with all Abair.ie voices, including dialect, name, gender, and engine type
+- **Speech Rate Control**: Slider is now dynamic, updates in real time, and reflects the actual rate used by TTS
+- **STT Error Handling**: Handles 413 errors (audio too large), provides user feedback, and falls back to browser STT with clear messaging
 
-##### Added  
+##### Added
 - **speechToText() Method**: Handles audio blob processing (with simulation for browser API limitations)
 - **updateConfigForFormat() Method**: Compatibility method for audio format configuration
 - **identifyPronunciationIssues() Method**: Pronunciation analysis using existing analyzePronunciation logic
 - **startLiveSpeechRecognition() Method**: Alternative live recognition approach for browsers
+- **Voice Dropdown Population**: Loads all voices from Abair.ie API, formats as "Dialect - Name (Gender, Engine)"
+- **Speech Rate Display**: Shows current rate value next to slider, updates as user changes
+- **STT Fallback and Feedback**: User is notified if Abair.ie STT fails or audio is too large
 
 ##### Technical Details
 - **Browser API Limitation**: Browser Speech Recognition API only works with live microphone input, not pre-recorded audio blobs
 - **Fallback Strategy**: speechToText() returns simulated results with clear indicators about the limitation
 - **Interface Matching**: All methods now match the original Google Cloud STT service interface expected by ereader.js
-- **Testing**: Created `stt-service-fix-test.html` for verification of method availability and functionality
+- **Abair.ie STT**: Implements POST/recognition/recognise with base64 audio, handles 413 errors, and GET/recognition/recordings for result retrieval
+- **Voice/Rate Controls**: Settings changes are persisted and applied instantly; UI reflects true state
+- **Testing**: Created `stt-service-fix-test.html`, `abair-stt-api-test.html`, and `voice-loading-test.html` for verification of method availability, voice/rate controls, and STT workflow
 
 ### Previous Changes (March 22, 2026)
 
