@@ -250,12 +250,12 @@
                         <h3>Settings - Socruithe</h3>
                         <div style="margin-top: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech Rate:</label>
-                            <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1" 
+                            <input type="range" id="speech-rate" min="0.5" max="1.5" step="0.01" value="1" 
                                    style="width: 100%; margin-bottom: 0.5rem;">
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
-                                <span>Slow</span>
-                                <span id="rate-value">1.0x</span>
-                                <span>Fast</span>
+                                <span>Slow (0.5x)</span>
+                                <span id="rate-value">1.00x</span>
+                                <span>Fast (1.5x)</span>
                             </div>
                         </div>
                         
@@ -263,8 +263,7 @@
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Voice:</label>
                             <select id="voice-select" style="width: 100%; padding: 0.5rem; 
                                                               border: 1px solid #e2d6c9; border-radius: 4px;">
-                                <option value="ga-IE-Standard-A">Irish Female (A)</option>
-                                <option value="ga-IE-Standard-B">Irish Male (B)</option>
+                                <!-- Options will be populated dynamically from Abair.ie API -->
                             </select>
                         </div>
                         

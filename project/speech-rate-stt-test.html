@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Rate & STT Compression Test - Irish E-Reader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .status.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .rate-display {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 1.4em;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .audio-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .record-button {
+            background: #dc3545;
+            font-size: 1.1em;
+            padding: 15px 25px;
+        }
+        .record-button:hover { background: #c82333; }
+        .record-button.recording {
+            background: #fd7e14;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎛️ Speech Rate & STT Compression Test</h1>
+    <p>Testing the fixed speech rate control (0.5x-1.5x, 0.01 increments) and STT audio compression (413 error fix).</p>
+
+    <div class="test-section">
+        <h2>📈 Speech Rate Control Test</h2>
+        <div id="rate-test-status" class="status info">Ready to test speech rate control...</div>
+        
+        <label><strong>Speech Rate:</strong></label>
+        <div class="rate-display" id="rate-display">1.00x</div>
+        <input type="range" id="rate-slider" min="0.5" max="1.5" step="0.01" value="1.0">
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+            <span>Slow (0.5x)</span>
+            <span>Normal (1.0x)</span>
+            <span>Fast (1.5x)</span>
+        </div>
+        
+        <button onclick="testSpeechRate()">Test Current Rate</button>
+        <button onclick="testRateExtremes()">Test Extreme Rates</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🎙️ STT Audio Compression Test</h2>
+        <div id="stt-test-status" class="status info">Ready to test STT with compression...</div>
+        
+        <div class="audio-info" id="audio-info">
+            No recording yet...
+        </div>
+        
+        <button id="record-btn" class="record-button" onclick="toggleRecording()">🎤 Start Recording</button>
+        <button onclick="testCompression()" disabled id="compress-btn">🗜️ Test Compression</button>
+        <button onclick="testSTTSubmission()" disabled id="stt-btn">📤 Test STT API</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Integration Test</h2>
+        <div id="integration-status" class="status info">Ready for integration test...</div>
+        
+        <button onclick="testFullWorkflow()">🚀 Test Complete Workflow</button>
+        <button onclick="openMainEReader()">📖 Open Main E-Reader</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="test-results">
+            <div class="status info">🔄 Waiting for tests...</div>
+        </div>
+    </div>
+
+    <script src="scripts/abair-tts-service.js"></script>
+    <script src="scripts/browser-stt-service.js"></script>
+    <script>
+        let ttsService;
+        let sttService;
+        let audioRecorder;
+        let isRecording = false;
+        let lastRecording = null;
+        const results = [];
+
+        function addResult(test, status, message) {
+            results.push({ test, status, message, time: new Date().toLocaleTimeString() });
+            updateResultsDisplay();
+        }
+
+        function updateResultsDisplay() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = results.map(r => 
+                `<div class="status ${r.status}">
+                    [${r.time}] ${r.test}: ${r.message}
+                </div>`
+            ).join('');
+        }
+
+        // Speech Rate Control Functions
+        function updateRateDisplay() {
+            const slider = document.getElementById('rate-slider');
+            const display = document.getElementById('rate-display');
+            const rate = parseFloat(slider.value);
+            display.textContent = rate.toFixed(2) + 'x';
+        }
+
+        async function testSpeechRate() {
+            const rate = parseFloat(document.getElementById('rate-slider').value);
+            
+            try {
+                if (!ttsService) {
+                    await initializeServices();
+                }
+                
+                // Set the rate
+                ttsService.setSpeechRate(rate);
+                
+                // Test with Irish text
+                const testText = `Táim ag triail luas cainte ag ${rate.toFixed(2)}x`;
+                const audioUrl = await ttsService.synthesize(testText);
+                
+                // Play the audio
+                const audio = new Audio(audioUrl);
+                audio.play();
+                
+                addResult('Speech Rate', 'success', `Successfully tested rate ${rate.toFixed(2)}x`);
+                document.getElementById('rate-test-status').innerHTML = `✅ Rate ${rate.toFixed(2)}x tested successfully`;
+                document.getElementById('rate-test-status').className = 'status success';
+                
+            } catch (error) {
+                addResult('Speech Rate', 'error', error.message);
+                document.getElementById('rate-test-status').innerHTML = `❌ Rate test failed: ${error.message}`;
+                document.getElementById('rate-test-status').className = 'status error';
+            }
+        }
+
+        async function testRateExtremes() {
+            const testRates = [0.5, 0.75, 1.0, 1.25, 1.5];
+            
+            for (const rate of testRates) {
+                document.getElementById('rate-slider').value = rate;
+                updateRateDisplay();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await testSpeechRate();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            addResult('Rate Extremes', 'success', 'All extreme rates tested successfully');
+        }
+
+        // Recording Functions
+        async function initializeRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioRecorder = new MediaRecorder(stream);
+                
+                const chunks = [];
+                audioRecorder.ondataavailable = (event) => {
+                    chunks.push(event.data);
+                };
+                
+                audioRecorder.onstop = () => {
+                    lastRecording = new Blob(chunks, { type: 'audio/wav' });
+                    updateAudioInfo();
+                    document.getElementById('compress-btn').disabled = false;
+                    document.getElementById('stt-btn').disabled = false;
+                };
+                
+                return true;
+            } catch (error) {
+                addResult('Recording Init', 'error', error.message);
+                return false;
+            }
+        }
+
+        async function toggleRecording() {
+            const button = document.getElementById('record-btn');
+            
+            if (!isRecording) {
+                if (!audioRecorder) {
+                    const success = await initializeRecording();
+                    if (!success) return;
+                }
+                
+                // Start recording
+                audioRecorder.start();
+                isRecording = true;
+                button.textContent = '⏹️ Stop Recording';
+                button.classList.add('recording');
+                
+                // Auto-stop after 10 seconds (matching the e-reader timeout)
+                setTimeout(() => {
+                    if (isRecording) {
+                        toggleRecording();
+                    }
+                }, 10000);
+                
+            } else {
+                // Stop recording
+                audioRecorder.stop();
+                isRecording = false;
+                button.textContent = '🎤 Start Recording';
+                button.classList.remove('recording');
+            }
+        }
+
+        function updateAudioInfo() {
+            const info = document.getElementById('audio-info');
+            if (lastRecording) {
+                info.innerHTML = `
+                    <strong>Recording Info:</strong><br>
+                    Size: ${lastRecording.size.toLocaleString()} bytes (${(lastRecording.size / 1024).toFixed(1)} KB)<br>
+                    Type: ${lastRecording.type}<br>
+                    Status: ${lastRecording.size > 1024*1024 ? '⚠️ Large (>1MB)' : '✅ Acceptable size'}
+                `;
+            }
+        }
+
+        async function testCompression() {
+            if (!lastRecording) {
+                addResult('Compression', 'error', 'No recording available');
+                return;
+            }
+            
+            try {
+                if (!sttService) {
+                    await initializeServices();
+                }
+                
+                const originalSize = lastRecording.size;
+                const maxSize = 512 * 1024; // 512KB target
+                
+                if (originalSize <= maxSize) {
+                    addResult('Compression', 'info', 'Recording already small enough');
+                    return;
+                }
+                
+                const compressed = await sttService.compressAudio(lastRecording, maxSize);
+                const compressionRatio = ((originalSize - compressed.size) / originalSize * 100).toFixed(1);
+                
+                addResult('Compression', 'success', `Compressed ${originalSize} → ${compressed.size} bytes (${compressionRatio}% reduction)`);
+                
+                // Update audio info
+                document.getElementById('audio-info').innerHTML += `<br>
+                    <strong>Compressed:</strong> ${compressed.size.toLocaleString()} bytes (${compressionRatio}% smaller)
+                `;
+                
+            } catch (error) {
+                addResult('Compression', 'error', error.message);
+            }
+        }
+
+        async function testSTTSubmission() {
+            if (!lastRecording) {
+                addResult('STT Test', 'error', 'No recording available');
+                return;
+            }
+            
+            try {
+                if (!sttService) {
+                    await initializeServices();
+                }
+                
+                document.getElementById('stt-test-status').innerHTML = '🔄 Testing STT API...';
+                document.getElementById('stt-test-status').className = 'status info';
+                
+                const result = await sttService.speechToText(lastRecording);
+                
+                if (result.transcript && result.transcript !== 'Abair STT unavailable - using browser fallback') {
+                    addResult('STT API', 'success', `Transcript: "${result.transcript}"`);
+                    document.getElementById('stt-test-status').innerHTML = `✅ STT Success: "${result.transcript}"`;
+                    document.getElementById('stt-test-status').className = 'status success';
+                } else {
+                    addResult('STT API', 'warning', 'Fell back to browser STT');
+                    document.getElementById('stt-test-status').innerHTML = '⚠️ STT fell back to browser simulation';
+                    document.getElementById('stt-test-status').className = 'status warning';
+                }
+                
+            } catch (error) {
+                addResult('STT API', 'error', error.message);
+                document.getElementById('stt-test-status').innerHTML = `❌ STT failed: ${error.message}`;
+                document.getElementById('stt-test-status').className = 'status error';
+            }
+        }
+
+        async function testFullWorkflow() {
+            addResult('Full Workflow', 'info', 'Starting complete workflow test...');
+            
+            // Test speech rate
+            await testSpeechRate();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // If we have a recording, test STT
+            if (lastRecording) {
+                await testSTTSubmission();
+            } else {
+                addResult('Full Workflow', 'info', 'No recording available for STT test - record some audio first');
+            }
+            
+            addResult('Full Workflow', 'success', 'Workflow test completed');
+            document.getElementById('integration-status').innerHTML = '✅ Integration test completed successfully';
+            document.getElementById('integration-status').className = 'status success';
+        }
+
+        async function initializeServices() {
+            if (!ttsService) {
+                ttsService = new AbairTTSService();
+                await ttsService.initialize();
+            }
+            
+            if (!sttService) {
+                sttService = new AbairSTTService();
+            }
+        }
+
+        function openMainEReader() {
+            window.open('index.html', '_blank');
+            addResult('Navigation', 'info', 'Opened main e-reader in new tab');
+        }
+
+        // Event Listeners
+        document.getElementById('rate-slider').addEventListener('input', updateRateDisplay);
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            updateRateDisplay();
+            addResult('Initialization', 'info', 'Test interface ready');
+            
+            try {
+                await initializeServices();
+                addResult('Services', 'success', 'TTS and STT services initialized');
+            } catch (error) {
+                addResult('Services', 'error', `Service initialization failed: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

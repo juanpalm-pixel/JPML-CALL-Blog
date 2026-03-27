@@ -473,8 +473,18 @@ class AbairSTTService {
             console.log('🎯 Using Abair.ie STT API (two-step process)');
             console.log('Audio blob size:', audioBlob.size, 'bytes');
             
+            // Check if audio is too large (limit to 1MB for Abair.ie API)
+            const maxSizeBytes = 1024 * 1024; // 1MB
+            let processedBlob = audioBlob;
+            
+            if (audioBlob.size > maxSizeBytes) {
+                console.log('⚠️ Audio too large, compressing...');
+                processedBlob = await this.compressAudio(audioBlob, maxSizeBytes);
+                console.log('✅ Audio compressed from', audioBlob.size, 'to', processedBlob.size, 'bytes');
+            }
+            
             // Step 1: Convert audio blob to base64
-            const base64Audio = await this.audioToBase64(audioBlob);
+            const base64Audio = await this.audioToBase64(processedBlob);
             console.log('✅ Audio converted to base64, length:', base64Audio.length);
             
             // Step 2: Submit audio for recognition
@@ -497,6 +507,16 @@ class AbairSTTService {
             if (!recogniseResponse.ok) {
                 const errorText = await recogniseResponse.text();
                 console.error('❌ Recognition submission failed:', recogniseResponse.status, errorText);
+                
+                // If payload too large, try with more aggressive compression
+                if (recogniseResponse.status === 413) {
+                    console.log('🔄 Payload too large, trying with smaller compression...');
+                    if (audioBlob.size > 512 * 1024) {
+                        const smallerBlob = await this.compressAudio(audioBlob, 512 * 1024);
+                        return await this.speechToText(smallerBlob);
+                    }
+                }
+                
                 throw new Error(`Abair STT submission failed: ${recogniseResponse.status} - ${errorText}`);
             }
             
@@ -576,6 +596,122 @@ class AbairSTTService {
                 alternatives: []
             };
         }
+    }
+    
+    /**
+     * Compress audio blob to target size
+     * @param {Blob} audioBlob - Original audio blob
+     * @param {number} maxSizeBytes - Maximum size in bytes
+     * @returns {Promise<Blob>} Compressed audio blob
+     */
+    async compressAudio(audioBlob, maxSizeBytes) {
+        try {
+            // If already small enough, return as-is
+            if (audioBlob.size <= maxSizeBytes) {
+                return audioBlob;
+            }
+            
+            // Create audio context for processing
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Convert blob to array buffer
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            
+            // Decode audio
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            // Calculate compression ratio needed
+            const compressionRatio = maxSizeBytes / audioBlob.size;
+            
+            // Reduce sample rate for compression
+            const originalSampleRate = audioBuffer.sampleRate;
+            const targetSampleRate = Math.max(8000, Math.floor(originalSampleRate * compressionRatio));
+            
+            console.log(`Compressing audio: ${originalSampleRate}Hz → ${targetSampleRate}Hz`);
+            
+            // Create new buffer with reduced sample rate
+            const compressedBuffer = audioContext.createBuffer(
+                1, // mono
+                Math.floor(audioBuffer.length * (targetSampleRate / originalSampleRate)),
+                targetSampleRate
+            );
+            
+            // Resample and mix to mono
+            const sourceData = audioBuffer.getChannelData(0);
+            const targetData = compressedBuffer.getChannelData(0);
+            
+            for (let i = 0; i < targetData.length; i++) {
+                const sourceIndex = Math.floor(i * (sourceData.length / targetData.length));
+                targetData[i] = sourceData[sourceIndex];
+            }
+            
+            // Convert back to WAV blob
+            const compressedBlob = this.audioBufferToWAV(compressedBuffer);
+            
+            console.log(`Audio compression: ${audioBlob.size} → ${compressedBlob.size} bytes`);
+            return compressedBlob;
+            
+        } catch (error) {
+            console.warn('Audio compression failed:', error);
+            // If compression fails, try simple truncation
+            return audioBlob.slice(0, maxSizeBytes);
+        }
+    }
+    
+    /**
+     * Convert AudioBuffer to WAV blob
+     * @param {AudioBuffer} buffer - Audio buffer
+     * @returns {Blob} WAV audio blob
+     */
+    audioBufferToWAV(buffer) {
+        const length = buffer.length;
+        const numberOfChannels = buffer.numberOfChannels;
+        const sampleRate = buffer.sampleRate;
+        const bitsPerSample = 16;
+        
+        // Calculate sizes
+        const bytesPerSample = bitsPerSample / 8;
+        const blockAlign = numberOfChannels * bytesPerSample;
+        const byteRate = sampleRate * blockAlign;
+        const dataSize = length * blockAlign;
+        const bufferSize = 44 + dataSize;
+        
+        // Create buffer
+        const arrayBuffer = new ArrayBuffer(bufferSize);
+        const view = new DataView(arrayBuffer);
+        
+        // Write WAV header
+        const writeString = (offset, string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+        
+        writeString(0, 'RIFF');
+        view.setUint32(4, bufferSize - 8, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numberOfChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bitsPerSample, true);
+        writeString(36, 'data');
+        view.setUint32(40, dataSize, true);
+        
+        // Write audio data
+        let offset = 44;
+        for (let i = 0; i < length; i++) {
+            for (let channel = 0; channel < numberOfChannels; channel++) {
+                const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
+                view.setInt16(offset, sample * 0x7FFF, true);
+                offset += 2;
+            }
+        }
+        
+        return new Blob([arrayBuffer], { type: 'audio/wav' });
     }
     
     /**

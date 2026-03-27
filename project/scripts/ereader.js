@@ -2671,8 +2671,8 @@ class IrishEReader {
                 }
             };
             
-            // Start recording with timeout and level monitoring
-            this.recordingPromise = this.audioProcessor.recordWithTimeout(30, onLevelUpdate);
+            // Start recording with shorter timeout for sentence-level practice
+            this.recordingPromise = this.audioProcessor.recordWithTimeout(10, onLevelUpdate);
             
             if (recordingStatus) {
                 recordingStatus.textContent = 'Recording... Speak clearly!';
@@ -3116,6 +3116,9 @@ class IrishEReader {
         // Set up event listeners for sliders
         this.setupSettingsEventListeners();
         
+        // Initialize display values
+        this.updateSettingsDisplay();
+        
         // Populate voice dropdown with available voices
         this.populateVoiceDropdown();
     }
@@ -3134,16 +3137,18 @@ class IrishEReader {
             // Clear existing options
             voiceSelect.innerHTML = '';
             
-            // Add voices to dropdown
+            // Add voices to dropdown with proper display format
             voices.forEach(voice => {
                 const option = document.createElement('option');
                 option.value = voice.id;
                 
-                // Format as "Dialect - Name (Gender)" if we have enough info
-                if (voice.description && voice.description.includes('dialect')) {
-                    option.textContent = `${voice.name} (${voice.gender || 'neutral'})`;
+                // Use displayName if available, otherwise format manually
+                if (voice.displayName) {
+                    option.textContent = voice.displayName;
+                } else if (voice.locale && voice.name && voice.gender) {
+                    option.textContent = `${voice.locale} - ${voice.name} (${voice.gender})`;
                 } else {
-                    option.textContent = voice.name;
+                    option.textContent = voice.name || voice.id;
                 }
                 
                 voiceSelect.appendChild(option);
@@ -3165,8 +3170,33 @@ class IrishEReader {
             
         } catch (error) {
             console.error('Error populating voice dropdown:', error);
-            // Add fallback option
-            voiceSelect.innerHTML = '<option value="ga_CO_snc_piper">Connacht (Default)</option>';
+            // Add fallback options
+            voiceSelect.innerHTML = `
+                <option value="ga_CO_snc_piper">Connemara - Sibéal (female)</option>
+                <option value="ga_CO_pmc_piper">Connemara - Pádraig (male)</option>
+                <option value="ga_UL_anb_piper">Ulster - Áine (female)</option>
+                <option value="ga_MU_cmg_piper">Munster - Colm (male)</option>
+            `;
+        }
+    }
+
+    /**
+     * Update settings display with current values
+     */
+    updateSettingsDisplay() {
+        // Update speech rate display
+        const speechRate = document.getElementById('speech-rate');
+        const rateValue = document.getElementById('rate-value');
+        
+        if (speechRate && rateValue) {
+            speechRate.value = this.settings.speechRate || 1.0;
+            rateValue.textContent = (this.settings.speechRate || 1.0).toFixed(2) + 'x';
+        }
+        
+        // Update voice selection
+        const voiceSelect = document.getElementById('voice-select');
+        if (voiceSelect && this.settings.voice) {
+            voiceSelect.value = this.settings.voice;
         }
     }
 
@@ -3175,19 +3205,21 @@ class IrishEReader {
      */
     setupSettingsEventListeners() {
         const speechRate = document.getElementById('speech-rate');
-        const speechRateValue = document.getElementById('speech-rate-value');
+        const rateValue = document.getElementById('rate-value');
         const pronunciationThreshold = document.getElementById('pronunciation-threshold');
         const pronunciationThresholdValue = document.getElementById('pronunciation-threshold-value');
         const voiceSelect = document.getElementById('voice-select');
         
         speechRate?.addEventListener('input', (e) => {
             const rate = parseFloat(e.target.value);
-            speechRateValue.textContent = rate + 'x';
+            if (rateValue) {
+                rateValue.textContent = rate.toFixed(2) + 'x';
+            }
             
             // Apply speech rate to TTS service immediately
             if (this.ttsService && typeof this.ttsService.setSpeechRate === 'function') {
                 this.ttsService.setSpeechRate(rate);
-                console.log(`Speech rate set to ${rate}x`);
+                console.log(`Speech rate set to ${rate.toFixed(2)}x`);
             }
             
             // Save to settings

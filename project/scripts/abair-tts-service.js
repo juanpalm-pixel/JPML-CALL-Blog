@@ -53,17 +53,31 @@ class AbairTTSService {
             }
 
             const data = await response.json();
+            console.log('Abair.ie voices response:', data);
             
-            if (data.voices && Array.isArray(data.voices)) {
-                this.availableVoices = data.voices.map(voice => ({
-                    id: voice.id || voice.name || voice,
-                    name: voice.name || voice.id || voice,
-                    description: voice.description || '',
-                    language: voice.language || 'ga-IE',
-                    gender: voice.gender || 'unknown'
-                }));
+            if (data.data && Array.isArray(data.data)) {
+                this.availableVoices = [];
+                
+                data.data.forEach(speaker => {
+                    // For each speaker, create entries for their available voice technologies
+                    speaker.voicenames.forEach((voicename, index) => {
+                        const voiceType = speaker.voices[index] || speaker.voices[0] || 'PIPER';
+                        this.availableVoices.push({
+                            id: voicename,
+                            name: speaker.name,
+                            locale: speaker.locale,
+                            gender: speaker.gender,
+                            technology: voiceType,
+                            shortCode: speaker.shortCode,
+                            heritage: speaker.heritage,
+                            displayName: `${speaker.locale} - ${speaker.name} (${speaker.gender}) [${voiceType}]`
+                        });
+                    });
+                });
+                
+                console.log('Processed voices:', this.availableVoices);
             } else {
-                throw new Error('Unexpected voices format in API response');
+                throw new Error('Unexpected voices format in API response - expected data array');
             }
 
         } catch (error) {
@@ -79,24 +93,53 @@ class AbairTTSService {
         this.availableVoices = [
             {
                 id: 'ga_CO_snc_piper',
-                name: 'Connacht (Neural)',
-                description: 'Connacht Irish dialect with neural synthesis',
-                language: 'ga-IE',
-                gender: 'neutral'
+                name: 'Sibéal',
+                locale: 'Connemara',
+                gender: 'female',
+                technology: 'PIPER',
+                shortCode: 'snc',
+                heritage: false,
+                displayName: 'Connemara - Sibéal (female) [PIPER]'
             },
             {
-                id: 'ga_MU_snc_piper', 
-                name: 'Munster (Neural)',
-                description: 'Munster Irish dialect with neural synthesis',
-                language: 'ga-IE',
-                gender: 'neutral'
+                id: 'ga_CO_pmc_piper',
+                name: 'Pádraig',
+                locale: 'Connemara',
+                gender: 'male',
+                technology: 'PIPER',
+                shortCode: 'pmc',
+                heritage: false,
+                displayName: 'Connemara - Pádraig (male) [PIPER]'
             },
             {
-                id: 'ga_UL_snc_piper',
-                name: 'Ulster (Neural)', 
-                description: 'Ulster Irish dialect with neural synthesis',
-                language: 'ga-IE',
-                gender: 'neutral'
+                id: 'ga_UL_anb_piper',
+                name: 'Áine',
+                locale: 'Ulster',
+                gender: 'female',
+                technology: 'PIPER',
+                shortCode: 'anb',
+                heritage: false,
+                displayName: 'Ulster - Áine (female) [PIPER]'
+            },
+            {
+                id: 'ga_MU_cmg_piper',
+                name: 'Colm',
+                locale: 'Munster',
+                gender: 'male',
+                technology: 'PIPER',
+                shortCode: 'cmg',
+                heritage: false,
+                displayName: 'Munster - Colm (male) [PIPER]'
+            },
+            {
+                id: 'ga_MU_nnc_piper',
+                name: 'Neasa',
+                locale: 'Munster',
+                gender: 'female',
+                technology: 'PIPER',
+                shortCode: 'nnc',
+                heritage: false,
+                displayName: 'Munster - Neasa (female) [PIPER]'
             }
         ];
     }
