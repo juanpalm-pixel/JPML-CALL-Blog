@@ -784,6 +784,10 @@ class IrishEReader {
         const targetDiv = document.getElementById('target-sentence');
         const playButton = document.getElementById('play-sentence-btn');
         
+        // Set the current practice text for pronunciation analysis
+        this.currentPracticeText = sentence.content;
+        console.log('Updated currentPracticeText:', this.currentPracticeText);
+        
         if (targetDiv) {
             targetDiv.innerHTML = `
                 <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 0.5rem;">
@@ -2714,11 +2718,74 @@ class IrishEReader {
     }
 
     /**
+     * Playback the last recorded audio
+     */
+    async playbackRecording() {
+        try {
+            // Check if we have a recent recording
+            if (!this.audioProcessor.lastRecording) {
+                this.showError('No recording available to playback. Please record first.');
+                return;
+            }
+
+            this.updateStatus('Playing back recording...');
+
+            // Create audio URL from the blob
+            const audioUrl = URL.createObjectURL(this.audioProcessor.lastRecording);
+            const audio = new Audio(audioUrl);
+
+            // Update UI during playback
+            const playbackBtn = document.getElementById('playback-btn');
+            const originalText = playbackBtn ? playbackBtn.textContent : 'Playback Recording';
+
+            if (playbackBtn) {
+                playbackBtn.disabled = true;
+                playbackBtn.textContent = '⏸ Playing...';
+                playbackBtn.style.backgroundColor = '#ffc107';
+            }
+
+            // Set up audio event handlers
+            audio.onended = () => {
+                // Clean up when playback finishes
+                URL.revokeObjectURL(audioUrl);
+                if (playbackBtn) {
+                    playbackBtn.disabled = false;
+                    playbackBtn.textContent = originalText;
+                    playbackBtn.style.backgroundColor = '#6c757d';
+                }
+                this.updateStatus('Playback complete');
+            };
+
+            audio.onerror = (error) => {
+                console.error('Audio playback error:', error);
+                URL.revokeObjectURL(audioUrl);
+                if (playbackBtn) {
+                    playbackBtn.disabled = false;
+                    playbackBtn.textContent = originalText;
+                    playbackBtn.style.backgroundColor = '#6c757d';
+                }
+                this.showError('Failed to play recording. Please try recording again.');
+            };
+
+            // Start playback
+            await audio.play();
+            console.log('Playing back recorded audio');
+
+        } catch (error) {
+            console.error('Playback error:', error);
+            this.showError(`Playback failed: ${error.message}`);
+        }
+    }
+
+    /**
      * Handle completed recording
      * @param {Blob} audioBlob - Recorded audio
      */
     async handleRecordingComplete(audioBlob) {
         try {
+            // Store the recording for playback
+            this.audioProcessor.lastRecording = audioBlob;
+            
             const recordBtn = document.getElementById('record-btn');
             const stopBtn = document.getElementById('stop-recording-btn');
             const recordingStatus = document.getElementById('recording-status');
@@ -3048,6 +3115,59 @@ class IrishEReader {
         
         // Set up event listeners for sliders
         this.setupSettingsEventListeners();
+        
+        // Populate voice dropdown with available voices
+        this.populateVoiceDropdown();
+    }
+
+    /**
+     * Populate voice dropdown with available Abair voices
+     */
+    async populateVoiceDropdown() {
+        const voiceSelect = document.getElementById('voice-select');
+        if (!voiceSelect) return;
+
+        try {
+            // Get available voices from TTS service
+            const voices = this.ttsService.getAvailableVoices();
+            
+            // Clear existing options
+            voiceSelect.innerHTML = '';
+            
+            // Add voices to dropdown
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.value = voice.id;
+                
+                // Format as "Dialect - Name (Gender)" if we have enough info
+                if (voice.description && voice.description.includes('dialect')) {
+                    option.textContent = `${voice.name} (${voice.gender || 'neutral'})`;
+                } else {
+                    option.textContent = voice.name;
+                }
+                
+                voiceSelect.appendChild(option);
+            });
+            
+            // Set current voice if saved in settings
+            if (this.settings.voice) {
+                voiceSelect.value = this.settings.voice;
+            } else {
+                // Set to first voice and save it
+                if (voices.length > 0) {
+                    voiceSelect.value = voices[0].id;
+                    this.settings.voice = voices[0].id;
+                    this.saveSettings();
+                }
+            }
+            
+            console.log(`Populated voice dropdown with ${voices.length} voices`);
+            
+        } catch (error) {
+            console.error('Error populating voice dropdown:', error);
+            // Add fallback option
+            voiceSelect.innerHTML = '<option value="ga_CO_snc_piper">Connacht (Default)</option>';
+        }
     }
 
     /**
@@ -3058,13 +3178,44 @@ class IrishEReader {
         const speechRateValue = document.getElementById('speech-rate-value');
         const pronunciationThreshold = document.getElementById('pronunciation-threshold');
         const pronunciationThresholdValue = document.getElementById('pronunciation-threshold-value');
+        const voiceSelect = document.getElementById('voice-select');
         
         speechRate?.addEventListener('input', (e) => {
-            speechRateValue.textContent = e.target.value + 'x';
+            const rate = parseFloat(e.target.value);
+            speechRateValue.textContent = rate + 'x';
+            
+            // Apply speech rate to TTS service immediately
+            if (this.ttsService && typeof this.ttsService.setSpeechRate === 'function') {
+                this.ttsService.setSpeechRate(rate);
+                console.log(`Speech rate set to ${rate}x`);
+            }
+            
+            // Save to settings
+            this.settings.speechRate = rate;
+            this.saveSettings();
+        });
+        
+        // Voice selection event listener
+        voiceSelect?.addEventListener('change', (e) => {
+            const voiceId = e.target.value;
+            
+            // Apply voice to TTS service immediately
+            if (this.ttsService && typeof this.ttsService.setVoice === 'function') {
+                this.ttsService.setVoice(voiceId);
+                console.log(`Voice set to ${voiceId}`);
+            }
+            
+            // Save to settings
+            this.settings.voice = voiceId;
+            this.saveSettings();
         });
         
         pronunciationThreshold?.addEventListener('input', (e) => {
             pronunciationThresholdValue.textContent = Math.round(e.target.value * 100) + '%';
+            
+            // Save threshold setting
+            this.settings.pronunciationThreshold = parseFloat(e.target.value);
+            this.saveSettings();
         });
     }
 

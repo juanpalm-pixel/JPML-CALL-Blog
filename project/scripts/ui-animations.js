@@ -701,6 +701,129 @@ class UIAnimations {
     }
 
     /**
+     * Animate entrance of an element with specified animation type
+     * @param {Element} element - Element to animate
+     * @param {string} animationType - Type of animation ('fade-in', 'slide-up', 'slide-down', etc.)
+     */
+    animateEntrance(element, animationType = 'fade-in') {
+        if (!element || !this.settings.enableAnimations) {
+            return;
+        }
+
+        // Remove any existing animation classes
+        element.classList.remove('fade-in', 'slide-up', 'slide-down', 'scale-in');
+        
+        // Force a reflow to ensure the class is removed
+        element.offsetHeight;
+        
+        // Add the animation class
+        element.classList.add(animationType);
+        
+        // Set initial state based on animation type
+        switch (animationType) {
+            case 'fade-in':
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(10px)';
+                break;
+            case 'slide-up':
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                break;
+            case 'slide-down':
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-20px)';
+                break;
+            case 'scale-in':
+                element.style.opacity = '0';
+                element.style.transform = 'scale(0.9)';
+                break;
+        }
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            element.style.transition = 'all 0.3s ease-out';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0) scale(1)';
+        });
+        
+        console.log(`Applied ${animationType} entrance animation to element`);
+    }
+
+    /**
+     * Animate exit of an element with specified animation type
+     * @param {Element} element - Element to animate
+     * @param {string} animationType - Type of animation ('fade-out', 'slide-out', etc.)
+     * @param {Function} callback - Optional callback after animation completes
+     */
+    animateExit(element, animationType = 'fade-out', callback = null) {
+        if (!element || !this.settings.enableAnimations) {
+            if (callback) callback();
+            return;
+        }
+
+        element.style.transition = 'all 0.3s ease-in';
+        
+        switch (animationType) {
+            case 'fade-out':
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-10px)';
+                break;
+            case 'slide-out':
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                break;
+        }
+        
+        // Clean up after animation
+        const timeoutId = setTimeout(() => {
+            if (callback) callback();
+            this.timeoutIds.delete(timeoutId);
+        }, 300);
+        
+        this.timeoutIds.add(timeoutId);
+        
+        console.log(`Applied ${animationType} exit animation to element`);
+    }
+
+    /**
+     * Update animation settings
+     * @param {Object} newSettings - New settings object
+     */
+    updateSettings(newSettings) {
+        this.settings = { ...this.settings, ...newSettings };
+        
+        // Update CSS custom properties
+        document.documentElement.style.setProperty('--animation-speed', this.settings.animationSpeed);
+        
+        console.log('Animation settings updated:', this.settings);
+    }
+
+    /**
+     * Clean up all animations and resources
+     */
+    cleanup() {
+        console.log('Cleaning up animations');
+        
+        this.pauseAnimations();
+        this.clearSentenceFocus();
+        this.clearAllWordHighlights();
+        
+        // Remove dynamic styles
+        const styleElement = document.querySelector('#ui-animations-styles');
+        if (styleElement) {
+            styleElement.remove();
+        }
+    }
+}
+
+// Export for use in other modules
+window.UIAnimations = UIAnimations;
+    resumeAnimations() {
+        console.log('Resuming animations');
+        this.isAnimating = true;
+    }
+
+    /**
      * Update animation settings
      * @param {Object} newSettings - New settings object
      */

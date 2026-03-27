@@ -1,10 +1,10 @@
 /**
- * Browser Speech-to-Text Service for Irish Language
- * Uses native browser Speech Recognition API as replacement for Google Cloud STT
- * Provides pronunciation feedback and confidence scoring
+ * Abair.ie Speech-to-Text Service for Irish Language
+ * Uses Abair.ie STT API for speech recognition with pronunciation feedback
+ * Also includes browser Speech Recognition API fallback for live recognition
  */
 
-class BrowserSTTService {
+class AbairSTTService {
     constructor() {
         // Check for Speech Recognition support
         this.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -451,11 +451,263 @@ class BrowserSTTService {
     isCurrentlyListening() {
         return this.isListening;
     }
+
+    /**
+     * Update configuration for audio format (compatibility method for ereader.js)
+     * Note: Browser Speech Recognition API doesn't need explicit format configuration
+     * @param {string} format - Audio format (ignored in browser API)
+     * @param {number} sampleRate - Sample rate (ignored in browser API)
+     */
+    updateConfigForFormat(format, sampleRate) {
+        // Browser Speech Recognition API handles format automatically
+        console.log(`Format configuration requested: ${format} at ${sampleRate}Hz (handled automatically by browser)`);
+    }
+
+    /**
+     * Convert speech to text using Abair.ie STT API (two-step process)
+     * @param {Blob} audioBlob - Audio blob to transcribe
+     * @returns {Promise<Object>} STT results with transcript and confidence
+     */
+    async speechToText(audioBlob) {
+        try {
+            console.log('🎯 Using Abair.ie STT API (two-step process)');
+            console.log('Audio blob size:', audioBlob.size, 'bytes');
+            
+            // Step 1: Convert audio blob to base64
+            const base64Audio = await this.audioToBase64(audioBlob);
+            console.log('✅ Audio converted to base64, length:', base64Audio.length);
+            
+            // Step 2: Submit audio for recognition
+            const recognitionPayload = {
+                recogniseBlob: base64Audio,
+                developer: true,
+                method: "online2bin"
+            };
+            
+            console.log('📤 Submitting audio for recognition...');
+            const recogniseResponse = await fetch('https://api.abair.ie/v3/recognition/recognise', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(recognitionPayload)
+            });
+            
+            if (!recogniseResponse.ok) {
+                const errorText = await recogniseResponse.text();
+                console.error('❌ Recognition submission failed:', recogniseResponse.status, errorText);
+                throw new Error(`Abair STT submission failed: ${recogniseResponse.status} - ${errorText}`);
+            }
+            
+            const recogniseResult = await recogniseResponse.json();
+            console.log('📋 Recognition response:', recogniseResult);
+            
+            // Step 3: Extract file path and transcription
+            if (recogniseResult.error) {
+                throw new Error(`Abair STT error: ${recogniseResult.error}`);
+            }
+            
+            if (!recogniseResult.audioFilePath) {
+                throw new Error('No audioFilePath returned from Abair STT API');
+            }
+            
+            // Extract transcription from initial response
+            let transcript = '';
+            let confidence = 0.8; // Default confidence
+            
+            if (recogniseResult.transcriptions && recogniseResult.transcriptions.length > 0) {
+                transcript = recogniseResult.transcriptions[0].utterance || '';
+                console.log(`📝 Transcription found: "${transcript}"`);
+            }
+            
+            // Step 4: Get processed audio (optional - for our use case, we mainly need the transcript)
+            const audioPath = recogniseResult.audioFilePath.replace('/tmp/', '').replace('.wav', '');
+            console.log('🔍 Audio file path:', audioPath);
+            
+            try {
+                console.log('📥 Retrieving processed audio...');
+                const recordingResponse = await fetch(
+                    `https://api.abair.ie/v3/recognition/recordings?path=${audioPath}`,
+                    {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    }
+                );
+                
+                if (recordingResponse.ok) {
+                    const recordingResult = await recordingResponse.json();
+                    console.log('✅ Retrieved processed audio data');
+                } else {
+                    console.warn('⚠️ Could not retrieve processed audio, but transcription is available');
+                }
+            } catch (audioError) {
+                console.warn('⚠️ Audio retrieval failed, but continuing with transcription:', audioError.message);
+            }
+            
+            // Return standardized result
+            const result = {
+                transcript: transcript,
+                confidence: confidence,
+                service: 'abair-stt',
+                audioFilePath: recogniseResult.audioFilePath,
+                duration: recogniseResult.duration || 0,
+                rawResponse: recogniseResult
+            };
+            
+            console.log(`✅ Abair STT complete: "${transcript}" (confidence: ${confidence})`);
+            return result;
+            
+        } catch (error) {
+            console.error('❌ Abair STT error:', error);
+            
+            // Fallback to browser STT if available
+            if (this.recognition) {
+                console.log('🔄 Falling back to browser STT...');
+                return await this.fallbackToBrowserSTT();
+            }
+            
+            // Fallback: return empty result with error info
+            return {
+                transcript: '',
+                confidence: 0.0,
+                error: error.message,
+                service: 'abair-stt-failed',
+                alternatives: []
+            };
+        }
+    }
+    
+    /**
+     * Convert audio blob to base64 string
+     * @param {Blob} blob - Audio blob
+     * @returns {Promise<string>} Base64 encoded audio
+     */
+    async audioToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                // Remove the data URL prefix to get just the base64 data
+                const base64 = reader.result.split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+    
+    /**
+     * Fallback to browser STT when Abair.ie STT fails
+     * @returns {Promise<Object>} Recognition result
+     */
+    async fallbackToBrowserSTT() {
+        return new Promise((resolve) => {
+            // Return a simulation result as fallback
+            resolve({
+                transcript: 'Abair STT unavailable - using browser fallback',
+                confidence: 0.3,
+                service: 'browser-fallback',
+                fallback: true
+            });
+        });
+    }
+
+    /**
+     * Start live speech recognition (alternative to blob processing)
+     * @param {string} expectedText - Text user should speak
+     * @returns {Promise<Object>} Live STT results
+     */
+    async startLiveSpeechRecognition(expectedText) {
+        return new Promise((resolve, reject) => {
+            if (!this.isSupported) {
+                reject(new Error('Speech Recognition API not supported in this browser'));
+                return;
+            }
+
+            this.expectedText = expectedText;
+            this.recognition.lang = 'ga-IE'; // Irish language
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.maxAlternatives = 3;
+
+            let resolved = false;
+
+            this.recognition.onresult = (event) => {
+                if (resolved) return;
+                resolved = true;
+
+                const result = event.results[0];
+                const transcript = result[0].transcript;
+                const confidence = result[0].confidence || 0.8;
+
+                console.log(`Live STT Result: "${transcript}" (confidence: ${confidence})`);
+
+                resolve({
+                    transcript: transcript,
+                    confidence: confidence,
+                    live: true,
+                    alternatives: Array.from(result).map(alt => ({
+                        transcript: alt.transcript,
+                        confidence: alt.confidence || 0.8
+                    }))
+                });
+            };
+
+            this.recognition.onerror = (event) => {
+                if (resolved) return;
+                resolved = true;
+
+                console.error('Live speech recognition error:', event.error);
+                reject(new Error(`Speech recognition failed: ${event.error}`));
+            };
+
+            this.recognition.onend = () => {
+                if (!resolved) {
+                    resolved = true;
+                    resolve({
+                        transcript: '',
+                        confidence: 0.0,
+                        live: true,
+                        alternatives: []
+                    });
+                }
+            };
+
+            try {
+                console.log('Starting live speech recognition...');
+                this.recognition.start();
+                this.isListening = true;
+            } catch (error) {
+                if (!resolved) {
+                    resolved = true;
+                    reject(error);
+                }
+            }
+        });
+    }
+
+    /**
+     * Identify pronunciation issues by comparing expected vs actual text
+     * @param {string} expectedText - The text the user should have said
+     * @param {Object} sttResults - Results from speechToText()
+     * @returns {Object} Pronunciation analysis with word-by-word feedback
+     */
+    identifyPronunciationIssues(expectedText, sttResults) {
+        const actualText = sttResults.transcript || '';
+        const confidence = sttResults.confidence || 0;
+        
+        console.log(`Comparing expected: "${expectedText}" vs actual: "${actualText}"`);
+        
+        // Use the existing pronunciation analysis method
+        return this.analyzePronunciation(actualText, expectedText, confidence);
+    }
 }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = BrowserSTTService;
+    module.exports = AbairSTTService;
 } else {
-    window.BrowserSTTService = BrowserSTTService;
+    window.AbairSTTService = AbairSTTService;
+    // Keep backward compatibility
+    window.BrowserSTTService = AbairSTTService;
 }

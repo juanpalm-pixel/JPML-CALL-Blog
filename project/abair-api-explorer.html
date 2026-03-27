@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abair.ie API Explorer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover { background: #2980b9; }
+        .button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .warning { color: #f39c12; font-weight: bold; }
+        .info { color: #3498db; font-weight: bold; }
+        .result {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .endpoint-item {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .method-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #2ecc71; }
+        .post { background: #f39c12; }
+        .put { background: #9b59b6; }
+        .delete { background: #e74c3c; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Abair.ie API Explorer</h1>
+    <p>Let's explore the Abair.ie API documentation together to understand what's available.</p>
+
+    <!-- Manual Discovery Section -->
+    <div class="section">
+        <h2 class="header">🕵️ Manual API Discovery</h2>
+        
+        <button class="button" onclick="exploreAPI()">🔍 Explore Base API</button>
+        <button class="button" onclick="testKnownEndpoints()">📋 Test Known Endpoints</button>
+        <button class="button" onclick="checkCORS()">🌐 Check CORS Policy</button>
+        <button class="button" onclick="inspectSwaggerUI()">🔧 Inspect Swagger UI</button>
+        
+        <div id="discovery-results" class="result">
+            Click the buttons above to start exploring the Abair.ie API...
+        </div>
+    </div>
+
+    <!-- Manual Testing Section -->
+    <div class="section">
+        <h2 class="header">🧪 Manual Endpoint Testing</h2>
+        
+        <div style="margin: 15px 0;">
+            <label>Test Endpoint:</label>
+            <input type="text" id="test-endpoint" value="/recognition/recognise" 
+                   style="padding: 8px; margin: 0 10px; width: 200px;">
+            <button class="button" onclick="testCustomEndpoint()">🔍 Test</button>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <label>Common Recognition Endpoints:</label><br>
+            <button class="button" onclick="testEndpoint('/recognition/recognise')">recognise</button>
+            <button class="button" onclick="testEndpoint('/recognition/recognize')">recognize</button>
+            <button class="button" onclick="testEndpoint('/speech-to-text')">speech-to-text</button>
+            <button class="button" onclick="testEndpoint('/stt')">stt</button>
+            <button class="button" onclick="testEndpoint('/recognition')">recognition</button>
+        </div>
+        
+        <div id="testing-results" class="result">
+            Ready to test specific endpoints...
+        </div>
+    </div>
+
+    <!-- Documentation Analysis -->
+    <div class="section">
+        <h2 class="header">📚 Documentation Analysis</h2>
+        
+        <p>Based on what we know:</p>
+        <ul>
+            <li><strong>Base URL:</strong> https://api.abair.ie/v3/</li>
+            <li><strong>Working TTS:</strong> /synthesis (confirmed working)</li>
+            <li><strong>Documentation:</strong> /docs/ (Swagger UI available)</li>
+            <li><strong>STT Assumption:</strong> /recognition/recognise (your original info)</li>
+        </ul>
+        
+        <button class="button" onclick="openSwaggerDocs()">📖 Open Official Docs</button>
+        <button class="button" onclick="analyzeDocumentationStructure()">🔍 Analyze Documentation Structure</button>
+        
+        <div id="docs-results" class="result">
+            Click above to analyze the documentation structure...
+        </div>
+    </div>
+
+    <!-- Findings Summary -->
+    <div class="section">
+        <h2 class="header">📊 Current Findings</h2>
+        <div id="findings-summary" class="result">
+            <strong>Summary will be updated as we explore...</strong>
+        </div>
+    </div>
+
+    <script>
+        let findings = {
+            workingEndpoints: [],
+            failingEndpoints: [],
+            corsIssues: [],
+            documentationUrls: [],
+            observations: []
+        };
+
+        function updateSummary() {
+            const summary = document.getElementById('findings-summary');
+            let html = '<strong>🎯 Current Findings:</strong><br><br>';
+            
+            if (findings.workingEndpoints.length > 0) {
+                html += '<div class="success">✅ Working Endpoints:</div>';
+                findings.workingEndpoints.forEach(ep => html += `• ${ep}<br>`);
+                html += '<br>';
+            }
+            
+            if (findings.failingEndpoints.length > 0) {
+                html += '<div class="error">❌ Failing Endpoints:</div>';
+                findings.failingEndpoints.forEach(ep => html += `• ${ep}<br>`);
+                html += '<br>';
+            }
+            
+            if (findings.observations.length > 0) {
+                html += '<div class="info">🔍 Observations:</div>';
+                findings.observations.forEach(obs => html += `• ${obs}<br>`);
+                html += '<br>';
+            }
+            
+            summary.innerHTML = html;
+        }
+
+        async function exploreAPI() {
+            const results = document.getElementById('discovery-results');
+            results.innerHTML = '<div class="info">🔍 Exploring Abair.ie API...</div>';
+            
+            const endpoints = [
+                '/',
+                '/synthesis',
+                '/synthesis/metadata',
+                '/recognition',
+                '/recognition/recognise',
+                '/docs',
+                '/health',
+                '/status'
+            ];
+            
+            let html = '<strong>🔍 API Exploration Results:</strong><br><br>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`https://api.abair.ie/v3${endpoint}`, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    const status = response.status;
+                    const statusText = response.statusText;
+                    
+                    if (status >= 200 && status < 300) {
+                        html += `<div class="success">✅ ${endpoint}: ${status} ${statusText}</div>`;
+                        findings.workingEndpoints.push(`${endpoint} (${status})`);
+                    } else if (status >= 400 && status < 500) {
+                        html += `<div class="warning">⚠️ ${endpoint}: ${status} ${statusText}</div>`;
+                        findings.failingEndpoints.push(`${endpoint} (${status})`);
+                    } else {
+                        html += `<div class="error">❌ ${endpoint}: ${status} ${statusText}</div>`;
+                        findings.failingEndpoints.push(`${endpoint} (${status})`);
+                    }
+                    
+                } catch (error) {
+                    html += `<div class="error">❌ ${endpoint}: ${error.message}</div>`;
+                    findings.failingEndpoints.push(`${endpoint} (${error.message})`);
+                }
+            }
+            
+            results.innerHTML = html;
+            updateSummary();
+        }
+
+        async function testKnownEndpoints() {
+            const results = document.getElementById('testing-results');
+            results.innerHTML = '<div class="info">🧪 Testing known working endpoints...</div>';
+            
+            let html = '<strong>🧪 Known Endpoint Tests:</strong><br><br>';
+            
+            // Test synthesis (we know this works)
+            try {
+                const synthResponse = await fetch('https://api.abair.ie/v3/synthesis?input=hello&voice=ga_CO_snc_piper');
+                html += `<div class="success">✅ Synthesis: ${synthResponse.status} ${synthResponse.statusText}</div>`;
+                findings.observations.push('TTS synthesis endpoint confirmed working');
+            } catch (error) {
+                html += `<div class="error">❌ Synthesis: ${error.message}</div>`;
+            }
+            
+            // Test metadata
+            try {
+                const metaResponse = await fetch('https://api.abair.ie/v3/synthesis/metadata');
+                html += `<div class="success">✅ Metadata: ${metaResponse.status} ${metaResponse.statusText}</div>`;
+                findings.observations.push('Voice metadata endpoint confirmed working');
+            } catch (error) {
+                html += `<div class="error">❌ Metadata: ${error.message}</div>`;
+            }
+            
+            results.innerHTML = html;
+            updateSummary();
+        }
+
+        async function testEndpoint(endpoint) {
+            const results = document.getElementById('testing-results');
+            results.innerHTML = `<div class="info">🔍 Testing: ${endpoint}</div>`;
+            
+            let html = `<strong>🔍 Testing ${endpoint}:</strong><br><br>`;
+            
+            const methods = ['GET', 'POST', 'OPTIONS'];
+            
+            for (const method of methods) {
+                try {
+                    const response = await fetch(`https://api.abair.ie/v3${endpoint}`, {
+                        method: method,
+                        mode: 'cors'
+                    });
+                    
+                    const status = response.status;
+                    const statusText = response.statusText;
+                    const contentType = response.headers.get('content-type');
+                    
+                    html += `<div class="method-tag ${method.toLowerCase()}">${method}</div>`;
+                    
+                    if (status >= 200 && status < 300) {
+                        html += `<span class="success">${status} ${statusText}</span>`;
+                        if (contentType) html += ` (${contentType})`;
+                    } else if (status >= 400 && status < 500) {
+                        html += `<span class="warning">${status} ${statusText}</span>`;
+                    } else {
+                        html += `<span class="error">${status} ${statusText}</span>`;
+                    }
+                    html += '<br>';
+                    
+                } catch (error) {
+                    html += `<div class="method-tag ${method.toLowerCase()}">${method}</div>`;
+                    html += `<span class="error">${error.message}</span><br>`;
+                }
+            }
+            
+            results.innerHTML = html;
+        }
+
+        function testCustomEndpoint() {
+            const endpoint = document.getElementById('test-endpoint').value;
+            if (endpoint) {
+                testEndpoint(endpoint);
+            }
+        }
+
+        async function checkCORS() {
+            const results = document.getElementById('discovery-results');
+            results.innerHTML = '<div class="info">🌐 Checking CORS policies...</div>';
+            
+            let html = '<strong>🌐 CORS Analysis:</strong><br><br>';
+            
+            try {
+                const response = await fetch('https://api.abair.ie/v3/', {
+                    method: 'OPTIONS'
+                });
+                
+                const accessControl = response.headers.get('Access-Control-Allow-Origin');
+                const allowedMethods = response.headers.get('Access-Control-Allow-Methods');
+                const allowedHeaders = response.headers.get('Access-Control-Allow-Headers');
+                
+                html += `<div class="info">Access-Control-Allow-Origin: ${accessControl || 'Not specified'}</div>`;
+                html += `<div class="info">Allowed Methods: ${allowedMethods || 'Not specified'}</div>`;
+                html += `<div class="info">Allowed Headers: ${allowedHeaders || 'Not specified'}</div>`;
+                
+                findings.observations.push(`CORS policy checked - Origin: ${accessControl || 'unspecified'}`);
+                
+            } catch (error) {
+                html += `<div class="error">❌ CORS check failed: ${error.message}</div>`;
+            }
+            
+            results.innerHTML = html;
+            updateSummary();
+        }
+
+        function openSwaggerDocs() {
+            window.open('https://api.abair.ie/v3/docs/', '_blank');
+            findings.observations.push('Opened official Swagger documentation');
+            updateSummary();
+        }
+
+        async function inspectSwaggerUI() {
+            const results = document.getElementById('docs-results');
+            results.innerHTML = '<div class="info">🔧 Inspecting Swagger UI configuration...</div>';
+            
+            let html = '<strong>🔧 Swagger UI Analysis:</strong><br><br>';
+            
+            try {
+                // Try to fetch the init script
+                const initResponse = await fetch('https://api.abair.ie/v3/docs/swagger-ui-init.js');
+                const initContent = await initResponse.text();
+                
+                html += '<div class="success">✅ Found swagger-ui-init.js</div>';
+                html += '<div style="background: #2c3e50; color: #ecf0f1; padding: 10px; margin: 10px 0; font-family: monospace; overflow-x: auto;">';
+                html += initContent.substring(0, 500) + (initContent.length > 500 ? '...' : '');
+                html += '</div>';
+                
+            } catch (error) {
+                html += `<div class="error">❌ Could not inspect Swagger UI: ${error.message}</div>`;
+            }
+            
+            results.innerHTML = html;
+        }
+
+        function analyzeDocumentationStructure() {
+            const results = document.getElementById('docs-results');
+            results.innerHTML = `
+                <strong>📚 Documentation Structure Analysis:</strong><br><br>
+                <div class="endpoint-item">
+                    <div class="method-tag get">GET</div>
+                    <strong>/docs/</strong> - Swagger UI Interface ✅ Working
+                </div>
+                <div class="endpoint-item">
+                    <div class="method-tag get">GET</div>
+                    <strong>/synthesis</strong> - Text-to-Speech ✅ Working
+                </div>
+                <div class="endpoint-item">
+                    <div class="method-tag get">GET</div>
+                    <strong>/synthesis/metadata</strong> - Voice metadata ✅ Working  
+                </div>
+                <div class="endpoint-item">
+                    <div class="method-tag post">POST</div>
+                    <strong>/recognition/recognise</strong> - Speech-to-Text ❓ Unknown
+                </div>
+                <br>
+                <div class="warning">
+                    <strong>🎯 Key Question:</strong> Is the STT endpoint actually available?<br>
+                    The 502/500 errors suggest the service might be:<br>
+                    • Under maintenance<br>
+                    • Requires authentication<br>  
+                    • Uses different parameters than expected<br>
+                    • Not yet implemented
+                </div>
+            `;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSummary();
+        });
+    </script>
+</body>
+</html>

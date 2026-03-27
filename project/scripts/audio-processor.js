@@ -87,45 +87,55 @@ class AudioProcessor {
      * @returns {Promise<void>}
      */
     async startRecording(options = {}) {
-        try {
-            if (this.isRecording) {
-                console.warn('Recording already in progress');
-                return;
-            }
-
-            if (!this.audioStream) {
-                await this.requestMicrophoneAccess();
-            }
-
-            console.log('Starting audio recording...');
-            
-            this.audioChunks = [];
-            const config = { ...this.recordingConfig, ...options };
-            
-            this.mediaRecorder = new MediaRecorder(this.audioStream, config);
-            
-            this.mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    this.audioChunks.push(event.data);
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (this.isRecording) {
+                    console.warn('Recording already in progress');
+                    resolve();
+                    return;
                 }
-            };
 
-            this.mediaRecorder.onstart = () => {
-                this.isRecording = true;
-                console.log('Recording started');
-            };
+                if (!this.audioStream) {
+                    await this.requestMicrophoneAccess();
+                }
 
-            this.mediaRecorder.onstop = () => {
-                this.isRecording = false;
-                console.log('Recording stopped');
-            };
+                console.log('Starting audio recording...');
+                
+                this.audioChunks = [];
+                const config = { ...this.recordingConfig, ...options };
+                
+                this.mediaRecorder = new MediaRecorder(this.audioStream, config);
+                
+                this.mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        this.audioChunks.push(event.data);
+                    }
+                };
 
-            this.mediaRecorder.start();
+                this.mediaRecorder.onstart = () => {
+                    this.isRecording = true;
+                    console.log('Recording started');
+                    resolve(); // Resolve when recording actually starts
+                };
 
-        } catch (error) {
-            console.error('Recording start error:', error);
-            throw new Error(`Failed to start recording: ${error.message}`);
-        }
+                this.mediaRecorder.onstop = () => {
+                    this.isRecording = false;
+                    console.log('Recording stopped');
+                };
+
+                this.mediaRecorder.onerror = (error) => {
+                    console.error('MediaRecorder error:', error);
+                    this.isRecording = false;
+                    reject(new Error(`MediaRecorder error: ${error.error || error}`));
+                };
+
+                this.mediaRecorder.start();
+
+            } catch (error) {
+                console.error('Recording start error:', error);
+                reject(new Error(`Failed to start recording: ${error.message}`));
+            }
+        });
     }
 
     /**
@@ -661,17 +671,12 @@ class AudioProcessor {
      */
     waitForRecordingStop() {
         return new Promise((resolve, reject) => {
-            // Wait a moment for recording state to be properly set
-            const checkRecording = () => {
-                if (!this.isRecording) {
-                    reject(new Error('No recording in progress'));
-                    return;
-                }
-                this.recordingStopResolver = resolve;
-            };
+            if (!this.isRecording) {
+                reject(new Error('No recording in progress'));
+                return;
+            }
             
-            // Small delay to ensure isRecording is properly set
-            setTimeout(checkRecording, 50);
+            this.recordingStopResolver = resolve;
         });
     }
 
