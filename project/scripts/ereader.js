@@ -100,6 +100,18 @@ class IrishEReader {
             this.errorManager = new ErrorManager();
             this.uiAnimations = new UIAnimations(); // Add animation system
             
+            // Wait for TTS service to load voices
+            console.log('Waiting for TTS service to load voices...');
+            await new Promise((resolve) => {
+                // Check if voices are already loaded
+                if (this.ttsService.availableVoices && this.ttsService.availableVoices.length > 0) {
+                    resolve();
+                } else {
+                    // Wait a bit for async initialization
+                    setTimeout(() => resolve(), 1500);
+                }
+            });
+            
             // Apply saved settings to services
             this.applySettings();
             
@@ -112,6 +124,12 @@ class IrishEReader {
             // Set up UI
             this.setupEventListeners();
             await this.loadDefaultText();
+            
+            // Populate voice dropdown on page load
+            await this.populateVoiceDropdown();
+            
+            // Set up settings event listeners for main page controls
+            this.setupSettingsEventListeners();
             
             // Set up auto-save interval
             this.setupAutoSave();
@@ -344,6 +362,30 @@ class IrishEReader {
         if (this.sentences.length > 0) {
             this.updateTextDisplay();
             this.updateProgress();
+        }
+    }
+
+    /**
+     * Load default sample text for demonstration
+     */
+    async loadDefaultText() {
+        const defaultText = `Bhi beantreach bhocht ann fadó agus bhí aon mhac amhain aice agus sé an t-ainm a bhi air Seán. Bhi siad i ndáirire bocht agus gan dada ach an mhuc acu agus ni raibh ocras ortha, acht tri olc agus maith b'é gnó Sheáin áire thabhairt dos na gabhair, iad a chomáint amach ar maidin, iad aodhaireacht i gcaitheamh an lae agus iad a thabhairt abhaile um thráthnóna chun a gcrúidhte.`;
+        
+        try {
+            // Set the text in the textarea
+            const textarea = document.getElementById('irish-text-input');
+            if (textarea) {
+                textarea.value = defaultText;
+            }
+            
+            // Load the text into the e-reader
+            this.loadText(defaultText);
+            
+            console.log('Default text loaded successfully');
+            
+        } catch (error) {
+            console.error('Failed to load default text:', error);
+            // Continue without default text if there's an error
         }
     }
 
@@ -3128,11 +3170,26 @@ class IrishEReader {
      */
     async populateVoiceDropdown() {
         const voiceSelect = document.getElementById('voice-select');
-        if (!voiceSelect) return;
+        if (!voiceSelect) {
+            console.log('Voice select element not found');
+            return;
+        }
 
         try {
+            // Ensure TTS service has loaded voices
+            if (!this.ttsService.availableVoices || this.ttsService.availableVoices.length === 0) {
+                console.log('Waiting for voices to load...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
             // Get available voices from TTS service
             const voices = this.ttsService.getAvailableVoices();
+            
+            if (!voices || voices.length === 0) {
+                throw new Error('No voices available from TTS service');
+            }
+            
+            console.log(`Found ${voices.length} voices to populate dropdown`);
             
             // Clear existing options
             voiceSelect.innerHTML = '';
@@ -3166,17 +3223,19 @@ class IrishEReader {
                 }
             }
             
-            console.log(`Populated voice dropdown with ${voices.length} voices`);
+            console.log(`✅ Populated voice dropdown with ${voices.length} voices`);
             
         } catch (error) {
             console.error('Error populating voice dropdown:', error);
             // Add fallback options
             voiceSelect.innerHTML = `
-                <option value="ga_CO_snc_piper">Connemara - Sibéal (female)</option>
-                <option value="ga_CO_pmc_piper">Connemara - Pádraig (male)</option>
-                <option value="ga_UL_anb_piper">Ulster - Áine (female)</option>
-                <option value="ga_MU_cmg_piper">Munster - Colm (male)</option>
+                <option value="ga_CO_snc_piper">Connemara - Sibéal (female) [PIPER]</option>
+                <option value="ga_CO_pmc_piper">Connemara - Pádraig (male) [PIPER]</option>
+                <option value="ga_UL_anb_piper">Ulster - Áine (female) [PIPER]</option>
+                <option value="ga_MU_cmg_piper">Munster - Colm (male) [PIPER]</option>
+                <option value="ga_MU_nnc_piper">Munster - Neasa (female) [PIPER]</option>
             `;
+            console.log('⚠️ Used fallback voices due to error');
         }
     }
 
@@ -3230,11 +3289,21 @@ class IrishEReader {
         // Voice selection event listener
         voiceSelect?.addEventListener('change', (e) => {
             const voiceId = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const voiceName = selectedOption ? selectedOption.text : voiceId;
+            
+            console.log(`🎤 Voice changed to: ${voiceName} (${voiceId})`);
             
             // Apply voice to TTS service immediately
             if (this.ttsService && typeof this.ttsService.setVoice === 'function') {
                 this.ttsService.setVoice(voiceId);
-                console.log(`Voice set to ${voiceId}`);
+                console.log(`✅ TTS service updated with new voice`);
+                
+                // Show brief feedback to user
+                this.updateStatus(`Voice changed to: ${voiceName}`, 'success');
+            } else {
+                console.error('❌ TTS service not available or setVoice method missing');
+                this.updateStatus('Error: Could not update voice', 'error');
             }
             
             // Save to settings
@@ -3283,14 +3352,24 @@ class IrishEReader {
     applySettings() {
         try {
             if (this.settings && this.ttsService) {
-                this.ttsService.setVoice(this.settings.selectedVoice);
-                this.ttsService.setSpeechRate(this.settings.speechRate);
-                console.log(`Applied settings: voice=${this.settings.selectedVoice}, rate=${this.settings.speechRate}`);
+                // Use 'voice' property (consistent with saveSettings)
+                const voiceToApply = this.settings.voice || this.settings.selectedVoice;
+                if (voiceToApply) {
+                    this.ttsService.setVoice(voiceToApply);
+                    console.log(`✅ Applied voice setting: ${voiceToApply}`);
+                }
+                
+                if (this.settings.speechRate) {
+                    this.ttsService.setSpeechRate(this.settings.speechRate);
+                    console.log(`✅ Applied speech rate: ${this.settings.speechRate}`);
+                }
             }
             
             if (this.settings && this.sttService) {
-                this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
-                console.log(`Applied STT threshold: ${this.settings.pronunciationThreshold}`);
+                if (this.settings.pronunciationThreshold) {
+                    this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
+                    console.log(`✅ Applied STT threshold: ${this.settings.pronunciationThreshold}`);
+                }
             }
         } catch (error) {
             console.warn('Failed to apply settings:', error);
