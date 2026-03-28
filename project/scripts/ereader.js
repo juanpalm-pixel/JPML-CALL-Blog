@@ -3070,8 +3070,11 @@ class IrishEReader {
             // Display results
             this.displayPronunciationResults(comparison);
             
-            // Track errors if score is below threshold (convert accuracy to 0-100 scale)
+            // Show practice options after analysis
             const scorePercent = (comparison.accuracy || 0) * 100;
+            this.showPracticeOptions(scorePercent);
+            
+            // Track errors if score is below threshold (convert accuracy to 0-100 scale)
             if (scorePercent < 70 && this.errorManager) {
                 this.errorManager.recordError({
                     sentence: this.currentPracticeText,
@@ -3820,10 +3823,351 @@ Generated on ${new Date().toLocaleDateString()}
             }
         }
     }
+    
+    /**
+     * Four Practice Options (from PRONUNCIATION_FEEDBACK_SYSTEM.md)
+     */
+    
+    /**
+     * Hear Again - Replay target pronunciation
+     */
+    async hearAgain() {
+        try {
+            console.log('🔊 Hear Again requested');
+            const targetSentence = document.getElementById('target-sentence');
+            
+            if (!targetSentence || !this.currentPracticeText) {
+                this.showError('No sentence selected for practice');
+                return;
+            }
+            
+            this.showStatus('🔊 Playing target pronunciation...');
+            
+            // Use TTS to speak the current practice text
+            if (this.ttsService) {
+                await this.ttsService.speakText(this.currentPracticeText, 'ga-IE');
+                this.showStatus('✅ Playback complete');
+            } else {
+                this.showError('TTS service not available');
+            }
+            
+        } catch (error) {
+            console.error('Hear Again failed:', error);
+            this.showError('Failed to play pronunciation');
+        }
+    }
+    
+    /**
+     * Try Again - Record another attempt
+     */
+    async tryAgain() {
+        try {
+            console.log('🎤 Try Again requested');
+            
+            // Hide practice options
+            const practiceOptions = document.getElementById('practice-options');
+            if (practiceOptions) {
+                practiceOptions.style.display = 'none';
+            }
+            
+            // Clear previous highlighting
+            const targetSentence = document.getElementById('target-sentence');
+            if (targetSentence && this.currentPracticeText) {
+                targetSentence.textContent = this.currentPracticeText;
+            }
+            
+            // Reset recording UI
+            const recordBtn = document.getElementById('record-btn');
+            const stopBtn = document.getElementById('stop-recording-btn');
+            if (recordBtn) {
+                recordBtn.disabled = false;
+                recordBtn.textContent = '🎤 Record Pronunciation';
+            }
+            if (stopBtn) {
+                stopBtn.disabled = true;
+            }
+            
+            this.showStatus('Ready to record another attempt');
+            
+            // Show recommendation
+            this.showPracticeRecommendation('Click "Record Pronunciation" to try again');
+            
+        } catch (error) {
+            console.error('Try Again failed:', error);
+            this.showError('Failed to reset for another attempt');
+        }
+    }
+    
+    /**
+     * Mark as Correct - Manual override for disputed pronunciations
+     */
+    async markCorrect() {
+        try {
+            console.log('✓ Mark as Correct requested');
+            
+            if (!this.currentPracticeText) {
+                this.showError('No active practice session');
+                return;
+            }
+            
+            // Update UI to show all words as correct
+            const targetSentence = document.getElementById('target-sentence');
+            if (targetSentence && this.currentPracticeText) {
+                const words = this.currentPracticeText.split(' ');
+                targetSentence.innerHTML = words.map(word => 
+                    `<span style="background-color: #28a745; color: white; padding: 2px 4px; border-radius: 3px; margin: 0 2px;">${word}</span>`
+                ).join(' ');
+            }
+            
+            // Update stats
+            const accuracyEl = document.getElementById('pronunciation-accuracy');
+            if (accuracyEl) {
+                accuracyEl.textContent = '100%';
+                accuracyEl.style.color = '#28a745';
+            }
+            
+            const confidenceEl = document.getElementById('confidence');
+            if (confidenceEl) {
+                confidenceEl.textContent = '100%';
+                confidenceEl.style.color = '#28a745';
+            }
+            
+            // Track in error system as manually marked correct
+            if (this.errorManager) {
+                await this.errorManager.trackError({
+                    word: this.currentPracticeText,
+                    type: 'manual_override',
+                    severity: 'info',
+                    userMarkedCorrect: true,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            this.showStatus('✅ Marked as correct (manual override)');
+            
+            // Hide practice options
+            const practiceOptions = document.getElementById('practice-options');
+            if (practiceOptions) {
+                practiceOptions.style.display = 'none';
+            }
+            
+            // Show recommendation to move on
+            setTimeout(() => {
+                this.showPracticeRecommendation('Great! Try the next sentence or practice more.');
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Mark Correct failed:', error);
+            this.showError('Failed to mark as correct');
+        }
+    }
+    
+    /**
+     * Skip to Next - Move to next sentence
+     */
+    async skipToNext() {
+        try {
+            console.log('⏭ Skip to Next requested');
+            
+            // Move to next sentence
+            if (this.currentSentenceIndex < this.sentences.length - 1) {
+                this.currentSentenceIndex++;
+                
+                // Update the reading area if visible
+                const displayBox = document.getElementById('sentence-display');
+                if (displayBox && displayBox.style.display !== 'none') {
+                    this.updateSentenceDisplay();
+                }
+                
+                // Load next sentence for practice
+                const nextSentence = this.sentences[this.currentSentenceIndex];
+                if (nextSentence) {
+                    this.currentPracticeText = nextSentence;
+                    const targetSentence = document.getElementById('target-sentence');
+                    if (targetSentence) {
+                        targetSentence.textContent = nextSentence;
+                        targetSentence.style.backgroundColor = '#e8f5e8';
+                    }
+                }
+                
+                // Hide practice options
+                const practiceOptions = document.getElementById('practice-options');
+                if (practiceOptions) {
+                    practiceOptions.style.display = 'none';
+                }
+                
+                // Update progress
+                this.updateProgressBar();
+                
+                this.showStatus(`✅ Moved to sentence ${this.currentSentenceIndex + 1} of ${this.sentences.length}`);
+                
+            } else {
+                this.showStatus('✅ You\'ve reached the end of the text!');
+                this.showPracticeRecommendation('Congratulations! You\'ve completed all sentences. Load new text or practice more.');
+            }
+            
+        } catch (error) {
+            console.error('Skip to Next failed:', error);
+            this.showError('Failed to skip to next sentence');
+        }
+    }
+    
+    /**
+     * Show practice recommendation
+     */
+    showPracticeRecommendation(message) {
+        const recommendationEl = document.getElementById('practice-recommendation');
+        if (recommendationEl) {
+            recommendationEl.textContent = message;
+            recommendationEl.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                recommendationEl.style.display = 'none';
+            }, 5000);
+        }
+    }
+    
+    /**
+     * Show practice options after pronunciation analysis
+     */
+    showPracticeOptions(overallScore) {
+        const practiceOptions = document.getElementById('practice-options');
+        if (practiceOptions) {
+            practiceOptions.style.display = 'block';
+            
+            // Show recommendation based on score
+            if (overallScore < 70) {
+                this.showPracticeRecommendation('💡 Suggestion: Try recording again to improve your pronunciation');
+            } else if (overallScore >= 70 && overallScore < 90) {
+                this.showPracticeRecommendation('👍 Good job! You can try again or move to the next sentence');
+            } else {
+                this.showPracticeRecommendation('🎉 Excellent! You can move on or practice more');
+            }
+        }
+    }
+}
+
+/**
+ * Global Functions for Practice Options and Threshold Controls
+ */
+
+// Four Practice Option Functions
+function hearAgain() {
+    if (window.eReader) {
+        window.eReader.hearAgain();
+    }
+}
+
+function tryAgain() {
+    if (window.eReader) {
+        window.eReader.tryAgain();
+    }
+}
+
+function markCorrect() {
+    if (window.eReader) {
+        window.eReader.markCorrect();
+    }
+}
+
+function skipToNext() {
+    if (window.eReader) {
+        window.eReader.skipToNext();
+    }
+}
+
+// Confidence Threshold Controls
+function updateThreshold(type, value) {
+    const valueSpan = document.getElementById(`threshold-${type}-value`);
+    if (valueSpan) {
+        valueSpan.textContent = value;
+    }
+    
+    // Update in eReader instance
+    if (window.eReader && window.eReader.pronunciationSession) {
+        window.eReader.pronunciationSession.confidenceThresholds[type] = value / 100;
+        console.log(`Updated ${type} threshold to ${value}%`);
+    }
+    
+    // Save to localStorage
+    const thresholds = {
+        excellent: parseInt(document.getElementById('threshold-excellent').value),
+        good: parseInt(document.getElementById('threshold-good').value),
+        fair: parseInt(document.getElementById('threshold-fair').value)
+    };
+    localStorage.setItem('pronunciationThresholds', JSON.stringify(thresholds));
+}
+
+function resetThresholds() {
+    const defaults = { excellent: 80, good: 70, fair: 50 };
+    
+    document.getElementById('threshold-excellent').value = defaults.excellent;
+    document.getElementById('threshold-excellent-value').textContent = defaults.excellent;
+    
+    document.getElementById('threshold-good').value = defaults.good;
+    document.getElementById('threshold-good-value').textContent = defaults.good;
+    
+    document.getElementById('threshold-fair').value = defaults.fair;
+    document.getElementById('threshold-fair-value').textContent = defaults.fair;
+    
+    // Update in eReader instance
+    if (window.eReader && window.eReader.pronunciationSession) {
+        window.eReader.pronunciationSession.confidenceThresholds = {
+            excellent: 0.8,
+            good: 0.7,
+            fair: 0.5,
+            poor: 0.3
+        };
+    }
+    
+    // Clear from localStorage
+    localStorage.removeItem('pronunciationThresholds');
+    
+    console.log('Thresholds reset to defaults');
+}
+
+// Load saved thresholds on page load
+function loadSavedThresholds() {
+    const saved = localStorage.getItem('pronunciationThresholds');
+    if (saved) {
+        try {
+            const thresholds = JSON.parse(saved);
+            if (thresholds.excellent) {
+                document.getElementById('threshold-excellent').value = thresholds.excellent;
+                document.getElementById('threshold-excellent-value').textContent = thresholds.excellent;
+            }
+            if (thresholds.good) {
+                document.getElementById('threshold-good').value = thresholds.good;
+                document.getElementById('threshold-good-value').textContent = thresholds.good;
+            }
+            if (thresholds.fair) {
+                document.getElementById('threshold-fair').value = thresholds.fair;
+                document.getElementById('threshold-fair-value').textContent = thresholds.fair;
+            }
+            
+            // Update in eReader if available
+            if (window.eReader && window.eReader.pronunciationSession) {
+                window.eReader.pronunciationSession.confidenceThresholds = {
+                    excellent: thresholds.excellent / 100,
+                    good: thresholds.good / 100,
+                    fair: thresholds.fair / 100,
+                    poor: 0.3
+                };
+            }
+            
+            console.log('Loaded saved thresholds:', thresholds);
+        } catch (e) {
+            console.error('Failed to load saved thresholds:', e);
+        }
+    }
 }
 
 // Initialize the e-reader when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const eReader = new IrishEReader();
     window.eReader = eReader; // Make globally available for debugging
+    
+    // Load saved thresholds
+    setTimeout(loadSavedThresholds, 100);
 });

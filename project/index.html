@@ -249,7 +249,33 @@
                         
                         <!-- Practice Options -->
                         <div id="practice-options" style="margin-top: 1rem; display: none;">
-                            <!-- Dynamic content populated by JS -->
+                            <!-- Four Practice Options -->
+                            <div class="practice-actions" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <h5 style="margin-bottom: 15px; color: #333;">What would you like to do next?</h5>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                                    <button onclick="hearAgain()" class="practice-action-btn" style="padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;">
+                                        <div>🔊</div>
+                                        <div style="font-weight: bold;">Hear Again</div>
+                                        <small style="opacity: 0.9;">Replay pronunciation</small>
+                                    </button>
+                                    <button onclick="tryAgain()" class="practice-action-btn" style="padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;">
+                                        <div>🎤</div>
+                                        <div style="font-weight: bold;">Try Again</div>
+                                        <small style="opacity: 0.9;">Record another attempt</small>
+                                    </button>
+                                    <button onclick="markCorrect()" class="practice-action-btn" style="padding: 12px; background: #ffc107; color: #212529; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;">
+                                        <div>✓</div>
+                                        <div style="font-weight: bold;">Mark Correct</div>
+                                        <small style="opacity: 0.9;">Manual override</small>
+                                    </button>
+                                    <button onclick="skipToNext()" class="practice-action-btn" style="padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;">
+                                        <div>⏭</div>
+                                        <div style="font-weight: bold;">Skip to Next</div>
+                                        <small style="opacity: 0.9;">Move forward</small>
+                                    </button>
+                                </div>
+                                <div id="practice-recommendation" style="margin-top: 10px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; display: none;"></div>
+                            </div>
                         </div>
                         
                         <!-- Session Statistics -->
@@ -289,6 +315,40 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Confidence Threshold Controls -->
+                            <details style="margin-top: 15px; padding: 12px; background: #fff; border-radius: 6px; border: 1px solid #ddd;">
+                                <summary style="cursor: pointer; font-weight: bold; color: #333;">⚙️ Adjust Confidence Thresholds</summary>
+                                <div style="margin-top: 15px;">
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <span>🟢 Excellent: <strong><span id="threshold-excellent-value">80</span>%</strong></span>
+                                        </label>
+                                        <input type="range" id="threshold-excellent" min="70" max="100" value="80" 
+                                               style="width: 100%;" oninput="updateThreshold('excellent', this.value)">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <span>🟡 Good: <strong><span id="threshold-good-value">70</span>%</strong></span>
+                                        </label>
+                                        <input type="range" id="threshold-good" min="60" max="90" value="70" 
+                                               style="width: 100%;" oninput="updateThreshold('good', this.value)">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <span>🟠 Fair: <strong><span id="threshold-fair-value">50</span>%</strong></span>
+                                        </label>
+                                        <input type="range" id="threshold-fair" min="40" max="70" value="50" 
+                                               style="width: 100%;" oninput="updateThreshold('fair', this.value)">
+                                    </div>
+                                    <button onclick="resetThresholds()" style="width: 100%; padding: 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px;">
+                                        Reset to Defaults
+                                    </button>
+                                    <small style="display: block; margin-top: 8px; color: #666; text-align: center;">
+                                        Thresholds determine word highlighting colors
+                                    </small>
+                                </div>
+                            </details>
                             
                             <!-- Session Controls -->
                             <div style="margin-top: 15px; text-align: center;">

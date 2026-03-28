@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STT Test - Abair.ie Irish Speech Recognition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .status.checking {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+        
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+            font-family: inherit;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.recording {
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            min-height: 50px;
+        }
+        
+        .result-box pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box strong {
+            color: #2196F3;
+        }
+        
+        .audio-visualizer {
+            height: 100px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        
+        .endpoint-config {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .endpoint-config input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+        }
+        
+        .log-entry.error {
+            color: #ff6b6b;
+        }
+        
+        .log-entry.success {
+            color: #51cf66;
+        }
+        
+        .log-entry.info {
+            color: #74c0fc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Abair.ie STT Test Page</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">
+            Test Speech-to-Text functionality for Irish language
+        </p>
+        
+        <!-- Server Status -->
+        <div id="serverStatus" class="status checking">
+            🔍 Checking proxy server connection...
+        </div>
+        
+        <!-- Configuration Section -->
+        <div class="test-section">
+            <h2>⚙️ Configuration</h2>
+            <div class="info-box">
+                <strong>Test Mode:</strong> Try direct API first (CORS may be enabled!), then proxy
+            </div>
+            <div style="margin: 15px 0;">
+                <label>
+                    <input type="radio" name="mode" value="direct" checked> 
+                    Direct API (https://api.abair.ie/v3/recognition/recognise)
+                </label>
+                <br>
+                <label>
+                    <input type="radio" name="mode" value="proxy"> 
+                    Via Proxy Server (localhost:3001 or deployed)
+                </label>
+            </div>
+            <div class="endpoint-config">
+                <input type="text" id="proxyUrl" value="http://localhost:3001/api/stt" placeholder="Proxy URL (if using proxy mode)">
+                <button onclick="testConnection()">Test Connection</button>
+            </div>
+            
+            <div class="info-box">
+                <strong>Notice:</strong> Abair API docs show access-control-allow-origin: * on GET endpoint!
+            </div>
+        </div>
+        
+        <!-- Recording Section -->
+        <div class="test-section">
+            <h2>🎙️ Record & Test</h2>
+            <p><strong>Expected text (for comparison):</strong></p>
+            <textarea id="expectedText" rows="2" placeholder="Enter Irish text you'll say...">Dia dhuit, conas atá tú?</textarea>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button id="recordBtn" onclick="toggleRecording()">🎤 Start Recording</button>
+                <button onclick="clearResults()">🗑️ Clear</button>
+            </div>
+            
+            <div class="audio-visualizer" id="visualizer">
+                🔇 No audio input
+            </div>
+            
+            <p><strong>Status:</strong> <span id="recordingStatus">Ready to record</span></p>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="test-section">
+            <h2>📊 Results</h2>
+            <p><strong>Transcript:</strong></p>
+            <div class="result-box" id="transcript">No recording yet</div>
+            
+            <p><strong>Confidence:</strong></p>
+            <div class="result-box" id="confidence">-</div>
+            
+            <p><strong>Full API Response:</strong></p>
+            <div class="result-box">
+                <pre id="apiResponse">No data yet</pre>
+            </div>
+        </div>
+        
+        <!-- Console Log -->
+        <div class="test-section">
+            <h2>📝 Console Log</h2>
+            <div class="log" id="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+    
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioContext;
+        let analyser;
+        
+        // Logging
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            log('Log cleared', 'info');
+        }
+        
+        function clearResults() {
+            document.getElementById('transcript').textContent = 'No recording yet';
+            document.getElementById('confidence').textContent = '-';
+            document.getElementById('apiResponse').textContent = 'No data yet';
+            log('Results cleared', 'info');
+        }
+        
+        // Test connection based on selected mode
+        async function testConnection() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const statusDiv = document.getElementById('serverStatus');
+            
+            statusDiv.className = 'status checking';
+            
+            if (mode === 'direct') {
+                statusDiv.textContent = '🔍 Testing direct Abair.ie API (checking CORS)...';
+                log('Testing direct API connection', 'info');
+                
+                try {
+                    // Try a simple GET request to check CORS
+                    const testUrl = 'https://api.abair.ie/v3/recognition/recordings?path=test';
+                    const response = await fetch(testUrl);
+                    
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Direct API accessible! CORS appears to be enabled';
+                    log('Direct API accessible - CORS is enabled!', 'success');
+                    return true;
+                } catch (error) {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = `❌ Direct API blocked: ${error.message}`;
+                    log(`Direct API blocked: ${error.message}`, 'error');
+                    return false;
+                }
+            } else {
+                // Test proxy
+                const proxyUrl = document.getElementById('proxyUrl').value;
+                statusDiv.textContent = '🔍 Checking proxy server...';
+                log(`Testing proxy: ${proxyUrl}`, 'info');
+                
+                try {
+                    const baseUrl = proxyUrl.replace('/api/stt', '');
+                    const response = await fetch(baseUrl, { method: 'GET' });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        statusDiv.className = 'status success';
+                        statusDiv.textContent = `✅ Proxy server connected: ${data.service || 'Running'}`;
+                        log(`Proxy connected: ${JSON.stringify(data)}`, 'success');
+                        return true;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = `❌ Proxy not available: ${error.message}`;
+                    log(`Proxy failed: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            log('STT Test page loaded', 'info');
+            log('Abair API docs show access-control-allow-origin: * on GET endpoint!', 'info');
+            testConnection();
+        });
+        
+        // Recording functions
+        async function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                await startRecording();
+            }
+        }
+        
+        async function startRecording() {
+            try {
+                log('Requesting microphone access...', 'info');
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        channelCount: 1,
+                        sampleRate: 16000,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+                
+                log('Microphone access granted', 'success');
+                
+                // Setup audio visualizer
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 256;
+                visualizeAudio();
+                
+                // Setup recorder
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    log('Recording stopped, processing...', 'info');
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    log(`Audio blob created: ${audioBlob.size} bytes`, 'info');
+                    await processAudio(audioBlob);
+                    
+                    // Stop visualizer
+                    if (audioContext) {
+                        audioContext.close();
+                    }
+                    document.getElementById('visualizer').innerHTML = '🔇 No audio input';
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                const btn = document.getElementById('recordBtn');
+                btn.textContent = '⏹️ Stop Recording';
+                btn.className = 'recording';
+                document.getElementById('recordingStatus').textContent = '🔴 Recording...';
+                log('Recording started', 'success');
+                
+            } catch (error) {
+                log(`Recording error: ${error.message}`, 'error');
+                alert('Microphone access denied or unavailable');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                
+                const btn = document.getElementById('recordBtn');
+                btn.textContent = '🎤 Start Recording';
+                btn.className = '';
+                document.getElementById('recordingStatus').textContent = 'Processing...';
+            }
+        }
+        
+        function visualizeAudio() {
+            if (!analyser) return;
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            function draw() {
+                if (!isRecording) return;
+                
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Calculate average volume
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const average = sum / bufferLength;
+                const percentage = Math.round((average / 255) * 100);
+                
+                document.getElementById('visualizer').innerHTML = 
+                    `🎙️ Volume: ${'█'.repeat(Math.floor(percentage / 5))}${'░'.repeat(20 - Math.floor(percentage / 5))} ${percentage}%`;
+            }
+            
+            draw();
+        }
+        
+        // Process and send audio
+        async function processAudio(audioBlob) {
+            try {
+                log('Converting audio to WAV format...', 'info');
+                
+                // Convert to proper WAV format
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                // Convert to 16kHz mono WAV
+                const wavBlob = await audioBufferToWav(audioBuffer);
+                log(`WAV conversion complete: ${wavBlob.size} bytes`, 'success');
+                
+                // Convert to base64
+                const base64Audio = await blobToBase64(wavBlob);
+                log(`Base64 encoding complete: ${base64Audio.length} characters`, 'success');
+                
+                // Send to API
+                await sendToAbair(base64Audio);
+                
+            } catch (error) {
+                log(`Audio processing error: ${error.message}`, 'error');
+                document.getElementById('recordingStatus').textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        function audioBufferToWav(audioBuffer) {
+            return new Promise((resolve) => {
+                const numberOfChannels = 1;
+                const sampleRate = 16000;
+                const format = 1; // PCM
+                const bitDepth = 16;
+                
+                const length = audioBuffer.length;
+                const buffer = audioBuffer.getChannelData(0);
+                
+                const wav = new ArrayBuffer(44 + length * 2);
+                const view = new DataView(wav);
+                
+                // Write WAV header
+                writeString(view, 0, 'RIFF');
+                view.setUint32(4, 36 + length * 2, true);
+                writeString(view, 8, 'WAVE');
+                writeString(view, 12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, format, true);
+                view.setUint16(22, numberOfChannels, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * numberOfChannels * bitDepth / 8, true);
+                view.setUint16(32, numberOfChannels * bitDepth / 8, true);
+                view.setUint16(34, bitDepth, true);
+                writeString(view, 36, 'data');
+                view.setUint32(40, length * 2, true);
+                
+                // Write audio data
+                let offset = 44;
+                for (let i = 0; i < length; i++) {
+                    const sample = Math.max(-1, Math.min(1, buffer[i]));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+                
+                resolve(new Blob([view], { type: 'audio/wav' }));
+            });
+        }
+        
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+        
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+        
+        // Send to Abair API (direct or via proxy)
+        async function sendToAbair(base64Audio) {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const directUrl = 'https://api.abair.ie/v3/recognition/recognise';
+            const proxyUrl = document.getElementById('proxyUrl').value;
+            const apiUrl = mode === 'direct' ? directUrl : proxyUrl;
+            
+            log(`Sending audio to Abair.ie (${mode} mode)...`, 'info');
+            document.getElementById('recordingStatus').textContent = '⏳ Sending to API...';
+            
+            try {
+                const payload = {
+                    recogniseBlob: base64Audio,
+                    developer: true,
+                    method: "online2bin"
+                };
+                
+                log(`Payload size: ${JSON.stringify(payload).length} bytes`, 'info');
+                log(`API URL: ${apiUrl}`, 'info');
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                log(`Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                // Log response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                log(`Response headers: ${JSON.stringify(headers)}`, 'info');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                log('API response received successfully', 'success');
+                log(`Response data: ${JSON.stringify(data)}`, 'info');
+                displayResults(data);
+                
+            } catch (error) {
+                log(`API request failed: ${error.message}`, 'error');
+                
+                // If direct mode failed, suggest trying proxy
+                if (mode === 'direct' && error.message.includes('CORS')) {
+                    log('💡 Suggestion: Try switching to Proxy mode', 'info');
+                }
+                
+                document.getElementById('recordingStatus').textContent = `❌ API Error: ${error.message}`;
+                document.getElementById('transcript').textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        function displayResults(data) {
+            log('Displaying results...', 'info');
+            
+            // Extract transcript - Abair API format from documentation:
+            // { audioFilePath, transcriptions: [{ utterance }], duration }
+            let transcript = 'No transcript available';
+            let confidence = 'N/A';
+            
+            // Check for Abair format (from docs)
+            if (data.transcriptions && data.transcriptions.length > 0) {
+                transcript = data.transcriptions[0].utterance || transcript;
+                log('Using Abair API format (transcriptions)', 'info');
+            }
+            // Fallback to alternative format (if exists)
+            else if (data.result && data.result.hypotheses && data.result.hypotheses.length > 0) {
+                transcript = data.result.hypotheses[0].transcript || transcript;
+                confidence = data.result.hypotheses[0].confidence 
+                    ? `${(data.result.hypotheses[0].confidence * 100).toFixed(2)}%`
+                    : 'N/A';
+                log('Using alternative format (result.hypotheses)', 'info');
+            }
+            
+            document.getElementById('transcript').textContent = transcript;
+            document.getElementById('confidence').textContent = confidence;
+            document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('recordingStatus').textContent = '✅ Complete';
+            
+            log(`Transcript: "${transcript}"`, 'success');
+            log(`Confidence: ${confidence}`, 'success');
+            
+            if (data.duration) {
+                log(`Audio duration: ${data.duration}s`, 'info');
+            }
+            
+            // Compare with expected
+            const expected = document.getElementById('expectedText').value.trim();
+            if (expected && transcript !== 'No transcript available') {
+                const match = transcript.toLowerCase() === expected.toLowerCase();
+                log(`Match: ${match ? 'YES ✓' : 'NO ✗'}`, match ? 'success' : 'error');
+            }
+        }
+    </script>
+</body>
+</html>

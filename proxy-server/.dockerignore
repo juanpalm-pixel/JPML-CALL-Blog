@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+DOCKER_GUIDE.md
+CLOUD_DEPLOYMENT.md
+*.bat
+.DS_Store
