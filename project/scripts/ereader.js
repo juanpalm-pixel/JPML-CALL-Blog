@@ -3043,6 +3043,15 @@ class IrishEReader {
                 sttResults
             );
             
+            // Check if comparison is valid (not an error/fallback)
+            if (comparison.valid === false) {
+                // Show error message from comparison
+                const errorMsg = comparison.feedback || 'Speech recognition failed. Please try again.';
+                this.showError(errorMsg);
+                this.updateStatus('Speech recognition failed - please try again');
+                return; // Don't proceed with display or error tracking
+            }
+            
             // Validate that comparison has meaningful data
             if (!comparison.wordAnalysis || comparison.wordAnalysis.length === 0) {
                 this.showError('Could not analyze pronunciation. Please try speaking again.');

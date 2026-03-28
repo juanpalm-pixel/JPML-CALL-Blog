@@ -12,6 +12,7 @@ class AbairSTTService {
         
         this.recognition = null;
         this.isListening = false;
+        this.isRecognizing = false; // Track if recognition is actively running
         this.currentText = '';
         this.expectedText = '';
         this.confidenceThreshold = 0.7;
@@ -473,6 +474,11 @@ class AbairSTTService {
             console.log('🎯 Using Abair.ie STT API (two-step process)');
             console.log('Audio blob size:', audioBlob.size, 'bytes');
             
+            console.warn('⚠️ NOTE: Abair.ie API does not support CORS from browsers.');
+            console.warn('   This will fail and automatically fall back to browser STT.');
+            console.warn('   For production, implement a backend proxy server.');
+            console.warn('   See CORS_ISSUE_EXPLAINED.md for details.');
+            
             // Check if audio is too large (limit to 1MB for Abair.ie API)
             const maxSizeBytes = 1024 * 1024; // 1MB
             let processedBlob = audioBlob;
@@ -495,7 +501,7 @@ class AbairSTTService {
             };
             
             console.log('📤 Submitting audio for recognition...');
-            const recogniseResponse = await fetch('https://api.abair.ie/v3/recognition/recognise', {
+            const recogniseResponse = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -749,6 +755,23 @@ class AbairSTTService {
             };
         }
 
+        // Check if recognition is already running
+        if (this.isRecognizing) {
+            console.warn('⚠️ Recognition already in progress, waiting...');
+            // Wait for current recognition to complete
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // If still running, abort and restart
+            if (this.isRecognizing) {
+                try {
+                    this.recognition.abort();
+                } catch (e) {
+                    console.warn('Could not abort recognition:', e);
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
         // Use browser speech recognition API
         return new Promise((resolve, reject) => {
             console.log('🎤 Starting browser speech recognition fallback...');
@@ -762,7 +785,11 @@ class AbairSTTService {
             const timeout = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
-                    this.recognition.abort();
+                    try {
+                        this.recognition.abort();
+                    } catch (e) {
+                        console.warn('Could not abort on timeout:', e);
+                    }
                     resolve({
                         transcript: '',
                         confidence: 0,
@@ -777,6 +804,7 @@ class AbairSTTService {
                 if (resolved) return;
                 resolved = true;
                 clearTimeout(timeout);
+                this.isRecognizing = false;
 
                 const result = event.results[0];
                 const transcript = result[0].transcript;
@@ -800,18 +828,32 @@ class AbairSTTService {
                 if (resolved) return;
                 resolved = true;
                 clearTimeout(timeout);
+                this.isRecognizing = false;
                 
                 console.error('❌ Browser STT error:', event.error);
-                resolve({
-                    transcript: '',
-                    confidence: 0,
-                    service: 'browser-fallback-error',
-                    fallback: true,
-                    error: event.error
-                });
+                
+                // Don't treat "aborted" as error since we abort on timeout
+                if (event.error === 'aborted') {
+                    resolve({
+                        transcript: '',
+                        confidence: 0,
+                        service: 'browser-fallback-aborted',
+                        fallback: true,
+                        error: 'Recognition aborted'
+                    });
+                } else {
+                    resolve({
+                        transcript: '',
+                        confidence: 0,
+                        service: 'browser-fallback-error',
+                        fallback: true,
+                        error: event.error
+                    });
+                }
             };
 
             this.recognition.onend = () => {
+                this.isRecognizing = false;
                 if (!resolved) {
                     resolved = true;
                     clearTimeout(timeout);
@@ -826,18 +868,33 @@ class AbairSTTService {
             };
 
             try {
+                this.isRecognizing = true;
                 this.recognition.start();
             } catch (error) {
+                this.isRecognizing = false;
                 if (!resolved) {
                     resolved = true;
                     clearTimeout(timeout);
-                    resolve({
-                        transcript: '',
-                        confidence: 0,
-                        service: 'browser-fallback-error',
-                        fallback: true,
-                        error: error.message
-                    });
+                    
+                    // If error is "already started", wait and try again
+                    if (error.message && error.message.includes('already started')) {
+                        console.warn('Recognition already started, aborting and retrying...');
+                        try {
+                            this.recognition.abort();
+                        } catch (e) {}
+                        
+                        setTimeout(() => {
+                            this.fallbackToBrowserSTT().then(resolve).catch(reject);
+                        }, 1000);
+                    } else {
+                        resolve({
+                            transcript: '',
+                            confidence: 0,
+                            service: 'browser-fallback-error',
+                            fallback: true,
+                            error: error.message
+                        });
+                    }
                 }
             }
         });
@@ -929,8 +986,40 @@ class AbairSTTService {
         
         console.log(`Comparing expected: "${expectedText}" vs actual: "${actualText}"`);
         
+        // Check if STT results are valid
+        if (!actualText || actualText.trim() === '') {
+            console.warn('⚠️ Empty transcript, cannot compare');
+            return {
+                accuracy: 0,
+                confidence: 0,
+                wordAnalysis: [],
+                errors: [],
+                expectedText: expectedText,
+                spokenText: '',
+                feedback: 'No speech detected. Please try again.',
+                valid: false
+            };
+        }
+
+        // Check if this is an error/fallback response
+        if (sttResults.error || sttResults.fallback) {
+            console.warn('⚠️ STT error or fallback, skipping comparison');
+            return {
+                accuracy: 0,
+                confidence: 0,
+                wordAnalysis: [],
+                errors: [],
+                expectedText: expectedText,
+                spokenText: actualText,
+                feedback: sttResults.error || 'Speech recognition failed. Please try again.',
+                valid: false
+            };
+        }
+        
         // Use the existing pronunciation analysis method
-        return this.analyzePronunciation(actualText, expectedText, confidence);
+        const result = this.analyzePronunciation(actualText, expectedText, confidence);
+        result.valid = true; // Mark as valid comparison
+        return result;
     }
 }
 
