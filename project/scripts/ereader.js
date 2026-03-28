@@ -2764,6 +2764,25 @@ class IrishEReader {
      */
     async playbackRecording() {
         try {
+            // Check if currently playing - if so, stop it
+            if (this.currentPlaybackAudio) {
+                console.log('Stopping current playback');
+                this.currentPlaybackAudio.pause();
+                this.currentPlaybackAudio.currentTime = 0;
+                
+                // Clean up
+                const playbackBtn = document.getElementById('playback-btn');
+                if (playbackBtn) {
+                    playbackBtn.disabled = false;
+                    playbackBtn.textContent = '▶ Playback Recording';
+                    playbackBtn.style.backgroundColor = '#6c757d';
+                }
+                
+                this.currentPlaybackAudio = null;
+                this.updateStatus('Playback stopped');
+                return;
+            }
+            
             // Check if we have a recent recording
             if (!this.audioProcessor.lastRecording) {
                 this.showError('No recording available to playback. Please record first.');
@@ -2775,14 +2794,14 @@ class IrishEReader {
             // Create audio URL from the blob
             const audioUrl = URL.createObjectURL(this.audioProcessor.lastRecording);
             const audio = new Audio(audioUrl);
+            this.currentPlaybackAudio = audio;
 
             // Update UI during playback
             const playbackBtn = document.getElementById('playback-btn');
-            const originalText = playbackBtn ? playbackBtn.textContent : 'Playback Recording';
 
             if (playbackBtn) {
-                playbackBtn.disabled = true;
-                playbackBtn.textContent = '⏸ Playing...';
+                playbackBtn.disabled = false;
+                playbackBtn.textContent = '⏸ Stop Playback';
                 playbackBtn.style.backgroundColor = '#ffc107';
             }
 
@@ -2792,9 +2811,10 @@ class IrishEReader {
                 URL.revokeObjectURL(audioUrl);
                 if (playbackBtn) {
                     playbackBtn.disabled = false;
-                    playbackBtn.textContent = originalText;
+                    playbackBtn.textContent = '▶ Playback Recording';
                     playbackBtn.style.backgroundColor = '#6c757d';
                 }
+                this.currentPlaybackAudio = null;
                 this.updateStatus('Playback complete');
             };
 
@@ -2803,9 +2823,10 @@ class IrishEReader {
                 URL.revokeObjectURL(audioUrl);
                 if (playbackBtn) {
                     playbackBtn.disabled = false;
-                    playbackBtn.textContent = originalText;
+                    playbackBtn.textContent = '▶ Playback Recording';
                     playbackBtn.style.backgroundColor = '#6c757d';
                 }
+                this.currentPlaybackAudio = null;
                 this.showError('Failed to play recording. Please try recording again.');
             };
 
@@ -2815,6 +2836,7 @@ class IrishEReader {
 
         } catch (error) {
             console.error('Playback error:', error);
+            this.currentPlaybackAudio = null;
             this.showError(`Playback failed: ${error.message}`);
         }
     }
@@ -3006,14 +3028,16 @@ class IrishEReader {
             // Display results
             this.displayPronunciationResults(comparison);
             
-            // Track errors if score is below threshold
-            if (comparison.overallScore < 70) {
-                this.errorManager.logError({
-                    type: 'pronunciation',
-                    text: this.currentPracticeText,
-                    userInput: sttResults.transcript,
-                    score: comparison.overallScore,
-                    feedback: comparison.feedback
+            // Track errors if score is below threshold (convert accuracy to 0-100 scale)
+            const scorePercent = (comparison.accuracy || 0) * 100;
+            if (scorePercent < 70 && this.errorManager) {
+                this.errorManager.recordError({
+                    sentence: this.currentPracticeText,
+                    expectedText: this.currentPracticeText,
+                    actualText: sttResults.transcript,
+                    errorType: 'pronunciation',
+                    confidence: comparison.confidence || 0,
+                    score: scorePercent
                 });
             }
             
@@ -3033,48 +3057,72 @@ class IrishEReader {
      * @param {Object} comparison - Comparison results from STT service
      */
     displayPronunciationResults(comparison) {
-        const resultsDiv = document.getElementById('practice-results');
         const feedbackDiv = document.getElementById('pronunciation-feedback');
+        const targetSentence = document.getElementById('target-sentence');
         
-        if (resultsDiv) {
-            resultsDiv.innerHTML = `
-                <div class="pronunciation-score score-${comparison.overallScore >= 80 ? 'good' : comparison.overallScore >= 60 ? 'fair' : 'poor'}">
-                    <h4>Score: ${comparison.overallScore}%</h4>
-                    <div class="score-details">
-                        <p>Word Accuracy: ${Math.round(comparison.wordAccuracy * 100)}%</p>
-                        <p>Sequence Accuracy: ${Math.round(comparison.sequenceAccuracy * 100)}%</p>
-                        <p>Confidence: ${Math.round(comparison.confidence * 100)}%</p>
-                    </div>
-                </div>
+        // Map comparison fields to expected format
+        const overallScore = (comparison.accuracy || comparison.overallScore || 0) * 100;
+        const wordAccuracy = (comparison.accuracy || comparison.wordAccuracy || 0);
+        const confidence = comparison.confidence || 0;
+        const wordAnalysis = comparison.wordAnalysis || comparison.analysis?.word_analysis || [];
+        
+        // Highlight words directly in #target-sentence
+        if (targetSentence && wordAnalysis && wordAnalysis.length > 0) {
+            // Build highlighted sentence HTML
+            const highlightedHTML = wordAnalysis.map(word => {
+                const bgColor = word.isCorrect ? '#d4edda' : '#f8d7da';
+                const textColor = word.isCorrect ? '#155724' : '#721c24';
+                const borderColor = word.isCorrect ? '#28a745' : '#dc3545';
+                const icon = word.isCorrect ? '✓' : '✗';
                 
-                <div class="transcription-comparison">
-                    <p><strong>Expected:</strong> ${comparison.expectedText}</p>
-                    <p><strong>You said:</strong> ${comparison.actualText}</p>
-                </div>
-            `;
+                return `<span style="
+                    padding: 0.25rem 0.5rem; 
+                    background-color: ${bgColor}; 
+                    color: ${textColor}; 
+                    border-radius: 4px; 
+                    border: 2px solid ${borderColor};
+                    font-weight: 500;
+                    margin: 0.2rem;
+                    display: inline-block;
+                    transition: all 0.3s ease;
+                " title="${word.isCorrect ? 'Correct pronunciation ✓' : 'Expected: ' + word.expected + (word.spoken ? ' | You said: ' + word.spoken : '')}">
+                    <small style="font-size: 0.7em;">${icon}</small> ${word.expected}
+                </span>`;
+            }).join(' ');
+            
+            targetSentence.innerHTML = highlightedHTML;
         }
         
+        // Update pronunciation stats
+        this.updatePronunciationStats(overallScore, wordAccuracy, confidence, comparison);
+        
+        // Show feedback section with transcription comparison
         if (feedbackDiv) {
-            let feedbackHTML = `<div class="feedback-message">${comparison.feedback}</div>`;
+            feedbackDiv.style.display = 'block';
             
-            if (comparison.suggestions.length > 0) {
-                feedbackHTML += `
-                    <div class="suggestions">
-                        <h5>Suggestions for improvement:</h5>
-                        <ul>
-                            ${comparison.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
+            let feedbackHTML = `
+                <div class="feedback-message" style="padding: 1rem; background-color: ${overallScore >= 70 ? '#d4edda' : '#fff3cd'}; border-radius: 4px; margin-bottom: 1rem; border-left: 4px solid ${overallScore >= 70 ? '#28a745' : '#ffc107'};">
+                    <strong>${comparison.feedback || 'Analysis complete.'}</strong>
+                </div>
+                
+                <div class="transcription-comparison" style="padding: 1rem; background: white; border-radius: 6px; border: 1px solid #dee2e6;">
+                    <p style="margin: 0.5rem 0;"><strong>Expected:</strong> ${comparison.expectedText || this.currentPracticeText}</p>
+                    <p style="margin: 0.5rem 0;"><strong>You said:</strong> ${comparison.spokenText || comparison.actualText || '<em>No transcription</em>'}</p>
+                </div>
+            `;
             
-            if (comparison.analysis.pronunciation_issues.length > 0) {
+            // Show errors if any
+            if (comparison.errors && comparison.errors.length > 0) {
                 feedbackHTML += `
-                    <div class="pronunciation-issues">
-                        <h5>Words to focus on:</h5>
-                        <ul>
-                            ${comparison.analysis.pronunciation_issues.map(issue => 
-                                `<li>${issue.word} (confidence: ${Math.round(issue.confidence * 100)}%)</li>`
+                    <div class="pronunciation-issues" style="margin-top: 1rem; padding: 1rem; background-color: #f8d7da; border-radius: 6px; border-left: 4px solid #dc3545;">
+                        <h5 style="margin: 0 0 0.75rem 0; color: #721c24;">Words to practice (${comparison.errors.length}):</h5>
+                        <ul style="margin: 0; padding-left: 1.5rem;">
+                            ${comparison.errors.map(error => 
+                                `<li style="margin: 0.5rem 0; color: #721c24; font-weight: 500;">
+                                    <strong>${error.expected}</strong> 
+                                    ${error.spoken ? `(you said: "${error.spoken}")` : '(not detected)'}
+                                    ${error.similarity ? ` - ${Math.round(error.similarity * 100)}% similar` : ''}
+                                </li>`
                             ).join('')}
                         </ul>
                     </div>
@@ -3082,6 +3130,45 @@ class IrishEReader {
             }
             
             feedbackDiv.innerHTML = feedbackHTML;
+        }
+    }
+    
+    /**
+     * Update pronunciation statistics display
+     * @param {number} score - Overall score (0-100)
+     * @param {number} wordAccuracy - Word accuracy (0-1)
+     * @param {number} confidence - Confidence (0-1)
+     * @param {Object} comparison - Full comparison object
+     */
+    updatePronunciationStats(score, wordAccuracy, confidence, comparison) {
+        // Update overall accuracy
+        const accuracyElement = document.getElementById('accuracy');
+        if (accuracyElement) {
+            accuracyElement.textContent = Math.round(score);
+        }
+        
+        // Update confidence with dynamic color
+        const confidenceElement = document.getElementById('confidence');
+        if (confidenceElement) {
+            const confidencePercent = Math.round(confidence * 100);
+            confidenceElement.textContent = confidencePercent;
+            
+            // Set color based on confidence level
+            if (confidencePercent >= 80) {
+                confidenceElement.style.color = '#28a745'; // Green for high confidence
+            } else if (confidencePercent >= 60) {
+                confidenceElement.style.color = '#ffc107'; // Yellow for medium confidence
+            } else if (confidencePercent >= 40) {
+                confidenceElement.style.color = '#fd7e14'; // Orange for low confidence
+            } else {
+                confidenceElement.style.color = '#dc3545'; // Red for very low confidence
+            }
+        }
+        
+        // Update words to practice
+        const wordsToPracticeElement = document.getElementById('words-to-practice');
+        if (wordsToPracticeElement && comparison.errors) {
+            wordsToPracticeElement.textContent = comparison.errors.length || 0;
         }
     }
 

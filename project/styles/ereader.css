@@ -2236,3 +2236,161 @@ select:focus-visible {
     z-index: 91;
     position: relative;
 }
+/* ============ PRONUNCIATION FEEDBACK STYLES ============ */
+
+/* Practice results container */
+#practice-results {
+    padding: 1rem;
+    margin-top: 1rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+/* Pronunciation score display */
+.pronunciation-score {
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pronunciation-score h4 {
+    font-size: 2rem;
+    margin: 0 0 1rem 0;
+}
+
+.pronunciation-score.score-good {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border: 2px solid #28a745;
+    color: #155724;
+}
+
+.pronunciation-score.score-fair {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    color: #856404;
+}
+
+.pronunciation-score.score-poor {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border: 2px solid #dc3545;
+    color: #721c24;
+}
+
+.pronunciation-score .score-details {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pronunciation-score .score-details p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Transcription comparison */
+.transcription-comparison {
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.transcription-comparison p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.transcription-comparison strong {
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Pronunciation feedback container */
+#pronunciation-feedback {
+    padding: 1rem;
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+#pronunciation-feedback .feedback-message {
+    padding: 1rem;
+    background-color: #e8f5e8;
+    border-left: 4px solid #28a745;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+#pronunciation-feedback .suggestions {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #e7f3ff;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+#pronunciation-feedback .suggestions h5 {
+    margin: 0 0 0.75rem 0;
+    color: #0056b3;
+    font-size: 1rem;
+}
+
+#pronunciation-feedback .suggestions ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+#pronunciation-feedback .suggestions li {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+#pronunciation-feedback .pronunciation-issues {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+}
+
+#pronunciation-feedback .pronunciation-issues h5 {
+    margin: 0 0 0.75rem 0;
+    color: #856404;
+    font-size: 1rem;
+}
+
+#pronunciation-feedback .pronunciation-issues ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+#pronunciation-feedback .pronunciation-issues li {
+    margin: 0.5rem 0;
+    color: #856404;
+    font-weight: 500;
+}
+
+/* Responsive feedback display */
+@media (max-width: 768px) {
+    .pronunciation-score {
+        padding: 1rem;
+    }
+    
+    .pronunciation-score h4 {
+        font-size: 1.5rem;
+    }
+    
+    .pronunciation-score .score-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

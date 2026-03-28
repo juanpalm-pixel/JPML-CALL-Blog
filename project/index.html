@@ -25,9 +25,6 @@
     
     <!-- Header matching main site -->
     <div class="header">
-        <div class="home-button">
-            <a href="../index.html" style="color: white; text-decoration: none;">← Home</a>
-        </div>
         <div class="header-content">
             <div class="text-container">
                 <h1 class="banner-pill">Irish E-Reader</h1>
@@ -160,11 +157,11 @@
                             </button>
                             <button id="playback-btn" disabled
                                     style="background-color: #6c757d; color: white; 
-                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
                                 ▶ Playback Recording
                             </button>
                             <button id="compare-btn" disabled
-                                    style="background-color: #17a2b8; color: white; 
+                                    style="background-color: #17a2b8; color: white;
                                            border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;">
                                 📊 Compare
                             </button>
@@ -184,11 +181,11 @@
                             </div>
                         </div>
                         
-                        <div id="feedback-area" style="margin-top: 1.5rem; padding: 1rem; 
-                                                      background-color: #f8f9fa; border-radius: 8px; display: none;">
-                            <h4 style="margin-top: 0;">Pronunciation Feedback</h4>
-                            <div id="feedback-content"></div>
-                        </div>
+                        <!-- Practice Results -->
+                        <div id="practice-results" style="margin-top: 1.5rem;"></div>
+                        
+                        <!-- Pronunciation Feedback -->
+                        <div id="pronunciation-feedback" style="margin-top: 1rem;"></div>
                         
                         <!-- Practice Options -->
                         <div id="practice-options" style="margin-top: 1rem; display: none;">
@@ -199,7 +196,7 @@
                         <div id="pronunciation-stats" style="margin-top: 1rem; padding: 1rem; 
                                                             background-color: #e8f5e8; border-radius: 8px;">
                             <h5>Session Statistics</h5>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; text-align: center;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; text-align: center;">
                                 <div>
                                     <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);" id="pronunciation-accuracy">0%</div>
                                     <div style="font-size: 0.8rem; color: #666;">Accuracy</div>
@@ -207,6 +204,10 @@
                                 <div>
                                     <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;" id="practice-attempts">0</div>
                                     <div style="font-size: 0.8rem; color: #666;">Attempts</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;" id="confidence">0</div>
+                                    <div style="font-size: 0.8rem; color: #666;">Confidence</div>
                                 </div>
                                 <div>
                                     <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;" id="current-streak">0</div>
