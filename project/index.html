@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="styles/ereader.css">
     
-    <!-- PWA and mobile optimization -->
+    <!-- PWA and mobile optimization - Commented out to avoid CORS errors -->
     <!--<link rel="manifest" href="../manifest.json">-->
 </head>
 
@@ -42,7 +42,7 @@
 
             <!-- Text Input Section -->
             <div class="container" id="text-input-section">
-                <div class="post">
+                <div class="post" style="margin-bottom: 0px;">
                     <h3>Irish Text Input</h3>
                     <p class="post-meta">Enter Irish text to practice reading and pronunciation</p>
                     
@@ -73,6 +73,66 @@
                                        border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 1rem;">
                             Load Sample
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings and Error Management -->
+            <div class="settings-error-grid"">
+                <div class="container">
+                    <div class="post" style="margin-bottom: 0px;">
+                        <h3>Settings - Socruithe</h3>
+                        <div style="margin-top: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech Rate:</label>
+                            <input type="range" id="speech-rate" min="0.5" max="1.5" step="0.01" value="1" 
+                                   style="width: 100%; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+                                <span>Slow (0.5x)</span>
+                                <span id="rate-value">1.00x</span>
+                                <span>Fast (1.5x)</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Voice:</label>
+                            <select id="voice-select" style="width: 100%; padding: 0.5rem; 
+                                                              border: 1px solid #e2d6c9; border-radius: 4px;">
+                                <!-- Options will be populated dynamically from Abair.ie API -->
+                            </select>
+                        </div>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="auto-advance" style="margin-right: 0.5rem;">
+                                Auto-advance to next sentence
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container" style="display: flex;">
+                    <div class="post" style="margin-bottom: 0px;">
+                        <h3>Error Tracking - Rianú Earráidí</h3>
+                        <div style="margin-top: 1rem; text-align: center;">
+                            <div id="error-stats" style="margin-bottom: 1rem;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="total-attempts">0</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Total Attempts</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: #dc3545;" id="error-count">0</div>
+                                        <div style="font-size: 0.9rem; color: #666;">Errors</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="view-errors-btn" 
+                                    style="background-color: #fd7e14; color: white; 
+                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;"
+                                    onclick="window.location.href='errors.html'">
+                                View Error Practice
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -181,8 +241,8 @@
                             </div>
                         </div>
                         
-                        <!-- Practice Results -->
-                        <div id="practice-results" style="margin-top: 1.5rem;"></div>
+                        <!-- Practice Results - Removed, words now highlighted directly in target-sentence -->
+                        <!-- <div id="practice-results" style="margin-top: 1.5rem;"></div> -->
                         
                         <!-- Pronunciation Feedback -->
                         <div id="pronunciation-feedback" style="margin-top: 1rem;"></div>
@@ -206,7 +266,7 @@
                                     <div style="font-size: 0.8rem; color: #666;">Attempts</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1;" id="confidence">0</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;" id="confidence">0</div>
                                     <div style="font-size: 0.8rem; color: #666;">Confidence</div>
                                 </div>
                                 <div>
@@ -244,69 +304,9 @@
                 </div>
             </div>
 
-            <!-- Settings and Error Management -->
-            <div class="settings-error-grid"">
-                <div class="container">
-                    <div class="post">
-                        <h3>Settings - Socruithe</h3>
-                        <div style="margin-top: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Speech Rate:</label>
-                            <input type="range" id="speech-rate" min="0.5" max="1.5" step="0.01" value="1" 
-                                   style="width: 100%; margin-bottom: 0.5rem;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
-                                <span>Slow (0.5x)</span>
-                                <span id="rate-value">1.00x</span>
-                                <span>Fast (1.5x)</span>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 1.5rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Voice:</label>
-                            <select id="voice-select" style="width: 100%; padding: 0.5rem; 
-                                                              border: 1px solid #e2d6c9; border-radius: 4px;">
-                                <!-- Options will be populated dynamically from Abair.ie API -->
-                            </select>
-                        </div>
-                        
-                        <div style="margin-top: 1.5rem;">
-                            <label style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="auto-advance" style="margin-right: 0.5rem;">
-                                Auto-advance to next sentence
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="container">
-                    <div class="post">
-                        <h3>Error Tracking - Rianú Earráidí</h3>
-                        <div style="margin-top: 1rem; text-align: center;">
-                            <div id="error-stats" style="margin-bottom: 1rem;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
-                                    <div>
-                                        <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="total-attempts">0</div>
-                                        <div style="font-size: 0.9rem; color: #666;">Total Attempts</div>
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 2rem; font-weight: bold; color: #dc3545;" id="error-count">0</div>
-                                        <div style="font-size: 0.9rem; color: #666;">Errors</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button id="view-errors-btn" 
-                                    style="background-color: #fd7e14; color: white; 
-                                           border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer;"
-                                    onclick="window.location.href='errors.html'">
-                                View Error Practice
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Quick Actions -->
             <div class="container" style="margin-top: 1.5rem;">
-                <div class="post">
+                <div class="post" style="margin-bottom: 0px;">
                     <h3>Quick Actions - Gníomhartha Tapa</h3>
                     <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
                         <button id="export-session-btn" 
@@ -350,6 +350,5 @@
     <script src="scripts/ereader.js"></script>
     
     <!-- Include test script for development -->
-    <!--<script src="scripts/google-cloud-test.js"></script>-->
 </body>
 </html>

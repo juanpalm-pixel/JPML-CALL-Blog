@@ -213,6 +213,9 @@ class IrishEReader {
         
         // Session management controls
         document.getElementById('export-session-btn')?.addEventListener('click', () => this.exportSession());
+        document.getElementById('import-text-btn')?.addEventListener('click', () => this.importTextFile());
+        document.getElementById('share-progress-btn')?.addEventListener('click', () => this.shareProgress());
+        document.getElementById('reset-session-btn')?.addEventListener('click', () => this.resetSession());
         document.getElementById('clear-session-btn')?.addEventListener('click', () => this.clearSession());
         
         // Keyboard shortcuts
@@ -2875,6 +2878,16 @@ class IrishEReader {
             // Analyze audio quality first
             const qualityAnalysis = await this.audioProcessor.analyzeAudioQuality(audioBlob);
             
+            // Check for silence or extremely quiet audio
+            if (qualityAnalysis.silenceRatio > 0.9) {
+                this.showError('⚠️ No speech detected. Recording was silent. Please try again and speak clearly.');
+                if (recordingStatus) {
+                    recordingStatus.textContent = 'No speech detected - try again';
+                    recordingStatus.className = 'status-error';
+                }
+                return; // Stop processing completely
+            }
+            
             if (qualityAnalysis.quality === 'too_short' || qualityAnalysis.quality === 'too_quiet') {
                 this.showQualityFeedback(qualityAnalysis);
                 if (recordingStatus) {
@@ -3011,11 +3024,31 @@ class IrishEReader {
             // Convert speech to text
             const sttResults = await this.sttService.speechToText(audioBlob);
             
+            // Check if STT failed or returned fallback/error
+            if (!sttResults.transcript || sttResults.transcript.trim() === '' || 
+                sttResults.error || sttResults.fallback) {
+                
+                // Show error message
+                const errorMsg = sttResults.error || 'Speech recognition failed. Please try again.';
+                this.showError(`STT Error: ${errorMsg}`);
+                this.updateStatus('Speech recognition failed - please try again');
+                
+                // Don't proceed with pronunciation analysis
+                return;
+            }
+            
             // Compare with expected text
             const comparison = this.sttService.identifyPronunciationIssues(
                 this.currentPracticeText,
                 sttResults
             );
+            
+            // Validate that comparison has meaningful data
+            if (!comparison.wordAnalysis || comparison.wordAnalysis.length === 0) {
+                this.showError('Could not analyze pronunciation. Please try speaking again.');
+                this.updateStatus('Analysis failed - please try again');
+                return;
+            }
             
             // Store results for error tracking
             this.practiceResults.push({
@@ -3661,6 +3694,120 @@ class IrishEReader {
             } catch (error) {
                 console.error('Clear session failed:', error);
                 this.showError('Failed to clear session: ' + error.message);
+            }
+        }
+    }
+
+    /**
+     * Import text from file
+     */
+    importTextFile() {
+        const fileInput = document.getElementById('file-input');
+        if (!fileInput) {
+            this.showError('File input element not found');
+            return;
+        }
+
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const textInput = document.getElementById('irish-text-input');
+                if (textInput) {
+                    textInput.value = text;
+                    // Trigger load text
+                    await this.loadText();
+                    this.showStatus(`Loaded text from ${file.name}`);
+                } else {
+                    this.showError('Text input element not found');
+                }
+            } catch (error) {
+                console.error('Import failed:', error);
+                this.showError('Failed to import text file: ' + error.message);
+            }
+        };
+
+        fileInput.click();
+    }
+
+    /**
+     * Share progress with generated summary
+     */
+    shareProgress() {
+        try {
+            const stats = this.feedbackState.sessionStats;
+            const summary = `
+🇮🇪 Irish Pronunciation Practice Progress
+
+📊 Session Statistics:
+• Total Attempts: ${stats.totalAttempts}
+• Successful: ${stats.successfulAttempts}
+• Success Rate: ${stats.totalAttempts > 0 ? Math.round((stats.successfulAttempts / stats.totalAttempts) * 100) : 0}%
+• Current Streak: ${stats.currentStreak}
+• Best Streak: ${stats.bestStreak}
+• Words Practiced: ${stats.wordsPracticed}
+
+Generated on ${new Date().toLocaleDateString()}
+            `.trim();
+
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(summary).then(() => {
+                    this.showStatus('✅ Progress summary copied to clipboard!');
+                }).catch(() => {
+                    // Fallback: show in alert
+                    alert(summary);
+                    this.showStatus('Progress summary shown (clipboard unavailable)');
+                });
+            } else {
+                // Fallback for browsers without clipboard API
+                alert(summary);
+                this.showStatus('Progress summary shown (clipboard unavailable)');
+            }
+        } catch (error) {
+            console.error('Share progress failed:', error);
+            this.showError('Failed to share progress: ' + error.message);
+        }
+    }
+
+    /**
+     * Reset session with confirmation
+     */
+    resetSession() {
+        const confirmMessage = `Reset the entire session?\n\nThis will:\n- Clear all text and sentences\n- Reset all statistics to zero\n- Clear pronunciation history\n- Reset error tracking\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            try {
+                // Clear all data
+                this.clearSessionData();
+                
+                // Reset text input
+                const textInput = document.getElementById('irish-text-input');
+                if (textInput) textInput.value = '';
+                
+                // Reset sentences
+                this.sentences = [];
+                this.currentSentenceIndex = 0;
+                
+                // Hide panels
+                const readingArea = document.getElementById('reading-area');
+                const practicePanel = document.getElementById('practice-panel');
+                const statsPanel = document.getElementById('pronunciation-stats');
+                
+                if (readingArea) readingArea.style.display = 'none';
+                if (practicePanel) practicePanel.style.display = 'none';
+                if (statsPanel) statsPanel.style.display = 'none';
+                
+                // Clear display
+                const displayBox = document.getElementById('sentence-display');
+                if (displayBox) displayBox.innerHTML = '';
+                
+                this.showStatus('✅ Session reset successfully. Load new text to begin.');
+            } catch (error) {
+                console.error('Reset session failed:', error);
+                this.showError('Failed to reset session: ' + error.message);
             }
         }
     }

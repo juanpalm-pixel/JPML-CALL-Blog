@@ -737,14 +737,109 @@ class AbairSTTService {
      * @returns {Promise<Object>} Recognition result
      */
     async fallbackToBrowserSTT() {
-        return new Promise((resolve) => {
-            // Return a simulation result as fallback
-            resolve({
-                transcript: 'Abair STT unavailable - using browser fallback',
-                confidence: 0.3,
-                service: 'browser-fallback',
-                fallback: true
-            });
+        // If browser STT not supported, return error
+        if (!this.isSupported || !this.recognition) {
+            console.warn('⚠️ Browser STT not supported - cannot fallback');
+            return {
+                transcript: '',
+                confidence: 0,
+                service: 'browser-fallback-unavailable',
+                fallback: true,
+                error: 'Browser speech recognition not supported'
+            };
+        }
+
+        // Use browser speech recognition API
+        return new Promise((resolve, reject) => {
+            console.log('🎤 Starting browser speech recognition fallback...');
+            
+            this.recognition.lang = 'ga-IE'; // Irish language
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.maxAlternatives = 3;
+
+            let resolved = false;
+            const timeout = setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    this.recognition.abort();
+                    resolve({
+                        transcript: '',
+                        confidence: 0,
+                        service: 'browser-fallback-timeout',
+                        fallback: true,
+                        error: 'Speech recognition timeout'
+                    });
+                }
+            }, 10000); // 10 second timeout
+
+            this.recognition.onresult = (event) => {
+                if (resolved) return;
+                resolved = true;
+                clearTimeout(timeout);
+
+                const result = event.results[0];
+                const transcript = result[0].transcript;
+                const confidence = result[0].confidence || 0.8;
+
+                console.log(`✅ Browser STT Result: "${transcript}" (confidence: ${confidence})`);
+
+                resolve({
+                    transcript: transcript,
+                    confidence: confidence,
+                    service: 'browser-fallback',
+                    fallback: true,
+                    alternatives: Array.from(result).map(alt => ({
+                        transcript: alt.transcript,
+                        confidence: alt.confidence || 0.8
+                    }))
+                });
+            };
+
+            this.recognition.onerror = (event) => {
+                if (resolved) return;
+                resolved = true;
+                clearTimeout(timeout);
+                
+                console.error('❌ Browser STT error:', event.error);
+                resolve({
+                    transcript: '',
+                    confidence: 0,
+                    service: 'browser-fallback-error',
+                    fallback: true,
+                    error: event.error
+                });
+            };
+
+            this.recognition.onend = () => {
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timeout);
+                    resolve({
+                        transcript: '',
+                        confidence: 0,
+                        service: 'browser-fallback-nodata',
+                        fallback: true,
+                        error: 'No speech detected'
+                    });
+                }
+            };
+
+            try {
+                this.recognition.start();
+            } catch (error) {
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timeout);
+                    resolve({
+                        transcript: '',
+                        confidence: 0,
+                        service: 'browser-fallback-error',
+                        fallback: true,
+                        error: error.message
+                    });
+                }
+            }
         });
     }
 
