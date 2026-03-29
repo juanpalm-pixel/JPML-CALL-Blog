@@ -69,7 +69,14 @@ body {
 .home-button {
   padding: 0.8rem;
   cursor: pointer; /* Make the curser a finger... I think it looks cool */
-  font-size: 1rem;  
+  font-size: 1rem;
+  font-weight: normal;
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.home-button:visited {
+  color: #551a8b;
 }
 
 .home-button:hover {
