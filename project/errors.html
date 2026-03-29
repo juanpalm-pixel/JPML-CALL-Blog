@@ -2,7 +2,7 @@
 <html lang="ga">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Error Practice - Cleachtadh Earráidí</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="styles/ereader.css">
@@ -15,7 +15,7 @@
         <div class="header-content">
             <div class="text-container">
                 <h1 class="banner-pill">Error Practice</h1>
-                <p class="banner-pill"><em>Cleachtadh Earráidí - Practice Your Mistakes</em></p>
+                <p class="banner-pill"><em>Practice Your Mistakes</em></p>
             </div>
         </div>
         <div style="width: 64px;"></div> <!-- Spacer for centered content -->
@@ -23,6 +23,7 @@
 
     <div class="page-container">
         <nav class="top-dropdown-nav" aria-label="Error Practice Navigation"></nav>
+        <nav class="side-tab" aria-label="Section navigation"></nav>
         
         <div class="main-content">
             <div class="container">
@@ -39,7 +40,7 @@
     <main id="error-practice-container">
         <!-- Statistics Overview -->
         <section id="error-statistics" style="margin-bottom: 1.5rem;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="display: grid; grid-auto-flow:column; gap: 1rem;">
                 <div class="stat-card" style="background: linear-gradient(135deg, #fff, #f8f9fa); border: 1px solid #e9ecef; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                     <h4 style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Total Errors</h4>
                     <span id="total-errors-count" style="font-size: 2rem; font-weight: bold; color: #dc3545;">0</span>
@@ -206,12 +207,5 @@
             }
         });
     </script>
-</body>
-</html>
-            const errorPracticePage = new ErrorPracticePage();
-            errorPracticePage.initialize();
-        });
-    </script>
-    <script src="scripts/error-practice-page.js"></script>
 </body>
 </html>

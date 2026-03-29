@@ -5,16 +5,37 @@
 
 /* Reset and base styles */
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: normal;
     line-height: 1.6;
-    background-color: #f5f7fa;
-    color: #333;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Keep header dimensions in sync with the main site */
+.header {
+    box-sizing: content-box;
+    height: 160px;
+    min-height: 160px;
+    padding: 2rem 1.5rem;
+}
+
+/* Keep core layout dimensions aligned with the main site */
+.page-container {
+    max-width: 1100px;
+}
+
+.main-content {
+    max-width: 800px;
+    width: fit-content;
+}
+
+.side-tab {
+    width: 260px;
 }
 
 /* Header styles */
@@ -33,12 +54,12 @@ header h1 {
     font-weight: 600;
 }
 
-nav {
+header nav {
     display: flex;
     gap: 1rem;
 }
 
-nav button {
+header nav button {
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -49,16 +70,18 @@ nav button {
     font-size: 0.9rem;
 }
 
-nav button:hover {
+header nav button:hover {
     background-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
 }
 
 /* Main container */
 #error-practice-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto 1fr auto;
@@ -70,7 +93,7 @@ nav button:hover {
 #error-statistics {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
     margin-bottom: 1rem;
 }
@@ -635,8 +658,12 @@ nav button:hover {
 
 .progress-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
+}
+
+#progress-stats .progress-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
 .progress-item {
@@ -853,9 +880,17 @@ nav button:hover {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    #error-statistics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #error-statistics > div {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
     #error-practice-container {
-        margin: 1rem;
-        padding: 0 0.5rem;
+        margin: 0;
+        padding: 0;
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto auto auto;
         gap: 1rem;
@@ -883,7 +918,7 @@ nav button:hover {
         padding: 1rem;
     }
     
-    nav {
+    header nav {
         justify-content: center;
         flex-wrap: wrap;
     }
@@ -908,6 +943,10 @@ nav button:hover {
     
     .progress-grid {
         grid-template-columns: 1fr;
+    }
+
+    #progress-stats .progress-grid {
+        grid-template-columns: 1fr !important;
     }
     
     .modal-content {
@@ -946,4 +985,14 @@ nav button:hover {
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    #error-statistics {
+        grid-template-columns: 1fr;
+    }
+
+    #error-statistics > div {
+        grid-template-columns: 1fr !important;
+    }
 }

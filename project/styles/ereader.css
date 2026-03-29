@@ -1134,12 +1134,6 @@
     }
 }
 
-.sentence.irish-content::after {
-    content: "🍀";
-    font-size: 0.8em;
-    margin-left: 0.2rem;
-    opacity: 0.6;
-}
 
 /* Warning styling for long sentences */
 .sentence.long-sentence {

@@ -937,7 +937,7 @@ class IrishEReader {
                 0.5,
                 Math.min(
                     2,
-                    Number(this.pronunciationSession?.ttsSettings?.speakingRate || this.settings?.speechRate || 1)
+                    Number(this.settings?.speechRate ?? this.pronunciationSession?.ttsSettings?.speakingRate ?? 1)
                 )
             );
             const ttsResult = await this.ttsService.synthesize(sentence.content, null, {
@@ -3400,6 +3400,9 @@ class IrishEReader {
             
             // Save to settings
             this.settings.speechRate = rate;
+            if (this.pronunciationSession?.ttsSettings) {
+                this.pronunciationSession.ttsSettings.speakingRate = rate;
+            }
             this.saveSettings();
         });
         
@@ -3478,6 +3481,9 @@ class IrishEReader {
                 
                 if (this.settings.speechRate) {
                     this.ttsService.setSpeechRate(this.settings.speechRate);
+                    if (this.pronunciationSession?.ttsSettings) {
+                        this.pronunciationSession.ttsSettings.speakingRate = this.settings.speechRate;
+                    }
                     console.log(`✅ Applied speech rate: ${this.settings.speechRate}`);
                 }
             }
