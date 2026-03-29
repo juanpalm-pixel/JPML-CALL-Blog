@@ -1337,6 +1337,12 @@ select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+#irish-text-input::placeholder {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1rem;
+    font-style: italic;
+}
+
 input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus,
