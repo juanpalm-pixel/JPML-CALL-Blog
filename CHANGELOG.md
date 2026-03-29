@@ -4,6 +4,48 @@ All notable changes to this CALL Blog project will be documented in this file.
 
 ## [Unreleased]
 
+### Latest Changes (STT Reliability and Debug-Driven Fixes - March 28, 2026)
+
+#### Summary
+
+Focused debugging and stabilization work was completed using logs from `website-error-debug-11` through `website-error-debug-15`, with improvements applied to both the production pronunciation flow and the STT test page.
+
+#### Added
+
+- **Chunked STT processing in production**: Long recordings are split into short chunks, transcribed per chunk, then merged into one transcript in `project/scripts/browser-stt-service.js`.
+- **Adaptive chunk configuration**: Chunk duration now scales by recording length, with chunk overlap added to reduce word boundary cut-offs.
+- **Transcript overlap merge logic**: Added chunk transcript merge helpers to deduplicate repeated boundary words when stitching chunk outputs.
+- **Upload re-encoding path**: Added aggressive mono 8kHz re-encoding before upload to reduce payload size and improve API compatibility.
+- **Debug GET follow-up in STT test page**: After recognition POST, `project/stt-test.html` now fetches `/recognition/recordings?path=...` for transparent two-step diagnostics.
+- **Chunk diagnostics in app status**: Production UI status now reports chunk count and chunk window/overlap when chunk mode is active.
+
+#### Changed
+
+- **Direct API test messaging** in `project/stt-test.html`: Updated language to clarify that successful GET checks do not guarantee POST success.
+- **STT test processing flow**: Added long-audio chunk mode to `project/stt-test.html` so multi-second recordings can be processed more reliably.
+- **Compression and payload handling**: Improved payload controls and retry behavior for large audio requests.
+
+#### Fixed
+
+- **Duplicate analysis triggers**: Removed duplicate pronunciation analysis paths that caused repeated requests and unstable behavior.
+- **Compare button conflict**: Removed conflicting compare action wiring that triggered a demo/random feedback path.
+- **Undefined audio crash**: Added strict guards for missing or empty audio to prevent `undefined` size errors in STT calls.
+- **Quick-action method mismatch**: Replaced invalid error-manager method usage in pronunciation quick actions.
+- **CORS noise path**: Prevented unreliable direct-browser STT submission path when proxy is unavailable and returned deterministic guidance.
+- **Long recording handling**: Added explicit timeout enforcement and user-facing messaging for recordings over 60 seconds.
+
+#### User-Facing Behavior
+
+- **Main website (`project/index.html`)** now includes guidance to keep recordings under 60 seconds.
+- **Main practice flow (`project/scripts/ereader.js`)** now reports timeout clearly for recordings above 60 seconds.
+- **Main STT service (`project/scripts/browser-stt-service.js`)** now handles sentence-length recordings more reliably through adaptive chunking and merge logic.
+
+#### Testing and Validation
+
+- Verified with iterative debug logs (`website-error-debug-11` to `website-error-debug-15`).
+- STT behavior confirmed for short and medium utterances in proxy mode with successful transcription responses.
+- No syntax errors in updated files after each patch cycle.
+
 ### Latest Changes (Migration to Abair.ie API - March 24, 2026)
 
 #### Major Migration: Google Cloud → Abair.ie API

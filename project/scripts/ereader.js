@@ -123,7 +123,6 @@ class IrishEReader {
             
             // Set up UI
             this.setupEventListeners();
-            await this.loadDefaultText();
             
             // Populate voice dropdown on page load
             await this.populateVoiceDropdown();
@@ -202,14 +201,13 @@ class IrishEReader {
         document.getElementById('record-btn')?.addEventListener('click', () => this.toggleRecording());
         document.getElementById('stop-recording-btn')?.addEventListener('click', () => this.stopRecording());
         document.getElementById('playback-btn')?.addEventListener('click', () => this.playbackRecording());
-        document.getElementById('compare-btn')?.addEventListener('click', () => this.analyzePronunciation());
+        document.getElementById('compare-btn')?.addEventListener('click', () => this.analyzePronunciation(this.audioProcessor?.lastRecording));
         
         // Enhanced pronunciation practice controls
         document.getElementById('hear-again-btn')?.addEventListener('click', () => this.hearTargetAgain());
         document.getElementById('try-again-btn')?.addEventListener('click', () => this.tryPronunciationAgain());
         document.getElementById('mark-correct-btn')?.addEventListener('click', () => this.markAsCorrect());
         document.getElementById('skip-next-btn')?.addEventListener('click', () => this.skipToNext());
-        document.getElementById('compare-btn')?.addEventListener('click', () => this.comparePronounciation());
         
         // Session management controls
         document.getElementById('export-session-btn')?.addEventListener('click', () => this.exportSession());
@@ -372,24 +370,8 @@ class IrishEReader {
      * Load default sample text for demonstration
      */
     async loadDefaultText() {
-        const defaultText = `Bhi beantreach bhocht ann fadó agus bhí aon mhac amhain aice agus sé an t-ainm a bhi air Seán. Bhi siad i ndáirire bocht agus gan dada ach an mhuc acu agus ni raibh ocras ortha, acht tri olc agus maith b'é gnó Sheáin áire thabhairt dos na gabhair, iad a chomáint amach ar maidin, iad aodhaireacht i gcaitheamh an lae agus iad a thabhairt abhaile um thráthnóna chun a gcrúidhte.`;
-        
-        try {
-            // Set the text in the textarea
-            const textarea = document.getElementById('irish-text-input');
-            if (textarea) {
-                textarea.value = defaultText;
-            }
-            
-            // Load the text into the e-reader
-            this.loadText(defaultText);
-            
-            console.log('Default text loaded successfully');
-            
-        } catch (error) {
-            console.error('Failed to load default text:', error);
-            // Continue without default text if there's an error
-        }
+        // Intentionally no default text.
+        return;
     }
 
     /**
@@ -2877,6 +2859,16 @@ class IrishEReader {
             
             // Analyze audio quality first
             const qualityAnalysis = await this.audioProcessor.analyzeAudioQuality(audioBlob);
+
+            // Enforce a hard timeout for long recordings to keep STT reliable.
+            if (qualityAnalysis.duration > 60) {
+                this.showError('⏱️ Timeout: recordings over 60 seconds are not supported. Please keep each sentence under 1 minute.');
+                if (recordingStatus) {
+                    recordingStatus.textContent = 'Timeout - recording too long (max 60s)';
+                    recordingStatus.className = 'status-error';
+                }
+                return;
+            }
             
             // Check for silence or extremely quiet audio
             if (qualityAnalysis.silenceRatio > 0.9) {
@@ -2911,20 +2903,6 @@ class IrishEReader {
             if (recordingStatus) {
                 recordingStatus.textContent = 'Recording complete - ready for analysis';
                 recordingStatus.className = 'status-success';
-            }
-            
-            // Automatically trigger pronunciation analysis for real-time feedback
-            if (this.isPracticeMode) {
-                setTimeout(async () => {
-                    try {
-                        await this.analyzePronunciation();
-                    } catch (error) {
-                        console.error('Auto-analysis failed:', error);
-                        if (recordingStatus) {
-                            recordingStatus.textContent = 'Recording complete - click Compare for analysis';
-                        }
-                    }
-                }, 500); // Small delay to ensure UI updates
             }
             
             this.updateStatus('Recording completed successfully');
@@ -3017,12 +2995,19 @@ class IrishEReader {
     async analyzePronunciation(audioBlob) {
         try {
             this.updateStatus('Analyzing pronunciation...');
+
+            const audioForAnalysis = audioBlob || this.audioProcessor?.lastRecording;
+            if (!audioForAnalysis) {
+                this.showError('No recording available for analysis');
+                this.updateStatus('No recording available - please record first');
+                return;
+            }
             
             // Update STT configuration for WAV format (since we converted it)
             this.sttService.updateConfigForFormat('wav', 16000);
             
             // Convert speech to text
-            const sttResults = await this.sttService.speechToText(audioBlob);
+            const sttResults = await this.sttService.speechToText(audioForAnalysis);
             
             // Check if STT failed or returned fallback/error
             if (!sttResults.transcript || sttResults.transcript.trim() === '' || 
@@ -3934,12 +3919,13 @@ Generated on ${new Date().toLocaleDateString()}
             
             // Track in error system as manually marked correct
             if (this.errorManager) {
-                await this.errorManager.trackError({
-                    word: this.currentPracticeText,
-                    type: 'manual_override',
-                    severity: 'info',
-                    userMarkedCorrect: true,
-                    timestamp: new Date().toISOString()
+                this.errorManager.recordError({
+                    sentence: this.currentPracticeText,
+                    expectedText: this.currentPracticeText,
+                    actualText: this.currentPracticeText,
+                    errorType: 'manual_override',
+                    confidence: 1,
+                    resolved: true
                 });
             }
             

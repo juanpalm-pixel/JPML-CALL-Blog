@@ -280,6 +280,7 @@
         let isRecording = false;
         let audioContext;
         let analyser;
+        let recordingStartTime = 0;
         
         // Logging
         function log(message, type = 'info') {
@@ -317,13 +318,13 @@
                 log('Testing direct API connection', 'info');
                 
                 try {
-                    // Try a simple GET request to check CORS
+                    // GET can succeed while POST still fails due to CORS/preflight or payload rules.
                     const testUrl = 'https://api.abair.ie/v3/recognition/recordings?path=test';
                     const response = await fetch(testUrl);
                     
                     statusDiv.className = 'status success';
-                    statusDiv.textContent = '✅ Direct API accessible! CORS appears to be enabled';
-                    log('Direct API accessible - CORS is enabled!', 'success');
+                    statusDiv.textContent = '✅ Direct GET reachable (POST may still fail)';
+                    log('Direct GET endpoint reachable; POST may still fail due to CORS/preflight/payload limits', 'info');
                     return true;
                 } catch (error) {
                     statusDiv.className = 'status error';
@@ -362,7 +363,7 @@
         // Initialize on load
         window.addEventListener('load', () => {
             log('STT Test page loaded', 'info');
-            log('Abair API docs show access-control-allow-origin: * on GET endpoint!', 'info');
+            log('Abair API GET may allow CORS, but POST checks can differ', 'info');
             testConnection();
         });
         
@@ -420,6 +421,7 @@
                 
                 mediaRecorder.start();
                 isRecording = true;
+                recordingStartTime = Date.now();
                 
                 const btn = document.getElementById('recordBtn');
                 btn.textContent = '⏹️ Stop Recording';
@@ -482,9 +484,68 @@
                 const arrayBuffer = await audioBlob.arrayBuffer();
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                const durationSeconds = audioBuffer.duration || ((Date.now() - recordingStartTime) / 1000);
+                log(`Decoded audio duration: ${durationSeconds.toFixed(2)}s`, 'info');
+
+                if (durationSeconds > 60) {
+                    throw new Error('Timeout: recordings over 60 seconds are not supported. Please keep each sentence under 1 minute.');
+                }
+
+                const chunkDurationSeconds = 0.9;
+                const shouldChunk = durationSeconds > 1.2;
+
+                if (shouldChunk) {
+                    log(`Long audio detected (${durationSeconds.toFixed(2)}s). Splitting into ${chunkDurationSeconds}s chunks...`, 'info');
+
+                    const audioChunksForSTT = splitAudioBuffer(audioBuffer, chunkDurationSeconds);
+                    log(`Created ${audioChunksForSTT.length} chunk(s)`, 'success');
+
+                    const transcripts = [];
+                    let lastResponse = null;
+
+                    for (let i = 0; i < audioChunksForSTT.length; i++) {
+                        const chunkBuffer = audioChunksForSTT[i];
+                        const wavBlob = await audioBufferToWav(chunkBuffer, {
+                            targetSampleRate: 8000,
+                            maxDurationSeconds: chunkDurationSeconds + 0.1
+                        });
+
+                        log(`Chunk ${i + 1}/${audioChunksForSTT.length} WAV size: ${wavBlob.size} bytes`, 'info');
+
+                        const base64Audio = await blobToBase64(wavBlob);
+                        const chunkResponse = await sendToAbair(base64Audio, {
+                            skipDisplay: true,
+                            skipRecordingLookup: true,
+                            chunkIndex: i + 1,
+                            totalChunks: audioChunksForSTT.length
+                        });
+
+                        lastResponse = chunkResponse;
+                        const utterance = chunkResponse?.transcriptions?.[0]?.utterance?.trim();
+                        if (utterance) {
+                            transcripts.push(utterance);
+                        }
+                    }
+
+                    const combinedTranscript = transcripts.join(' ').replace(/\s+/g, ' ').trim();
+                    const combinedResult = {
+                        ...(lastResponse || {}),
+                        transcriptions: [{ utterance: combinedTranscript || 'No transcript available' }],
+                        duration: durationSeconds,
+                        chunkCount: audioChunksForSTT.length
+                    };
+
+                    log(`Combined transcript from ${audioChunksForSTT.length} chunk(s)`, 'success');
+                    displayResults(combinedResult);
+                    return;
+                }
                 
                 // Convert to 16kHz mono WAV
-                const wavBlob = await audioBufferToWav(audioBuffer);
+                const wavBlob = await audioBufferToWav(audioBuffer, {
+                    targetSampleRate: 8000,
+                    maxDurationSeconds: 60
+                });
                 log(`WAV conversion complete: ${wavBlob.size} bytes`, 'success');
                 
                 // Convert to base64
@@ -500,15 +561,50 @@
             }
         }
         
-        function audioBufferToWav(audioBuffer) {
+        function splitAudioBuffer(audioBuffer, chunkDurationSeconds = 0.9) {
+            const chunks = [];
+            const sampleRate = audioBuffer.sampleRate;
+            const totalSamples = audioBuffer.length;
+            const chunkSamples = Math.max(1, Math.floor(sampleRate * chunkDurationSeconds));
+            const sourceChannel = audioBuffer.getChannelData(0);
+
+            for (let start = 0; start < totalSamples; start += chunkSamples) {
+                const end = Math.min(start + chunkSamples, totalSamples);
+                const sliceLength = end - start;
+                if (sliceLength <= 0) continue;
+
+                const chunkBuffer = new AudioBuffer({
+                    length: sliceLength,
+                    numberOfChannels: 1,
+                    sampleRate: sampleRate
+                });
+                chunkBuffer.getChannelData(0).set(sourceChannel.subarray(start, end));
+                chunks.push(chunkBuffer);
+            }
+
+            return chunks;
+        }
+
+        function audioBufferToWav(audioBuffer, options = {}) {
             return new Promise((resolve) => {
                 const numberOfChannels = 1;
-                const sampleRate = 16000;
+                const sampleRate = options.targetSampleRate || 8000;
                 const format = 1; // PCM
                 const bitDepth = 16;
-                
-                const length = audioBuffer.length;
-                const buffer = audioBuffer.getChannelData(0);
+                const maxDurationSeconds = options.maxDurationSeconds || 60;
+
+                // Downsample to 16kHz mono and cap to 5 seconds to keep payload manageable.
+                const sourceData = audioBuffer.getChannelData(0);
+                const sourceRate = audioBuffer.sampleRate;
+                const maxSourceSamples = Math.min(sourceData.length, Math.floor(sourceRate * maxDurationSeconds));
+                const resampleRatio = sourceRate / sampleRate;
+                const length = Math.floor(maxSourceSamples / resampleRatio);
+                const buffer = new Float32Array(length);
+
+                for (let i = 0; i < length; i++) {
+                    const sourceIndex = Math.floor(i * resampleRatio);
+                    buffer[i] = sourceData[sourceIndex] || 0;
+                }
                 
                 const wav = new ArrayBuffer(44 + length * 2);
                 const view = new DataView(wav);
@@ -559,14 +655,21 @@
         }
         
         // Send to Abair API (direct or via proxy)
-        async function sendToAbair(base64Audio) {
+        async function sendToAbair(base64Audio, options = {}) {
             const mode = document.querySelector('input[name="mode"]:checked').value;
             const directUrl = 'https://api.abair.ie/v3/recognition/recognise';
             const proxyUrl = document.getElementById('proxyUrl').value;
             const apiUrl = mode === 'direct' ? directUrl : proxyUrl;
+            const skipDisplay = options.skipDisplay === true;
+            const skipRecordingLookup = options.skipRecordingLookup === true;
+            const chunkInfo = options.chunkIndex && options.totalChunks
+                ? ` chunk ${options.chunkIndex}/${options.totalChunks}`
+                : '';
             
-            log(`Sending audio to Abair.ie (${mode} mode)...`, 'info');
-            document.getElementById('recordingStatus').textContent = '⏳ Sending to API...';
+            log(`Sending audio to Abair.ie (${mode} mode${chunkInfo})...`, 'info');
+            if (!skipDisplay) {
+                document.getElementById('recordingStatus').textContent = '⏳ Sending to API...';
+            }
             
             try {
                 const payload = {
@@ -576,6 +679,9 @@
                 };
                 
                 log(`Payload size: ${JSON.stringify(payload).length} bytes`, 'info');
+                if (base64Audio.length > 700000) {
+                    log('⚠ Large payload detected. Keep recordings short (3-5s) for better reliability.', 'info');
+                }
                 log(`API URL: ${apiUrl}`, 'info');
                 
                 const response = await fetch(apiUrl, {
@@ -604,18 +710,71 @@
                 const data = await response.json();
                 log('API response received successfully', 'success');
                 log(`Response data: ${JSON.stringify(data)}`, 'info');
-                displayResults(data);
+
+                // Step 2 debug: fetch Abair recordings metadata using returned path.
+                if (!skipRecordingLookup) {
+                    await fetchRecordingDetails(data);
+                }
+
+                if (!skipDisplay) {
+                    displayResults(data);
+                }
+
+                return data;
                 
             } catch (error) {
                 log(`API request failed: ${error.message}`, 'error');
-                
-                // If direct mode failed, suggest trying proxy
-                if (mode === 'direct' && error.message.includes('CORS')) {
-                    log('💡 Suggestion: Try switching to Proxy mode', 'info');
+                if (error.message === 'Failed to fetch') {
+                    log('Likely cause: direct POST blocked by CORS/preflight or upstream rejection before readable response', 'info');
                 }
                 
-                document.getElementById('recordingStatus').textContent = `❌ API Error: ${error.message}`;
-                document.getElementById('transcript').textContent = `Error: ${error.message}`;
+                // If direct mode failed, suggest trying proxy
+                if (mode === 'direct') {
+                    log('💡 Suggestion: switch to Proxy mode and keep recording to 3-5 seconds', 'info');
+                }
+
+                if (!skipDisplay) {
+                    document.getElementById('recordingStatus').textContent = `❌ API Error: ${error.message}`;
+                    document.getElementById('transcript').textContent = `Error: ${error.message}`;
+                }
+
+                throw error;
+            }
+        }
+
+        async function fetchRecordingDetails(recogniseData) {
+            try {
+                if (!recogniseData || !recogniseData.audioFilePath) {
+                    log('No audioFilePath in response; skipping recordings GET debug step', 'info');
+                    return;
+                }
+
+                const pathId = recogniseData.audioFilePath
+                    .replace('/tmp/', '')
+                    .replace('.wav', '');
+
+                const recordingsUrl = `https://api.abair.ie/v3/recognition/recordings?path=${encodeURIComponent(pathId)}`;
+                log(`Fetching recordings metadata: ${recordingsUrl}`, 'info');
+
+                const recordingsResponse = await fetch(recordingsUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                log(`Recordings GET status: ${recordingsResponse.status}`, recordingsResponse.ok ? 'success' : 'error');
+
+                if (!recordingsResponse.ok) {
+                    const errorText = await recordingsResponse.text();
+                    log(`Recordings GET failed: ${errorText}`, 'error');
+                    return;
+                }
+
+                const recordingsData = await recordingsResponse.json();
+                log(`Recordings GET response: ${JSON.stringify(recordingsData)}`, 'info');
+            } catch (error) {
+                log(`Recordings GET error: ${error.message}`, 'error');
             }
         }
         

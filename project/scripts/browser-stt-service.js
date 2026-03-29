@@ -469,24 +469,153 @@ class AbairSTTService {
      * @param {Blob} audioBlob - Audio blob to transcribe
      * @returns {Promise<Object>} STT results with transcript and confidence
      */
-    async speechToText(audioBlob) {
+    async speechToText(audioBlob, options = {}) {
         try {
+            const allowBrowserFallback = options.allowBrowserFallback !== false;
+            const skipChunking = options.skipChunking === true;
+            const maxDurationSeconds = 60;
+            const chunkDurationSeconds = 0.9;
+            const chunkingDurationThresholdSeconds = 1.2;
+            const uploadSampleRate = 8000;
+
+            if (!audioBlob) {
+                return {
+                    transcript: '',
+                    confidence: 0,
+                    error: 'No audio provided for speech recognition',
+                    service: 'abair-stt-invalid-input',
+                    fallback: false
+                };
+            }
+
+            if (audioBlob.size === 0) {
+                return {
+                    transcript: '',
+                    confidence: 0,
+                    error: 'Empty audio recording. Please try again.',
+                    service: 'abair-stt-empty-audio',
+                    fallback: false
+                };
+            }
+
             console.log('🎯 Using Abair.ie STT API (two-step process)');
             console.log('Audio blob size:', audioBlob.size, 'bytes');
             
-            console.warn('⚠️ NOTE: Abair.ie API does not support CORS from browsers.');
-            console.warn('   This will fail and automatically fall back to browser STT.');
-            console.warn('   For production, implement a backend proxy server.');
-            console.warn('   See CORS_ISSUE_EXPLAINED.md for details.');
+            // Define API URLs
+            const proxyUrl = 'http://localhost:3001/api/stt';
+            const directUrl = 'https://api.abair.ie/v3/recognition/recognise';
+            let apiUrl = directUrl; // Default to direct API
             
-            // Check if audio is too large (limit to 1MB for Abair.ie API)
-            const maxSizeBytes = 1024 * 1024; // 1MB
-            let processedBlob = audioBlob;
+            // Check if proxy is available
+            let useProxy = false;
+            try {
+                const proxyCheck = await fetch('http://localhost:3001/', { method: 'HEAD', signal: AbortSignal.timeout(1000) });
+                useProxy = proxyCheck.ok;
+                if (useProxy) {
+                    apiUrl = proxyUrl;
+                    console.log('✅ Proxy server detected, using proxy');
+                } else {
+                    console.log('⚠️ Proxy returned error, using direct API');
+                }
+            } catch (e) {
+                console.log('⚠️ Proxy not available, trying direct API (may fail due to CORS)');
+            }
             
-            if (audioBlob.size > maxSizeBytes) {
-                console.log('⚠️ Audio too large, compressing...');
-                processedBlob = await this.compressAudio(audioBlob, maxSizeBytes);
-                console.log('✅ Audio compressed from', audioBlob.size, 'to', processedBlob.size, 'bytes');
+            if (!useProxy) {
+                console.warn('⚠️ NOTE: Abair.ie API may not support CORS from browsers.');
+                console.warn('   If this fails, start the proxy server:');
+                console.warn('   - Docker: Run START_DOCKER.bat in proxy-server folder');
+                console.warn('   - Node.js: Run START_PROXY.bat in proxy-server folder');
+
+                // Avoid direct API calls from browser when proxy is not available.
+                // This prevents CORS errors and gives a deterministic user-facing result.
+                return {
+                    transcript: '',
+                    confidence: 0,
+                    error: 'STT proxy unavailable. Start proxy-server to enable Abair STT.',
+                    service: 'abair-stt-proxy-required',
+                    fallback: false
+                };
+            }
+
+            const metadata = await this.getAudioMetadata(audioBlob);
+            if (metadata.duration > maxDurationSeconds) {
+                return {
+                    transcript: '',
+                    confidence: 0,
+                    error: 'Timeout: recordings over 60 seconds are not supported. Please keep each sentence under 1 minute.',
+                    service: 'abair-stt-timeout-limit',
+                    fallback: false
+                };
+            }
+
+            // For larger recordings, split into short chunks and stitch transcripts.
+            // This avoids payload and upstream request-size limits.
+            if (!skipChunking && metadata.duration > chunkingDurationThresholdSeconds) {
+                console.log(`🔀 Long audio (${metadata.duration.toFixed(2)}s), using chunked STT mode...`);
+
+                const chunks = await this.splitAudioIntoChunks(audioBlob, chunkDurationSeconds, {
+                    targetSampleRate: uploadSampleRate,
+                    maxDurationSeconds
+                });
+
+                if (chunks.length > 1) {
+                    const transcripts = [];
+                    const confidences = [];
+
+                    for (let i = 0; i < chunks.length; i++) {
+                        console.log(`📦 Transcribing chunk ${i + 1}/${chunks.length} (${Math.floor(chunks[i].size / 1024)}KB)`);
+
+                        const chunkResult = await this.speechToText(chunks[i], {
+                            allowBrowserFallback: false,
+                            skipChunking: true
+                        });
+
+                        if (chunkResult && chunkResult.transcript && chunkResult.transcript.trim()) {
+                            transcripts.push(chunkResult.transcript.trim());
+                            confidences.push(chunkResult.confidence || 0.8);
+                        }
+                    }
+
+                    if (transcripts.length > 0) {
+                        const avgConfidence = confidences.length > 0
+                            ? confidences.reduce((sum, c) => sum + c, 0) / confidences.length
+                            : 0.8;
+
+                        const stitchedTranscript = transcripts.join(' ').replace(/\s+/g, ' ').trim();
+
+                        console.log(`✅ Chunked STT complete (${chunks.length} chunks): "${stitchedTranscript}"`);
+                        return {
+                            transcript: stitchedTranscript,
+                            confidence: avgConfidence,
+                            service: 'abair-stt-chunked',
+                            chunkCount: chunks.length,
+                            fallback: false,
+                            alternatives: []
+                        };
+                    }
+
+                    return {
+                        transcript: '',
+                        confidence: 0,
+                        error: 'No speech detected from chunked transcription',
+                        service: 'abair-stt-chunked-empty',
+                        fallback: false
+                    };
+                }
+            }
+            
+            // Check if audio is too large (limit to 512KB for better success)
+            const maxSizeBytes = 512 * 1024; // 512KB (reduced from 1MB for better compatibility)
+            let processedBlob = await this.reencodeAudioForUpload(audioBlob, {
+                targetSampleRate: uploadSampleRate,
+                maxDurationSeconds
+            });
+            
+            if (processedBlob.size > maxSizeBytes) {
+                console.log(`⚠️ Audio too large (${Math.floor(processedBlob.size/1024)}KB), compressing to ${Math.floor(maxSizeBytes/1024)}KB...`);
+                processedBlob = await this.compressAudio(processedBlob, maxSizeBytes);
+                console.log(`✅ Audio compressed to ${Math.floor(processedBlob.size/1024)}KB`);
             }
             
             // Step 1: Convert audio blob to base64
@@ -514,12 +643,30 @@ class AbairSTTService {
                 const errorText = await recogniseResponse.text();
                 console.error('❌ Recognition submission failed:', recogniseResponse.status, errorText);
                 
-                // If payload too large, try with more aggressive compression
+                // If payload too large, try with more aggressive compression (but prevent infinite loop)
                 if (recogniseResponse.status === 413) {
                     console.log('🔄 Payload too large, trying with smaller compression...');
-                    if (audioBlob.size > 512 * 1024) {
-                        const smallerBlob = await this.compressAudio(audioBlob, 512 * 1024);
-                        return await this.speechToText(smallerBlob);
+                    
+                    // Check if we've already tried compression (to prevent infinite loop)
+                    if (!processedBlob._compressionAttempts) {
+                        processedBlob._compressionAttempts = 0;
+                    }
+                    
+                    processedBlob._compressionAttempts++;
+                    
+                    // Max 3 compression attempts
+                    if (processedBlob._compressionAttempts <= 3 && processedBlob.size > 256 * 1024) {
+                        const targetSize = Math.floor(processedBlob.size / 2); // Halve the size each time
+                        console.log(`   Attempt ${processedBlob._compressionAttempts}/3: Compressing to ~${Math.floor(targetSize/1024)}KB`);
+                        const smallerBlob = await this.compressAudio(processedBlob, targetSize);
+                        smallerBlob._compressionAttempts = processedBlob._compressionAttempts; // Carry counter
+                        return await this.speechToText(smallerBlob, {
+                            allowBrowserFallback,
+                            skipChunking: true
+                        });
+                    } else {
+                        console.error('❌ Audio still too large after compression attempts. Cannot process.');
+                        throw new Error('Audio file too large for Abair API (even after compression). Try recording a shorter clip (3-5 seconds).');
                     }
                 }
                 
@@ -588,7 +735,7 @@ class AbairSTTService {
             console.error('❌ Abair STT error:', error);
             
             // Fallback to browser STT if available
-            if (this.recognition) {
+            if (allowBrowserFallback && this.recognition) {
                 console.log('🔄 Falling back to browser STT...');
                 return await this.fallbackToBrowserSTT();
             }
@@ -601,6 +748,131 @@ class AbairSTTService {
                 service: 'abair-stt-failed',
                 alternatives: []
             };
+        }
+    }
+
+    /**
+     * Read basic audio metadata for duration-based processing decisions.
+     * @param {Blob} audioBlob - Source audio blob
+     * @returns {Promise<Object>} Audio metadata
+     */
+    async getAudioMetadata(audioBlob) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const decoded = await audioContext.decodeAudioData(arrayBuffer);
+            return {
+                duration: decoded.duration || 0,
+                sampleRate: decoded.sampleRate,
+                channels: decoded.numberOfChannels
+            };
+        } finally {
+            try {
+                await audioContext.close();
+            } catch (e) {
+                // Ignore close errors.
+            }
+        }
+    }
+
+    /**
+     * Re-encode audio to mono PCM WAV at lower sample rate for smaller payloads.
+     * @param {Blob} audioBlob - Source audio blob
+     * @param {Object} options - Re-encoding options
+     * @returns {Promise<Blob>} Re-encoded WAV blob
+     */
+    async reencodeAudioForUpload(audioBlob, options = {}) {
+        const targetSampleRate = options.targetSampleRate || 8000;
+        const maxDurationSeconds = options.maxDurationSeconds || 60;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        try {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const decoded = await audioContext.decodeAudioData(arrayBuffer);
+
+            const sourceSampleRate = decoded.sampleRate;
+            const sourceData = decoded.getChannelData(0);
+            const maxSourceSamples = Math.min(sourceData.length, Math.floor(sourceSampleRate * maxDurationSeconds));
+            const resampleRatio = sourceSampleRate / targetSampleRate;
+            const targetLength = Math.max(1, Math.floor(maxSourceSamples / resampleRatio));
+
+            const outputBuffer = audioContext.createBuffer(1, targetLength, targetSampleRate);
+            const outputData = outputBuffer.getChannelData(0);
+
+            for (let i = 0; i < targetLength; i++) {
+                const sourceIndex = Math.floor(i * resampleRatio);
+                outputData[i] = sourceData[sourceIndex] || 0;
+            }
+
+            const reencodedBlob = this.audioBufferToWAV(outputBuffer);
+            console.log(`🎚️ Re-encoded audio for upload: ${Math.floor(audioBlob.size / 1024)}KB -> ${Math.floor(reencodedBlob.size / 1024)}KB (${targetSampleRate}Hz mono)`);
+            return reencodedBlob;
+        } catch (error) {
+            console.warn('Re-encoding failed, using original audio blob:', error.message);
+            return audioBlob;
+        } finally {
+            try {
+                await audioContext.close();
+            } catch (e) {
+                // Ignore close errors.
+            }
+        }
+    }
+
+    /**
+     * Split audio into short WAV chunks for safer STT uploads.
+     * @param {Blob} audioBlob - Source audio blob
+     * @param {number} chunkDurationSeconds - Chunk duration in seconds
+     * @param {Object} options - Chunk options
+     * @returns {Promise<Blob[]>} Array of WAV chunk blobs
+     */
+    async splitAudioIntoChunks(audioBlob, chunkDurationSeconds = 0.9, options = {}) {
+        const targetSampleRate = options.targetSampleRate || 8000;
+        const maxDurationSeconds = options.maxDurationSeconds || 60;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        try {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const decoded = await audioContext.decodeAudioData(arrayBuffer);
+
+            const sourceSampleRate = decoded.sampleRate;
+            const sourceData = decoded.getChannelData(0);
+            const maxSourceSamples = Math.min(sourceData.length, Math.floor(maxDurationSeconds * sourceSampleRate));
+            const chunkSamples = Math.max(1, Math.floor(chunkDurationSeconds * sourceSampleRate));
+
+            const chunks = [];
+            for (let start = 0; start < maxSourceSamples; start += chunkSamples) {
+                const end = Math.min(start + chunkSamples, maxSourceSamples);
+                const sliceLength = end - start;
+
+                if (sliceLength <= 0) {
+                    continue;
+                }
+
+                const sourceSlice = sourceData.subarray(start, end);
+                const resampleRatio = sourceSampleRate / targetSampleRate;
+                const targetLength = Math.max(1, Math.floor(sourceSlice.length / resampleRatio));
+
+                const chunkBuffer = audioContext.createBuffer(1, targetLength, targetSampleRate);
+                const targetData = chunkBuffer.getChannelData(0);
+
+                for (let i = 0; i < targetLength; i++) {
+                    const sourceIndex = Math.floor(i * resampleRatio);
+                    targetData[i] = sourceSlice[sourceIndex] || 0;
+                }
+
+                const chunkBlob = this.audioBufferToWAV(chunkBuffer);
+                chunks.push(chunkBlob);
+            }
+
+            console.log(`✂️ Split audio into ${chunks.length} chunk(s) of ~${chunkDurationSeconds}s at ${targetSampleRate}Hz`);
+            return chunks;
+        } finally {
+            try {
+                await audioContext.close();
+            } catch (e) {
+                // Ignore close errors.
+            }
         }
     }
     
