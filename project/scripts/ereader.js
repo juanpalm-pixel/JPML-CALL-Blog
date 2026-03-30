@@ -190,6 +190,11 @@ class IrishEReader {
                 }
             });
         }
+
+        const loadSampleBtn = document.getElementById('load-sample-btn');
+        if (loadSampleBtn) {
+            loadSampleBtn.addEventListener('click', () => this.loadDefaultText());
+        }
         
         // Audio controls
         document.getElementById('play-all-btn')?.addEventListener('click', () => this.playAllSentences());
@@ -370,8 +375,25 @@ class IrishEReader {
      * Load default sample text for demonstration
      */
     async loadDefaultText() {
-        // Intentionally no default text.
-        return;
+        const defaultText = "1. (Fadó, fadó, bhí fear ann agus Séadna dob ainm dó. Greasaí do beadh é. Bhí comhnuí air i dtigín beag, bán, cheann tuí ag bun an cnoic do dhéin sé féin dó féin agus 'se a bhí comh sásta áthasach le haon fhear riamh ná ó shin.)\n2. (Bhí trí rudaí aige a bhí sé an bhródúil as: Bhí cathaoir shúgáin aige do dhéin sé féin dó féin agus ba gnáth leis suí inti um thráthnóna, nuair a bhíodh obair an lae críochnaithe aige agus bhíodh sé ar a shástacht. Bhí mealbhóg mine aige crochta in aice na tine agus anois agus arís, chuireadh sé a lámh inti agus thogadh sé lán a dhoirn den mhin agus bhíodh sé á cogaint ar a shuaimhneas. Bhí crann úll ag fás ar an dtaobh amuigh de dhoras aige agus is ar an gcrann seo a bhí na h-úll is fearr ar fud Éireann. Nuair a bhí tart air ó bheith ag cogaint na mine, chuireadh sé a lámh sa chrann san agus thógadh sé ceann des na húllaibh agus d'itheadh sé é.)\n3. (Anois, san am sin ní hamhain a bhí na gréasaí ag deisiú na mbróg, ach dhéin siad brógai nua ar fad, agus tiochfhaidh na daoine i bhfad uaidh chun brógai fháil ó Shéadna mar bhi cáil mór air mar fear is fearr déanta na mbróg ar fud Éireann.)\n4. (Lá da raibh sé ag déanamh bróg, thug sé fé ndeara ná raibh a thuilleadh leathair aige, ná a thuilleadh snáithe na a thuilleadh cearach. Níor raibh fholáir dó dul go dtí Mágh Chruma agus níos mo fháil sara bhféadfadh sé a thuilleadh bróg a dhéanamh agus dúirt sé leis féin go mba cheart dó dul isteach go dtí an baile ar a lorg. Sheas sé suas agus chuardaigh sé tréna phócaí ag lorg airgead O ach fuair sé nach raibh ach trí scillinge aige. Ní dhéanfhaidh an méid sin an gno!ï¿½ ar seisean leis féin. Ara, nach mbeidh péire eile déanta agam sar i bhfad - agus nuair atá siad sin díolta nach mbeidh mo dhóthain agam chun níos mó leathair a cheannaigh ! Chuir sé a shean cháibín briste bruite ar a cheann agus a chóta ghiobalach agus bhuail sé amach sios an bóthar siar go Mágh Chruma.)";
+
+        const textarea = document.getElementById('irish-text-input');
+        if (textarea) {
+            textarea.value = defaultText;
+        }
+
+        this.loadText(defaultText);
+
+        if (this.sentences.length > 0) {
+            const readingArea = document.getElementById('reading-area');
+            const practicePanel = document.getElementById('practice-panel');
+
+            if (readingArea) readingArea.style.display = 'block';
+            if (practicePanel) practicePanel.style.display = 'block';
+
+            this.selectSentence(0);
+            readingArea?.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     /**
