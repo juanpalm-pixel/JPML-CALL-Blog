@@ -196,6 +196,34 @@ class IrishEReader {
             loadSampleBtn.addEventListener('click', () => this.loadDefaultText());
         }
         
+        // Settings controls on main page
+        const speechRateSlider = document.getElementById('speech-rate');
+        const rateValue = document.getElementById('rate-value');
+        
+        if (speechRateSlider) {
+            speechRateSlider.addEventListener('input', (e) => {
+                const rate = parseFloat(e.target.value);
+                
+                // Update display value
+                if (rateValue) {
+                    rateValue.textContent = rate.toFixed(2) + 'x';
+                }
+                
+                // Apply to TTS service immediately
+                if (this.ttsService && typeof this.ttsService.setSpeechRate === 'function') {
+                    this.ttsService.setSpeechRate(rate);
+                    console.log(`Speech rate set to ${rate.toFixed(2)}x`);
+                }
+                
+                // Update settings
+                this.settings.speechRate = rate;
+                if (this.pronunciationSession?.ttsSettings) {
+                    this.pronunciationSession.ttsSettings.speakingRate = rate;
+                }
+                this.saveSettings();
+            });
+        }
+        
         // Audio controls
         document.getElementById('play-all-btn')?.addEventListener('click', () => this.playAllSentences());
         document.getElementById('play-sentence-btn')?.addEventListener('click', () => this.playSentence());
@@ -375,7 +403,7 @@ class IrishEReader {
      * Load default sample text for demonstration
      */
     async loadDefaultText() {
-        const defaultText = "1. (Fadó, fadó, bhí fear ann agus Séadna dob ainm dó. Greasaí do beadh é. Bhí comhnuí air i dtigín beag, bán, cheann tuí ag bun an cnoic do dhéin sé féin dó féin agus 'se a bhí comh sásta áthasach le haon fhear riamh ná ó shin.)\n2. (Bhí trí rudaí aige a bhí sé an bhródúil as: Bhí cathaoir shúgáin aige do dhéin sé féin dó féin agus ba gnáth leis suí inti um thráthnóna, nuair a bhíodh obair an lae críochnaithe aige agus bhíodh sé ar a shástacht. Bhí mealbhóg mine aige crochta in aice na tine agus anois agus arís, chuireadh sé a lámh inti agus thogadh sé lán a dhoirn den mhin agus bhíodh sé á cogaint ar a shuaimhneas. Bhí crann úll ag fás ar an dtaobh amuigh de dhoras aige agus is ar an gcrann seo a bhí na h-úll is fearr ar fud Éireann. Nuair a bhí tart air ó bheith ag cogaint na mine, chuireadh sé a lámh sa chrann san agus thógadh sé ceann des na húllaibh agus d'itheadh sé é.)\n3. (Anois, san am sin ní hamhain a bhí na gréasaí ag deisiú na mbróg, ach dhéin siad brógai nua ar fad, agus tiochfhaidh na daoine i bhfad uaidh chun brógai fháil ó Shéadna mar bhi cáil mór air mar fear is fearr déanta na mbróg ar fud Éireann.)\n4. (Lá da raibh sé ag déanamh bróg, thug sé fé ndeara ná raibh a thuilleadh leathair aige, ná a thuilleadh snáithe na a thuilleadh cearach. Níor raibh fholáir dó dul go dtí Mágh Chruma agus níos mo fháil sara bhféadfadh sé a thuilleadh bróg a dhéanamh agus dúirt sé leis féin go mba cheart dó dul isteach go dtí an baile ar a lorg. Sheas sé suas agus chuardaigh sé tréna phócaí ag lorg airgead O ach fuair sé nach raibh ach trí scillinge aige. Ní dhéanfhaidh an méid sin an gno!ï¿½ ar seisean leis féin. Ara, nach mbeidh péire eile déanta agam sar i bhfad - agus nuair atá siad sin díolta nach mbeidh mo dhóthain agam chun níos mó leathair a cheannaigh ! Chuir sé a shean cháibín briste bruite ar a cheann agus a chóta ghiobalach agus bhuail sé amach sios an bóthar siar go Mágh Chruma.)";
+        const defaultText = "Fadó, fadó, bhí fear ann agus Séadna dob ainm dó. Greasaí do beadh é. Bhí comhnuí air i dtigín beag, bán, cheann tuí ag bun an cnoic do dhéin sé féin dó féin agus 'se a bhí comh sásta áthasach le haon fhear riamh ná ó shin. Bhí trí rudaí aige a bhí sé an bhródúil as: Bhí cathaoir shúgáin aige do dhéin sé féin dó féin agus ba gnáth leis suí inti um thráthnóna, nuair a bhíodh obair an lae críochnaithe aige agus bhíodh sé ar a shástacht. Bhí mealbhóg mine aige crochta in aice na tine agus anois agus arís, chuireadh sé a lámh inti agus thogadh sé lán a dhoirn den mhin agus bhíodh sé á cogaint ar a shuaimhneas. Bhí crann úll ag fás ar an dtaobh amuigh de dhoras aige agus is ar an gcrann seo a bhí na h-úll is fearr ar fud Éireann. Nuair a bhí tart air ó bheith ag cogaint na mine, chuireadh sé a lámh sa chrann san agus thógadh sé ceann des na húllaibh agus d'itheadh sé é.";
 
         const textarea = document.getElementById('irish-text-input');
         if (textarea) {
@@ -962,6 +990,9 @@ class IrishEReader {
                     Number(this.settings?.speechRate ?? this.pronunciationSession?.ttsSettings?.speakingRate ?? 1)
                 )
             );
+            
+            console.log(`🔊 Playing sentence with speed: ${playbackSpeed}x (from settings.speechRate=${this.settings?.speechRate})`);
+            
             const ttsResult = await this.ttsService.synthesize(sentence.content, null, {
                 speed: playbackSpeed
             });
@@ -3516,6 +3547,20 @@ class IrishEReader {
                     console.log(`✅ Applied STT threshold: ${this.settings.pronunciationThreshold}`);
                 }
             }
+            
+            // Sync UI elements with settings
+            const speechRateSlider = document.getElementById('speech-rate');
+            const rateValue = document.getElementById('rate-value');
+            
+            if (speechRateSlider) {
+                const rateToSet = this.settings?.speechRate ?? 1.0;
+                speechRateSlider.value = rateToSet;
+                console.log(`🎚️ Synced slider to ${rateToSet}x`);
+                
+                if (rateValue) {
+                    rateValue.textContent = rateToSet.toFixed(2) + 'x';
+                }
+            }
         } catch (error) {
             console.warn('Failed to apply settings:', error);
         }
@@ -3548,39 +3593,54 @@ class IrishEReader {
      */
     saveSettings() {
         try {
-            // Get current settings from UI
+            // Get current settings from UI if available (modal open)
             const voiceSelect = document.getElementById('voice-select');
             const speechRate = document.getElementById('speech-rate');
             const pronunciationThreshold = document.getElementById('pronunciation-threshold');
             const autoAdvance = document.getElementById('auto-advance');
 
-            // Update settings object
-            this.settings = {
-                selectedVoice: voiceSelect?.value || this.ttsService.getDefaultVoice().id,
-                speechRate: parseFloat(speechRate?.value || 1),
-                pronunciationThreshold: parseFloat(pronunciationThreshold?.value || 0.7),
-                autoAdvance: autoAdvance?.checked || false
+            // Build the updated settings object
+            const updatedSettings = {
+                selectedVoice: voiceSelect?.value || this.settings?.selectedVoice || this.ttsService.getDefaultVoice().id,
+                speechRate: speechRate ? parseFloat(speechRate.value) : (this.settings?.speechRate ?? 1),
+                pronunciationThreshold: pronunciationThreshold ? parseFloat(pronunciationThreshold.value) : (this.settings?.pronunciationThreshold ?? 0.7),
+                autoAdvance: autoAdvance ? autoAdvance.checked : (this.settings?.autoAdvance ?? false)
             };
+
+            // Verify speechRate is a valid number
+            if (isNaN(updatedSettings.speechRate)) {
+                updatedSettings.speechRate = this.settings?.speechRate ?? 1.0;
+            }
+            
+            // Update the in-memory settings
+            this.settings = updatedSettings;
 
             // Save to localStorage
             localStorage.setItem('ireader_settings', JSON.stringify(this.settings));
+            console.log('Saved settings to localStorage:', this.settings);
             
-            // Apply settings to services
+            // Apply settings to services immediately
             this.sttService.confidenceThreshold = this.settings.pronunciationThreshold;
             
             // Apply TTS settings
             if (this.ttsService) {
                 this.ttsService.setVoice(this.settings.selectedVoice);
                 this.ttsService.setSpeechRate(this.settings.speechRate);
-                console.log(`Applied TTS settings: voice=${this.settings.selectedVoice}, rate=${this.settings.speechRate}`);
+                console.log(`✅ Applied TTS settings: voice=${this.settings.selectedVoice}, speechRate=${this.settings.speechRate}x`);
             }
 
-            this.showStatus('Settings saved successfully', 'success');
+            // Only show status if there's a status element visible
+            const statusDisplay = document.getElementById('status-display');
+            if (statusDisplay) {
+                this.showStatus('Settings saved successfully', 'success');
+            }
+            
+            // Close settings modal only if it exists
             this.closeSettings();
             
         } catch (error) {
             console.error('Failed to save settings:', error);
-            this.showStatus('Failed to save settings', 'error');
+            this.showError('Failed to save settings: ' + error.message);
         }
     }
 

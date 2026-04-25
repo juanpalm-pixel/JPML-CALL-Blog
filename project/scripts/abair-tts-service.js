@@ -205,37 +205,55 @@ class AbairTTSService {
         const selectedVoice = voiceId || (this.currentVoice ? this.currentVoice.id : this.getDefaultVoice().id);
         
         // Use current speech rate if not specified in options
-        const speechRate = options.speed || this.speechRate || 1.0;
+        const speechRate = parseFloat(options.speed || this.speechRate || 1.0);
+        
+        // Clamp speech rate between 0.5 and 2.0
+        const clampedRate = Math.max(0.5, Math.min(2.0, speechRate));
         
         // Create cache key including rate for proper caching
-        const cacheKey = `${text}_${selectedVoice}_${speechRate}`;
+        const cacheKey = `${text}_${selectedVoice}_${clampedRate}`;
         if (this.cache.has(cacheKey)) {
             console.log('Returning cached audio for:', text.substring(0, 30) + '...');
             return this.cache.get(cacheKey);
         }
 
         try {
-            console.log(`Synthesizing Irish text with voice ${selectedVoice} at rate ${speechRate}:`, text.substring(0, 50) + '...');
+            console.log(`Synthesizing Irish text with voice ${selectedVoice} at rate ${clampedRate}x:`, text.substring(0, 50) + '...');
             
-            // Construct API URL with parameters
-            const apiUrl = new URL(`${this.baseUrl}/synthesis`);
-            apiUrl.searchParams.append('input', text);
-            apiUrl.searchParams.append('voice', selectedVoice);
-            
-            // Add speech rate if supported by API (may need to check Abair.ie docs)
-            if (speechRate !== 1.0) {
-                apiUrl.searchParams.append('speed', speechRate.toString());
-            }
-            
-            // Add other optional parameters
-            if (options.pitch) apiUrl.searchParams.append('pitch', options.pitch);
-            if (options.pitch) apiUrl.searchParams.append('pitch', options.pitch);
+            // Build request body according to Abair.ie API documentation
+            const requestBody = {
+                synthinput: {
+                    text: text.trim()
+                },
+                voiceparams: {
+                    languageCode: "ga-IE",
+                    name: selectedVoice
+                },
+                audioconfig: {
+                    audioEncoding: "LINEAR16",
+                    speakingRate: clampedRate,
+                    pitch: 1.0,
+                    volumeGainDb: 0,
+                    sampleRateHertz: 16000,
+                    effectsProfileId: []
+                },
+                outputType: "JSON",
+                timing: "WORD"
+            };
 
-            const response = await fetch(apiUrl.toString(), {
-                method: 'GET',
+            console.log('Sending synthesis request:', {
+                voice: selectedVoice,
+                speakingRate: clampedRate,
+                text: text.substring(0, 50) + '...'
+            });
+
+            const response = await fetch(`${this.baseUrl}/synthesis`, {
+                method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                }
+                },
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -243,6 +261,8 @@ class AbairTTSService {
             }
 
             const data = await response.json();
+            
+            console.log('✅ Synthesis response received with speakingRate:', clampedRate);
             
             // Process the audio response
             const audioResult = await this.processAudioResponse(data, text);
