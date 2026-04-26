@@ -403,7 +403,7 @@ class IrishEReader {
      * Load default sample text for demonstration
      */
     async loadDefaultText() {
-        const defaultText = "Fadó, fadó, bhí fear ann agus Séadna dob ainm dó. Greasaí do beadh é. Bhí comhnuí air i dtigín beag, bán, cheann tuí ag bun an cnoic do dhéin sé féin dó féin agus 'se a bhí comh sásta áthasach le haon fhear riamh ná ó shin. Bhí trí rudaí aige a bhí sé an bhródúil as: Bhí cathaoir shúgáin aige do dhéin sé féin dó féin agus ba gnáth leis suí inti um thráthnóna, nuair a bhíodh obair an lae críochnaithe aige agus bhíodh sé ar a shástacht. Bhí mealbhóg mine aige crochta in aice na tine agus anois agus arís, chuireadh sé a lámh inti agus thogadh sé lán a dhoirn den mhin agus bhíodh sé á cogaint ar a shuaimhneas. Bhí crann úll ag fás ar an dtaobh amuigh de dhoras aige agus is ar an gcrann seo a bhí na h-úll is fearr ar fud Éireann. Nuair a bhí tart air ó bheith ag cogaint na mine, chuireadh sé a lámh sa chrann san agus thógadh sé ceann des na húllaibh agus d'itheadh sé é.";
+        const defaultText = "Fadó, fadó, bhí fear ann agus Séadna dob ainm dó. Greasaí do beadh é. Bhí comhnuí air i dtigín beag, bán, cheann tuí ag bun an cnoic do dhéin sé féin dó féin agus 'se a bhí comh sásta áthasach le haon fhear riamh ná ó shin. Bhí trí rudaí aige a bhí sé an bhródúil as: Bhí cathaoir shúgáin aige do dhéin sé féin dó féin agus ba gnáth leis suí inti um thráthnóna, nuair a bhíodh obair an lae críochnaithe aige agus bhíodh sé ar a shástacht. ";
 
         const textarea = document.getElementById('irish-text-input');
         if (textarea) {

@@ -7,6 +7,7 @@
         { id: "post-call-background", label: "CALL Background" },
         { id: "post-speech-synthesis", label: "Speech Synthesis" },
         { id: "post-speech-recognition", label: "Speech Recognition" },
+        { id: "llms-in-call", label: "LLMs in CALL" },
       ],
     },
     technologies: {
@@ -54,6 +55,9 @@
   } else if (/\/technologies\/[^/]+\/[^/]+\.html$/i.test(pathname)) {
     // We're in a /technologies/subfolder/ directory (two levels deep)
     basePrefix = "../../index.html#";
+  } else if (/\/project\/[^/]+\.html$/i.test(pathname)) {
+    // We're in the /project/ directory (one level deep)
+    basePrefix = "../index.html#";
   } else {
     // Default fallback: assume we're one level deep
     basePrefix = "../index.html#";
