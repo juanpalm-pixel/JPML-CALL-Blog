@@ -15,6 +15,7 @@
       items: [
         { id: "technology-speech-synthesis", label: "Speech Synthesis" },
         { id: "technology-speech-recognition", label: "Speech Recognition" },
+        { id: "technology-h5p", label: "H5P" },
       ],
     },
     readings: {
