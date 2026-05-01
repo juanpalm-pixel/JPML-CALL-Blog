@@ -670,3 +670,14 @@ input[type="range"]::-moz-range-thumb {
         transform: translateY(0);
     }
 }
+
+.H5P-container {
+ padding: 1rem; /* White padding around the iframe */
+ background-color: white; /* Ensures the padding appears white */
+}
+.H5P-iframe {
+ width: 100%; /* Always take full width */
+ aspect-ratio: 1.7; /* Maintain 16:9 aspect ratio */
+ border: none; /* Remove default iframe border */
+ display: block; /* Ensures no extra space below the iframe */
+}
