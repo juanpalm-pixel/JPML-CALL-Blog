@@ -681,3 +681,38 @@ input[type="range"]::-moz-range-thumb {
  border: none; /* Remove default iframe border */
  display: block; /* Ensures no extra space below the iframe */
 }
+
+.card-h5p-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow cards to wrap to new lines */
+  gap: 1.5rem; /* Space between the cards */
+  justify-content: center; /* Center the cards horizontally */
+}
+
+.card-h5p {
+  flex: 1 1 calc(33.333% - 1.5rem); /* 3 columns on large screens */
+  background-color: #fff; /* Light background color */
+  padding: 1.5rem;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  text-align: left;
+  text-decoration: none; /* Remove underline from links */
+  color: var(--text-color); /* Text color */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-h5p:hover {
+  transform: translateY(-3px); /* Subtle lift effect on hover */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.card-h5p h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color); /* Accent color for the card title */
+}
+
+.card-h5p p {
+  margin: 0;
+  line-height: 1.6;
+}
