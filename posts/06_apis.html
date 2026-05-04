@@ -25,24 +25,42 @@
           <article class="blog-post">
             <div class="center">
               <a href="../index.html" class="back-button">← Back to Home</a>
-              <h2 style="margin-bottom: 16px;">[Name]</h2>
-              <p class="post-meta" style="margin-top: 12.8px; margin-bottom: 14px;"> 2026 Hilary Term</p>
-              <a href="">
+              <h2 style="margin-bottom: 16px;">Understanding APIs</h2>
+              <p class="post-meta" style="margin-top: 12.8px; margin-bottom: 14px;"> March 9th 2026 Hilary Term</p>
+              <a href="https://kapucuonur.medium.com/integrating-frontend-and-backend-with-apis-a-comprehensive-guide-9d296eef2e33" target="_blank" rel="noopener">
               <img
-                src=""
-                alt=""
+                src="../images/api.jpg"
+                alt="A cloud with the word API in the middle connected to various devices"
                 class="post-image"
                 style="width: 350px; height: auto; max-width: 100%;"
-                title=""
+                title="not a literal cloud..."
               /></a>
             </div>
 
-            <p><i>Text Here</i></p>
+              <h3>What exactly is an API?</h3>
+              <p>An Application Programming Interface, or API, is essentially a <a href="https://aws.amazon.com/what-is/api/#:~:text=A%20Web%20API%20or%20Web,all%20APIs%20are%20web%20services." target="_blank" rel="noopener">service</a>. While we interact with apps through buttons and screens, an API allows a user to communicate with a service directly via code. Think of it as the reception desk of a hotel, or a bouncer for a club. You've likely used them without even realizing it --<a href="https://mapsplatform.google.com/lp/maps-apis/" target="_blank" rel="noopener">Google Maps</a> provides maps and directions via API, <a href="https://developer.spotify.com/documentation/web-api/" target="_blank" rel="noopener">Spotify</a> uses them for music streaming--.</p>
+
+              <h3>Public vs. Private Interfaces</h3>
+              <p>Not all APIs are open to everyone. Public APIs, like Spotify’s, act as creative tools that let developers build new apps (such as <a href="https://receiptify.herokuapp.com/" target="_blank" rel="noopener">Receiptify</a> and <a href="https://airbuds-fm.webflow.io/" target="_blank" rel="noopener">Airbuds</a>). Conversely, private APIs are used internally by companies like Amazon to allow different parts of their system to talk to each other securely without exposing sensitive functions to the <a href="https://doc.scheer-pas.com/api-management/latest/api-types#:~:text=Only%20public%20APIs%20can%20be,plan%20offered%20by%20that%20API." target="_blank" rel="noopener">public</a>.</p>
+
+              <h3>Designing a RESTful API</h3>
+              <p>Most modern APIs follow "<a href="https://restfulapi.net/" target="_blank" rel="noopener">RESTful</a>" principles (Representational State Transfer), which involve four basic operations: <b>POST</b> (write new info), <b>GET</b> (retrieve info), <b>PUT</b> (edit info), and <b>DELETE</b>. For example, if you use the Abair synthesis API to turn text into speech, you use a <b>POST</b> request because the audio file doesn't exist yet and must be created. If you’re just checking your Spotify login details, you're using a <b>GET</b> request to view existing information.</p>
+
+              <h3>The Three Pillars of an API Gateway</h3>
+              <p>As systems grow complex, developers often use an <b>API Gateway</b> to centralize multiple <a href="https://www.ibm.com/think/topics/api-gateway" target="_blank" rel="noopener">APIs</a>. While a single API acts as a gateway to its own service, a true Gateway acts like an "address book" for many different APIs. A well-designed Gateway rests on three pillars:</p>
+              <ul>
+                  <li><b>Gatekeeping:</b> This involves security through API Keys and "Rate Limiting" to ensure no one abuses the service.</li>
+                  <li><b>Observability:</b> Developers use tools like Grafana to monitor traffic and identify bottlenecks or "bad actors".</li>
+                  <li><b>Documentation:</b> This is the most vital pillar; if a developer can't understand how to use your service, nobody will use it.</li>
+              </ul>
+
+        <p>By providing clear lists of endpoints, example requests, and response codes, an API becomes a powerful tool for scaling language learning technologies.</p>
+        <p>In summary, APIs are essential for connecting different software systems and enabling seamless integration of language learning features.</p>
 
             <div class="center">
               <p>
-                <a href="" class="back-button">← Previous Blog</a> 
-                <a href="" class="next-button">Next Blog →</a>
+                <a href="./05_llms_in_call.html" class="back-button">← Previous Blog</a> 
+                <a href="./07_letat.html" class="next-button">Next Blog →</a>
               </p>
             </div>
 

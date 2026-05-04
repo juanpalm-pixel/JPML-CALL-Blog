@@ -8,6 +8,9 @@
         { id: "post-speech-synthesis", label: "Speech Synthesis" },
         { id: "post-speech-recognition", label: "Speech Recognition" },
         { id: "llms-in-call", label: "LLMs in CALL" },
+        { id: "apis", label: "Understanding APIs" },
+        { id: "letat", label: "What is LeTAT?" },
+        { id: "evaluation", label: "Evaluating CALL Applications" },
       ],
     },
     technologies: {
